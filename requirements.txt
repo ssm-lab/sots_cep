@@ -1,0 +1,5 @@
+numpy==2.2.3
+pandas==2.3.2
+pytest==8.4.1
+pyzmq==27.1.0
+scikit_learn==1.7.2

@@ -1,0 +1,151 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>ca.mcmaster.ssm.oades</groupId>
+  <artifactId>sots-uncertainty-aware-cep</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Uncertainty-Aware CEP Engine</name>
+<description>Complex event processing engine with Kalman-based imputation and confidence-aware filtering for systems of twinned systems.</description>
+  
+  
+  
+  <developers>
+	  <developer>
+	    <id>oades</id>
+	    <name>Oluwafeyisayo Adesanya</name>
+	    <organization>McMaster University</organization>
+	    <organizationUrl>https://www.mcmaster.ca/</organizationUrl>
+	    <roles>
+	      <role>developer</role>
+	      <role>researcher</role>
+	    </roles>
+	  </developer>
+</developers>
+
+<!-- Compiler plugin (Java 21) -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                </configuration>
+            </plugin>
+           <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-shade-plugin</artifactId>
+      <version>3.5.0</version>
+      <executions>
+        <execution>
+          <phase>package</phase>
+          <goals>
+            <goal>shade</goal>
+          </goals>
+          <configuration>
+            <transformers>
+              <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <mainClass>app.Main</mainClass>
+              </transformer>
+            </transformers>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+        </plugins>
+    </build>
+
+
+<dependencies>
+  <!-- Esper 9.0.0 -->
+  <dependency>
+    <groupId>com.espertech</groupId>
+    <artifactId>esper-runtime</artifactId>
+    <version>9.0.0</version>
+  </dependency>
+  <dependency>
+    <groupId>com.espertech</groupId>
+    <artifactId>esper-compiler</artifactId>
+    <version>9.0.0</version>
+  </dependency>
+  <dependency>
+    <groupId>com.espertech</groupId>
+    <artifactId>esper-common</artifactId>
+    <version>9.0.0</version>
+  </dependency>
+
+  <!-- Gson (for JSON parsing) -->
+  <dependency>
+    <groupId>com.google.code.gson</groupId>
+    <artifactId>gson</artifactId>
+    <version>2.13.1</version>
+  </dependency>
+  
+  <!-- Jackson Databind (for JSON parsing)-->
+  <dependency>
+  <groupId>com.fasterxml.jackson.core</groupId>
+  <artifactId>jackson-databind</artifactId>
+  <version>2.19.2</version>
+</dependency>
+
+  
+  <!-- JUnit (for testing) -->
+  <dependency>
+	  <groupId>org.junit.jupiter</groupId>
+	  <artifactId>junit-jupiter</artifactId>
+	  <version>5.10.0</version>
+	  <scope>test</scope>
+  </dependency>
+
+
+  <!-- Janino (dynamic code compilation) -->
+  <dependency>
+    <groupId>org.codehaus.janino</groupId>
+    <artifactId>janino</artifactId>
+    <version>3.1.9</version>
+  </dependency>
+  <dependency>
+    <groupId>org.codehaus.janino</groupId>
+    <artifactId>commons-compiler</artifactId>
+    <version>3.1.9</version>
+  </dependency>
+
+  <!-- SLF4J (logging) -->
+  <dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-api</artifactId>
+    <version>1.7.25</version>
+  </dependency>
+  <dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-simple</artifactId>
+    <version>1.7.25</version>
+  </dependency>
+
+  <!-- ANTLR (Esper dependency) -->
+  <dependency>
+    <groupId>org.antlr</groupId>
+    <artifactId>antlr4-runtime</artifactId>
+    <version>4.13.1</version>
+  </dependency>
+  
+  	<!-- EJML (matrix math operations) -->
+	<dependency>
+	  <groupId>org.ejml</groupId>
+	  <artifactId>ejml-all</artifactId>
+	  <version>0.43</version>
+	</dependency>
+	
+	<!-- ZMQ (data streams) -->
+	<dependency>
+	  <groupId>org.zeromq</groupId>
+	  <artifactId>jeromq</artifactId>
+	  <version>0.6.0</version>
+	</dependency>
+
+</dependencies>
+
+
+
+</project>

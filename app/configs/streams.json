@@ -1,0 +1,20 @@
+{
+  "temp-1": {
+    "stream_type": "temperature",
+    "unit": "C",
+    "datatype": "float",
+    "interval": 1.0,
+    "min": 15.0,
+    "max": 30.0,
+    "filter_template": "kf1"
+  },
+  "humid-1": {
+    "stream_type": "humidity",
+    "unit": "%",
+    "datatype": "float",
+    "interval": 2.0,
+    "min": 30.0,
+    "max": 90.0,
+    "filter_template": "kf2"
+  }
+}
