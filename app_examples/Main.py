@@ -22,7 +22,7 @@ def main():
         event_stream.subscribe(logger, partition, "*") 
    
     try:
-        event_stream.dispatch_forever(timeout=1000)
+        event_stream.dispatch(timeout=1000)
     except KeyboardInterrupt:
         event_stream.stop()
         logger.close()
