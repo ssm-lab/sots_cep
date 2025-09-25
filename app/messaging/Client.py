@@ -29,7 +29,7 @@ class Client:
         event["__topic__"] = topic
         payload = json.dumps(event).encode("utf-8")
         self._publisher.send_multipart([topic.encode("utf-8"), payload])
-        logging.debug(f"[{self.prefix.upper()}-CLIENT] Published event to {topic}: {event}")
+        # logging.debug(f"[{self.prefix.upper()}-CLIENT] Published event to {topic}: {event}")
 
     def subscribe_to(self, stream_id: str, consumer: EventConsumer):
         if stream_id == "*":

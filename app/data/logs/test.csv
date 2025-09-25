@@ -1,5 +1,6 @@
-partition,stream_id,timestamp,datatype,unit,value,observed_value,imputed_value,method,confidence,imputation_flag,extras,__topic__
-observed,temp-1,1758816192.422079,float,C,27.465828863936046,27.465828863936046,,,,,{'ground_truth': 27.465828863936046},observed.temp-1
-imputed,temp-1,1758816192.422079,float,C,27.465828863936046,27.465828863936046,,observed,1.0,False,{'ground_truth': 27.465828863936046},imputed.temp-1
-observed,humid-1,1758816192.422079,float,%,26.57861822062949,26.57861822062949,,,,,{'ground_truth': 26.57861822062949},observed.humid-1
-imputed,humid-1,1758816192.422079,float,%,26.57861822062949,26.57861822062949,,observed,1.0,False,{'ground_truth': 26.57861822062949},imputed.humid-1
+partition,stream_id,timestamp,datatype,unit,value,imputed_value,imputation_method,confidence,imputation_flag,event_id,status,source,provenance,extras,__topic__,metadata
+observed,temp-1,1758829239.6725502,float,C,,,,,,,missing,SimulatedDroppingStream,,,observed.temp-1,{}
+observed,temp-1,1758829240.6725502,float,C,,,,,,,missing,SimulatedDroppingStream,,,observed.temp-1,{}
+observed,temp-1,1758829241.6725502,float,C,23.93313585303431,,,,,,observed,SimulatedDroppingStream,,{},observed.temp-1,
+observed,temp-1,1758829242.6725502,float,C,23.395799149078346,,,,,,observed,SimulatedDroppingStream,,{},observed.temp-1,
+observed,temp-1,1758829243.6725502,float,C,,,,,,,missing,SimulatedDroppingStream,,,observed.temp-1,{}

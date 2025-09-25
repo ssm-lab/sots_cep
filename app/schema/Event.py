@@ -1,25 +1,30 @@
 from abc import ABC, abstractmethod
 from typing import Any, TypedDict, Optional
+import uuid
+import time
+from typing import Optional, Any
 
-class Event(TypedDict, total=False):
-    stream_id: str          # ID of the source stream
-    timestamp: float        # When the value was observed or imputed
-    datatype: str          
-    unit: Optional[str]   
+class Event(TypedDict):
+    stream_id: str
+    timestamp: float
+    datatype: str
+    unit: Optional[str]
+    value: Optional[float]
 
-
-    value: float
-
-    # Imputation fields
-    observed_value: Optional[float]   
-    imputed_value: Optional[float]    
-    method: str                       # type of predictor used, like Kalman
-    confidence: Optional[float]       # 1.0 for observed, <1.0 if imputed
+    # Imputation / reliability
+    imputed_value: Optional[float]
+    imputation_method: Optional[str]          # e.g., "Kalman", "ARIMA"
+    confidence: Optional[float]    # 1.0 = observed, <1.0 if estimated
     imputation_flag: Optional[bool]
 
-    # Optional extra data to pass through
-    extras: Optional[dict[str, Any]]
+    # Provenance / metadata
+    event_id: Optional[str]
+    status: str                    # "observed", "imputed", "missing"
+    source: str          # "sensor", "simulator", etc.
+    provenance: Optional[dict[str, Any]]
 
+    # Flexible extra fields
+    extras: Optional[dict[str, Any]]
 
 
 class EventConsumer(ABC):

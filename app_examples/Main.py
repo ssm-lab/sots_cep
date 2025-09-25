@@ -14,7 +14,7 @@ def main():
     event_stream = EventStream()
 
     stream_manager = StreamManager(event_stream, "app/configs/streams.json")
-    imputer_manager = ImputerManager(event_stream, "app/configs/streams.json", "app/configs/filters.json")
+    # imputer_manager = ImputerManager(event_stream, "app/configs/streams.json", "app/configs/filters.json")
     stream_manager.start()
 
     logger = Logger()

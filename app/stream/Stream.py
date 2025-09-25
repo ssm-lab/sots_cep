@@ -2,7 +2,7 @@ import time
 from abc import ABC, abstractmethod
 from typing import Optional, Any
 from app.schema.Event import Event
-import time, random
+import time
 
 class Stream(ABC):
     def __init__(self, stream_id: str, unit: Optional[str] = None, datatype: str = "float", interval: float = 1, **kwargs):
