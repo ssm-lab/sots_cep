@@ -1,31 +1,22 @@
-import json
 import logging
 import threading
 import time
+from app.stream.StreamRegistry import get_stream_class
 from app.schema.Event import Event
-from app.stream.Stream import SimulatedStream
-
+from app.helper.Helper import _load_json
 
 class StreamManager:
     def __init__(self, event_stream, streams_config_path: str):
         self.event_stream = event_stream
-        self.streams_config = self._load_json(streams_config_path)
+        self.streams_config = _load_json(streams_config_path)
         self.streams = {}
         self.threads = {}
         self.running = False
 
-    def _load_json(self, path: str) -> dict:
-        with open(path, "r") as f:
-            return json.load(f)
-
     def _create_stream(self, stream_id: str, cfg: dict):
-        return SimulatedStream(
-            stream_id=stream_id,
-            unit=cfg.get("unit", "unknown"),
-            datatype=cfg.get("datatype", "float"),
-            min_value=cfg.get("min", 0.0),
-            max_value=cfg.get("max", 100.0),
-        )
+        stream_type = cfg.get("type", "simulated")
+        cls = get_stream_class(stream_type)
+        return cls(stream_id=stream_id, **cfg)
 
     def _run_stream(self, stream_id: str, interval: float):
         stream = self.streams[stream_id]

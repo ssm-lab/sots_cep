@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.1.2 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36" version="28.1.2">
   <diagram name="Page-1" id="nLHSv5qawO0i9cInuJ0M">
-    <mxGraphModel dx="1724" dy="727" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="2185" dy="783" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -101,20 +101,6 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="IS17HLQf8USK1EShI2KF-25" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.615;exitY=0.141;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;curved=1;" parent="1" source="IS17HLQf8USK1EShI2KF-17" target="IS17HLQf8USK1EShI2KF-9" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="-620" y="550" as="sourcePoint" />
-            <mxPoint x="-570" y="500" as="targetPoint" />
-            <Array as="points">
-              <mxPoint x="-540" y="490" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="IS17HLQf8USK1EShI2KF-26" value="Publishes Matched Events" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="IS17HLQf8USK1EShI2KF-25" vertex="1" connectable="0">
-          <mxGeometry x="-0.1001" y="26" relative="1" as="geometry">
-            <mxPoint y="19" as="offset" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="IS17HLQf8USK1EShI2KF-27" value="Logger" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="-470" y="510" width="120" height="30" as="geometry" />
         </mxCell>
@@ -186,17 +172,14 @@
         <mxCell id="IS17HLQf8USK1EShI2KF-42" value="&lt;b&gt;Imputed Partition&lt;/b&gt;&lt;div&gt;holds events with missing data filled&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="-740" y="1110" width="160" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="IS17HLQf8USK1EShI2KF-43" value="&lt;b&gt;Matched Partition&lt;/b&gt;&lt;div&gt;holds events annotated with detected pattern matches&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="-740" y="1190" width="160" height="60" as="geometry" />
-        </mxCell>
         <mxCell id="IS17HLQf8USK1EShI2KF-45" value="Event Stream" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="-710" y="980" width="100" height="30" as="geometry" />
         </mxCell>
         <mxCell id="IS17HLQf8USK1EShI2KF-46" value="&lt;b&gt;ImputerManager&lt;/b&gt;&lt;div&gt;consumes observed events and publishes imputed events&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="-340" y="1060" width="120" height="60" as="geometry" />
+          <mxGeometry x="-190" y="1060" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="IS17HLQf8USK1EShI2KF-47" value="&lt;b&gt;CEPManager&lt;/b&gt;&lt;div&gt;consumes imputed events and publishes pattern matches&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="-340" y="1150" width="120" height="60" as="geometry" />
+          <mxGeometry x="-280" y="1160" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="IS17HLQf8USK1EShI2KF-48" value="&lt;b&gt;Logger&lt;/b&gt;&lt;div&gt;subscribes to all partitions and maintains history of event stream&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="-430" y="1280" width="160" height="60" as="geometry" />
@@ -265,17 +248,6 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="IS17HLQf8USK1EShI2KF-61" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="IS17HLQf8USK1EShI2KF-47" target="IS17HLQf8USK1EShI2KF-43" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="-570" y="1180" as="sourcePoint" />
-            <mxPoint x="-520" y="1130" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="IS17HLQf8USK1EShI2KF-62" value="Publishes matched events" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="IS17HLQf8USK1EShI2KF-61" vertex="1" connectable="0">
-          <mxGeometry x="-0.0042" y="2" relative="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="IS17HLQf8USK1EShI2KF-63" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="IS17HLQf8USK1EShI2KF-40" target="IS17HLQf8USK1EShI2KF-41" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="-680" y="1180" as="sourcePoint" />
@@ -286,6 +258,14 @@
           <mxGeometry x="0.1797" relative="1" as="geometry">
             <mxPoint x="-33" y="8" as="offset" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="Nq0pLye9EC4zpgn6VftU-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" target="Nq0pLye9EC4zpgn6VftU-4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="85" y="1275.0000000000002" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Nq0pLye9EC4zpgn6VftU-4" value="&lt;b&gt;EventListern&lt;/b&gt;&lt;br&gt;&lt;div&gt;subscribes to all partitions and maintains history of event stream&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-200" y="1280" width="160" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
