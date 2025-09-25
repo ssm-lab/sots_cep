@@ -1,0 +1,5 @@
+partition,stream_id,timestamp,datatype,unit,value,imputed_value,imputation_method,confidence,imputation_flag,event_id,status,source,provenance,extras,__topic__,extra
+observed,temp-1,1758834021.7906327,float,C,,,,,,,missing,SimulatedDroppingStream,,,observed.temp-1,{'ground_truth': 15.153373856836469}
+imputed,temp-1,1758834021.7906327,float,C,20.0,,KalmanFilter,0.30303030303030304,True,,imputed,SimulatedDroppingStream,,,imputed.temp-1,{'ground_truth': 15.153373856836469}
+observed,temp-1,1758834022.7906327,float,C,17.56001305318785,,,,,,observed,SimulatedDroppingStream,,{'ground_truth': 17.56001305318785},observed.temp-1,
+imputed,temp-1,1758834022.7906327,float,C,17.56001305318785,,observed,1.0,False,,observed,SimulatedDroppingStream,,{'ground_truth': 17.56001305318785},imputed.temp-1,

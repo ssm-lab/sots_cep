@@ -1,60 +1,42 @@
 import time
 import logging
-from app.schema.Event import Event, EventConsumer
-from app.imputation.predictors.Predictor import BasePredictor
+from ..messaging.EventStream import EventStream
+from ..schema.Event import Event
+from ..imputation.predictors.predictorTypes.BasePredictor import BasePredictor
 
 
-class Imputer(EventConsumer):
+class Imputer:
     """
-    Consumes observed events, predicts and updates, and immediately publishes
-    events to the EventStream.
+    Takes an observed event, applies predictor, and returns a new imputed/observed event.
     """
-    def __init__(self, stream_id: str, predictor: BasePredictor, event_stream=None):
+    def __init__(self, stream_id: str, predictor: BasePredictor, event_stream: EventStream):
         self.stream_id = stream_id
         self.predictor = predictor
-        self.current_prediction = None
         self.event_stream = event_stream
 
-    def consume_event(self, event: Event):
-        logging.debug(f"[IMPUTER-{self.stream_id}] Consuming event: {event}")
+    def consume_event(self, event: Event) -> Event:
+        logging.debug(f"[IMPUTER-{self.stream_id}] Processing event: {event}")
         observed_value = event.get("value")
+        prediction = None
 
         try:
-            self.current_prediction = self.predictor.predict()
+            if observed_value is None:
+                prediction = self.predictor.predict()
+            else:
+                prediction = self.predictor.update(observed_value)
         except Exception as e:
-            logging.error(f"[IMPUTER-{self.stream_id}] Predictor.predict() failed: {e}")
-            self.current_prediction = None
+            logging.error(f"[IMPUTER-{self.stream_id}] Predictor failed: {e}")
 
-        # If we got a real observation, update predictor
-        if observed_value is not None:
-            try:
-                self.current_prediction = self.predictor.update(observed_value)
-            except Exception as e:
-                logging.error(f"[IMPUTER-{self.stream_id}] Predictor.update() failed: {e}")
+        processed: Event = {**event}
+        processed.update({
+            "value": prediction if observed_value is None else observed_value,
+            "imputation_flag": observed_value is None,
+            "status": "imputed" if event.get("status") == "missing" else "observed",
+            "imputation_method": self.predictor.name if observed_value is None else "observed",
+            "confidence": (
+                self.predictor.confidence() if observed_value is None else 1.0
+            ),
+            "imputation_time": time.time(),
+        })
 
-        # Build an event passed with data from the predictor
-        processed: Event = dict(event)
-        processed["observed_value"] = observed_value
-
-        if observed_value is None:
-            processed["imputed_value"] = self.current_prediction
-            processed["value"] = self.current_prediction
-            processed["confidence"] = (
-                self.predictor.confidence() if hasattr(self.predictor, "confidence") else 0.5
-            )
-            processed["method"] = self.predictor.name
-        else:
-            processed["imputed_value"] = None
-            processed["value"] = observed_value
-            processed["confidence"] = 1.0
-            processed["method"] = "observed"
-            processed["imputation_flag"] = False
-
-        processed["extras"] = event.get("extras", {})
-        processed["imputation_time"] = time.time()
-
-        logging.debug(f"[IMPUTER-{self.stream_id}] Publishing processed event: {processed}")
-
-        # immediately publish to eventstream
-        if self.event_stream:
-            self.event_stream.add_event(processed, "imputed", self.stream_id)
+        self.event_stream.add_event(processed, "imputed", self.stream_id)

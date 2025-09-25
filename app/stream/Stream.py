@@ -1,7 +1,7 @@
 import time
 from abc import ABC, abstractmethod
 from typing import Optional, Any
-from app.schema.Event import Event
+from ..schema.Event import Event
 import time
 
 class Stream(ABC):

@@ -1,7 +1,7 @@
 import logging
 import json
 import zmq
-from app.schema.Event import Event, EventConsumer
+from ..schema.Event import Event, EventConsumer
 
 """
 Generic stream client component.

@@ -3,9 +3,10 @@ import threading
 import time
 from typing import Dict, Any, Optional
 
-from app.stream.StreamRegistry import get_stream_class
-from app.schema.Event import Event
-from app.helper.Helper import _load_json
+from ..stream.StreamTypes import *
+from ..stream.StreamRegistry import get_stream_class
+from ..schema.Event import Event
+from ..helper.Helper import _load_json
 
 
 class TickScheduler:
@@ -16,7 +17,6 @@ class TickScheduler:
         self.grace = grace  # leeway in seconds
 
     def wait_next(self) -> float:
-        """Sleep until the next scheduled tick and return its timestamp."""
         now = time.time()
         sleep_for = self.next_tick - now
         if sleep_for > 0:
@@ -27,7 +27,6 @@ class TickScheduler:
         return tick_ts
 
     def stamp(self, event: Event, scheduled_ts: float) -> Event:
-        """Ensure the event has the correct scheduled timestamp."""
         if isinstance(event, dict):
             event["timestamp"] = scheduled_ts
         else:
@@ -65,7 +64,7 @@ class StreamManager:
             "unit": getattr(stream, "unit", None),
             "datatype": getattr(stream, "datatype", None),
             "status": "missing",
-            "metadata": {},
+            "extra": {"ground_truth": getattr(stream, "last_truth", None)},
         }
 
     def _run_stream(self, stream_id: str, scheduler: TickScheduler, stream) -> None:

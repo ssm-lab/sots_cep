@@ -12,14 +12,15 @@ logging.basicConfig(
 
 def main():
     event_stream = EventStream()
-
-    stream_manager = StreamManager(event_stream, "app/configs/streams.json")
-    # imputer_manager = ImputerManager(event_stream, "app/configs/streams.json", "app/configs/filters.json")
-    stream_manager.start()
-
     logger = Logger()
     for partition in list(event_stream.partitions.keys()):
         event_stream.subscribe(logger, partition, "*") 
+        
+    imputer_manager = ImputerManager(event_stream, "app/configs/streams.json", "app/configs/filters.json")
+    stream_manager = StreamManager(event_stream, "app/configs/streams.json")
+    stream_manager.start()
+
+    
    
     try:
         event_stream.dispatch(timeout=1000)

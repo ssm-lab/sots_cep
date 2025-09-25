@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import Any, TypedDict, Optional
-import uuid
-import time
 from typing import Optional, Any
 
 class Event(TypedDict):
@@ -17,13 +15,12 @@ class Event(TypedDict):
     confidence: Optional[float]    # 1.0 = observed, <1.0 if estimated
     imputation_flag: Optional[bool]
 
-    # Provenance / metadata
+    # metadata
     event_id: Optional[str]
     status: str                    # "observed", "imputed", "missing"
     source: str          # "sensor", "simulator", etc.
     provenance: Optional[dict[str, Any]]
 
-    # Flexible extra fields
     extras: Optional[dict[str, Any]]
 
 

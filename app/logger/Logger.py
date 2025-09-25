@@ -1,10 +1,10 @@
 import csv
 import os
-from app.schema.Event import Event, EventConsumer
+from ..schema.Event import Event, EventConsumer
 
 
 class Logger(EventConsumer):
-    def __init__(self, output_dir="app/data/logs", name="test"):
+    def __init__(self, output_dir="data/logs", name="all_paritions"):
         filename = f"{name}.csv"
 
         self.records: list[Event] = []

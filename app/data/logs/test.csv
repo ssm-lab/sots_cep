@@ -1,6 +1,0 @@
-partition,stream_id,timestamp,datatype,unit,value,imputed_value,imputation_method,confidence,imputation_flag,event_id,status,source,provenance,extras,__topic__,metadata
-observed,temp-1,1758829239.6725502,float,C,,,,,,,missing,SimulatedDroppingStream,,,observed.temp-1,{}
-observed,temp-1,1758829240.6725502,float,C,,,,,,,missing,SimulatedDroppingStream,,,observed.temp-1,{}
-observed,temp-1,1758829241.6725502,float,C,23.93313585303431,,,,,,observed,SimulatedDroppingStream,,{},observed.temp-1,
-observed,temp-1,1758829242.6725502,float,C,23.395799149078346,,,,,,observed,SimulatedDroppingStream,,{},observed.temp-1,
-observed,temp-1,1758829243.6725502,float,C,,,,,,,missing,SimulatedDroppingStream,,,observed.temp-1,{}

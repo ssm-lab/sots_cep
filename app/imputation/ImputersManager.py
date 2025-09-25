@@ -1,12 +1,12 @@
 import json
 import logging
-from app.imputation.Imputer import Imputer
-from app.imputation.predictors.Predictor import KalmanFilter
-
+from .Imputer import Imputer
+from .predictors.predictorTypes import *
+from .predictors.PredictorRegistry import get_predictor_class
 
 class ImputerManager:
     """
-    Creates and manages imputers that consume observed events and publish imputed events.
+    Wires imputers to observed streams, publishes results to imputed topic.
     """
     def __init__(self, event_stream, streams_config_path: str, filters_config_path: str):
         self.event_stream = event_stream
@@ -24,8 +24,8 @@ class ImputerManager:
         ftype = cfg["type"]
         params = cfg["params"]
 
-        if ftype == "KalmanFilter":
-            return KalmanFilter(**params)
+        cls = get_predictor_class(ftype)
+        return cls(**params)
 
     def _create_workers(self):
         for stream_id, cfg in self.streams_config.items():
@@ -33,6 +33,7 @@ class ImputerManager:
             worker = Imputer(stream_id=stream_id, predictor=predictor, event_stream=self.event_stream)
             self.workers[stream_id] = worker
 
-            # Subscribe worker to observed.<id>
+            # Subscribe worker to its own observed.<stream_id>
             self.event_stream.subscribe(worker, "observed", stream_id)
+
             logging.info(f"[IMPUTER-MANAGER] Worker for {stream_id} subscribed to observed.{stream_id}")

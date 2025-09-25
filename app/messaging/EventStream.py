@@ -1,6 +1,6 @@
 import logging
-from app.schema.Event import Event, EventConsumer
-from app.messaging.Client import Client
+from ..schema.Event import Event, EventConsumer
+from ..messaging.Client import Client
 
 class EventStream:
     def __init__(self):

@@ -1,29 +1,15 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
+from .BasePredictor import BasePredictor
+from ..PredictorRegistry import register_predictor
 
-class BasePredictor(ABC):
-    def __init__(self, name: str):
-        self.name = name
-
-    @abstractmethod
-    def predict(self) -> float:
-        pass
-
-    @abstractmethod
-    def update(self, observed_value: float) -> float:
-        pass
-
-    @abstractmethod
-    def confidence(self) -> float:
-        pass
-
-
+@register_predictor("KalmanFilter")
 class KalmanFilter(BasePredictor):
     def __init__(self, initial_value=0.0, initial_rate=0.0,
                  initial_acceleration=0.0, initial_variance=1.0,
                  dt=1.0, process_noise=0.01, measurement_noise=0.1):
-        super().__init__(name="kalman")
+        super().__init__(name="KalmanFilter")
 
         self.dt = dt
         dt2 = 0.5 * dt**2

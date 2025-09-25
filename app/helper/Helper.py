@@ -1,6 +1,6 @@
 import json
 
-from app.schema.Event import Event
+from ..schema.Event import Event
 
 # Loading functions
 def _load_json(path: str) -> dict:
