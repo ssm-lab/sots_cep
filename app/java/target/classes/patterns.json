@@ -1,0 +1,10 @@
+[
+  {
+    "name": "CompletedMatch",
+    "epl": "@Name('CompletedMatch') select a as firstEvent, b as secondEvent from pattern [every a=Event(status='observed') -> b=Event(status='observed')]"
+  },
+  {
+    "name": "TimeoutMatch",
+    "epl": "@Name('TimeoutMatch') select a as firstEvent, b as secondEvent from pattern [every a=Event(status='observed') -> (b=Event(status='observed') or timer:interval(5 sec))]"
+  }
+]

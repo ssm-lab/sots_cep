@@ -1,6 +1,0 @@
-[
-  {
-    "name": "HighValueEvent",
-    "epl": "@name('HighValueEvent') select * from Event where value > 25.0"
-  }
-]

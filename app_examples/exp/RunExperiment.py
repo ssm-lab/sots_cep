@@ -1,9 +1,8 @@
 from app.core.runtime.EventStream import EventStream
-from app.core.stream.StreamManager import StreamManager
+from .ExperimentStreamManager import ExperimentStreamManager
 from app.core.imputation.ReconstructionManager import ReconstructionManager
 from app.core.logger.Logger import CSVLogger
 import logging
-from app_examples.exp.evaluation.Evaluator import Evaluator
 
 
 logging.basicConfig(
@@ -26,7 +25,7 @@ def main():
             "app/core/configs/streams.json",
             "app/core/configs/filters.json"
         )
-        stream_manager = StreamManager(event_stream, "app/core/configs/streams.json")
+        stream_manager = ExperimentStreamManager(event_stream, "app/core/configs/streams.json")
         stream_manager.start()
 
         try:
@@ -34,17 +33,6 @@ def main():
         except KeyboardInterrupt:
             event_stream.stop()
             logging.info("[MAIN] Stopping pipeline")
-
-
-        logging.info("[MAIN] Running evaluation...")
-        evaluator = Evaluator(filepath=logger.filepath)
-        metrics = evaluator.compute_basic_metrics()
-        stats = evaluator.run_statistical_tests()
-
-        logging.info("[MAIN] Evaluation finished")
-        logging.info(f"Metrics: {metrics}")
-        logging.info(f"Statistical tests: {stats}")
-
 
 if __name__ == "__main__":
     main()
