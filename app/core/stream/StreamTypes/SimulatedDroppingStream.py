@@ -28,5 +28,6 @@ class SimulatedDroppingStream(Stream):
             "unit": self.unit,
             "datatype": self.datatype,
             "status": "observed",
+            "origin": "source",
             "extras": {"ground_truth": value}
         }

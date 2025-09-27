@@ -31,21 +31,24 @@ public class Event {
     @JsonProperty("unit")
     private String unit;
 
+    @JsonProperty("origin")
+    private String origin;
+
     @JsonProperty("value")
     private Double value;
 
-    // Imputation / reliability
-    @JsonProperty("imputed_value")
-    private Double imputedValue;
+    // Reconstruction fields
+    @JsonProperty("reconstructed_value")
+    private Double reconstructedValue;
 
-    @JsonProperty("imputation_method")
-    private String imputationMethod;
+    @JsonProperty("reconstruction_method")
+    private String reconstructionMethod;
 
     @JsonProperty("confidence")
     private Double confidence;
 
-    @JsonProperty("imputation_flag")
-    private Boolean imputationFlag;
+    @JsonProperty("reconstruction_flag")
+    private Boolean reconstructionFlag;
 
     // Metadata
     @JsonProperty("status")
@@ -60,14 +63,16 @@ public class Event {
     // --- Constructors ---
     public Event() {}
 
-    public Event(String streamId, String eventId, Double sampledTs, Double value, String datatype,
-                 String unit, String status, String source, Map<String, Object> extras) {
+    public Event(String streamId, String eventId, Double sampledTs, Double value,
+                 String datatype, String unit, String origin, String status,
+                 String source, Map<String, Object> extras) {
         this.streamId = streamId;
         this.eventId = eventId;
         this.sampledTs = sampledTs;
         this.value = value;
         this.datatype = datatype;
         this.unit = unit;
+        this.origin = origin;
         this.status = status;
         this.source = source;
         this.extras = extras;
@@ -95,20 +100,23 @@ public class Event {
     public String getUnit() { return unit; }
     public void setUnit(String unit) { this.unit = unit; }
 
+    public String getOrigin() { return origin; }
+    public void setOrigin(String origin) { this.origin = origin; }
+
     public Double getValue() { return value; }
     public void setValue(Double value) { this.value = value; }
 
-    public Double getImputedValue() { return imputedValue; }
-    public void setImputedValue(Double imputedValue) { this.imputedValue = imputedValue; }
+    public Double getReconstructedValue() { return reconstructedValue; }
+    public void setReconstructedValue(Double reconstructedValue) { this.reconstructedValue = reconstructedValue; }
 
-    public String getImputationMethod() { return imputationMethod; }
-    public void setImputationMethod(String imputationMethod) { this.imputationMethod = imputationMethod; }
+    public String getReconstructionMethod() { return reconstructionMethod; }
+    public void setReconstructionMethod(String reconstructionMethod) { this.reconstructionMethod = reconstructionMethod; }
 
     public Double getConfidence() { return confidence; }
     public void setConfidence(Double confidence) { this.confidence = confidence; }
 
-    public Boolean getImputationFlag() { return imputationFlag; }
-    public void setImputationFlag(Boolean imputationFlag) { this.imputationFlag = imputationFlag; }
+    public Boolean getReconstructionFlag() { return reconstructionFlag; }
+    public void setReconstructionFlag(Boolean reconstructionFlag) { this.reconstructionFlag = reconstructionFlag; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
@@ -130,11 +138,12 @@ public class Event {
                 ", eventTs=" + eventTs +
                 ", datatype='" + datatype + '\'' +
                 ", unit='" + unit + '\'' +
+                ", origin='" + origin + '\'' +
                 ", value=" + value +
-                ", imputedValue=" + imputedValue +
-                ", imputationMethod='" + imputationMethod + '\'' +
+                ", reconstructedValue=" + reconstructedValue +
+                ", reconstructionMethod='" + reconstructionMethod + '\'' +
                 ", confidence=" + confidence +
-                ", imputationFlag=" + imputationFlag +
+                ", reconstructionFlag=" + reconstructionFlag +
                 ", status='" + status + '\'' +
                 ", source='" + source + '\'' +
                 ", extras=" + extras +

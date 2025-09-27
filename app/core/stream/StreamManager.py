@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional
 from ..stream.StreamTypes import *
 from ..stream.StreamRegistry import get_stream_class
 from ..schema.Event import Event, make_event
-from ..helper.Helper import _load_json
+from ..utils.UtilityFunctions import _load_json
 
 
 class TickScheduler:
@@ -67,6 +67,7 @@ class StreamManager:
                     sampled_ts=event_time,
                     status="missing",
                     source=stream.__class__.__name__,
+                    origin="observed",
                     extras= {},
                 )
                 self._publish(stream_id, event, partition="observed")
@@ -84,6 +85,7 @@ class StreamManager:
                 sampled_ts=sampled_ts,
                 status="observed",
                 source=stream.__class__.__name__,
+                origin="observed",
                 extras=extras,
             )
 

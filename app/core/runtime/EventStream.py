@@ -1,7 +1,7 @@
 import logging
 from ..schema.Event import Event
 from .EventConsumer import EventConsumer
-from ..messaging.Client import Client
+from ..communication.Client import Client
 
 class EventStream:
     def __init__(self):

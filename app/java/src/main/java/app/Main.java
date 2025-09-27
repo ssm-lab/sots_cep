@@ -7,30 +7,30 @@ import runtime.EventStream;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+    	String patternFile = args.length > 0 ? args[0] : "patterns/basic_patterns.json";
+        String logFile = args.length > 1 ? args[1] : "data/logs";
+        
         EventStream eventStream = new EventStream("tcp://localhost:5557", "tcp://localhost:5558");
         EsperSetup esper = new EsperSetup();
 
         eventStream.subscribe((topic, event) -> {
-            System.out.println("Got event from " + topic + ": " + event);
             esper.getRuntime().getEventService().sendEventBean(event, "Event");
         }, "reconstructed", "*");
-
         
+        eventStream.subscribe((topic, event) -> {
+            esper.getRuntime().getEventService().sendEventBean(event, "Event");
+        }, "groundtruth", "*");
 
-        try (PatternLogger patternLogger = new PatternLogger("data/pattern_logs.csv")) {
+
+        try (PatternLogger patternLogger = new PatternLogger(logFile, "patterns")) {
             PatternLoader loader = new PatternLoader(
                     esper.getConfiguration(),
                     esper.getRuntime(),
-                    eventStream,
                     patternLogger
             );
 
-            // Load patterns from JSON file in resources
-            loader.loadPatternsFromFile("patterns.json");
-
-            // 5. Start dispatch loop (blocking)
+            loader.loadPatternsFromFile(patternFile);
             eventStream.dispatch(1000, false);
         }
-        // PatternLogger closes automatically (try-with-resources)
     }
 }

@@ -18,7 +18,7 @@ public class EventStream {
         partitions.put("reconstructed", new Client("reconstructed", subscriberEndpoint, publisherEndpoint));
         partitions.put("matched", new Client("matched", subscriberEndpoint, publisherEndpoint));
         partitions.put("late", new Client("late", subscriberEndpoint, publisherEndpoint));
-        partitions.put("grountruth", new Client("grountruth", subscriberEndpoint, publisherEndpoint));
+        partitions.put("groundtruth", new Client("groundtruth", subscriberEndpoint, publisherEndpoint));
     }
 
     public void addEvent(Event event, String partition, String streamId) {

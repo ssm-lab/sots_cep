@@ -49,7 +49,6 @@ public class Client {
         String payload = gson.toJson(event);
         publisher.sendMore(topic);
         publisher.send(payload);
-        LOG.fine(() -> "[Client-" + prefix + "] Published " + payload + " to " + topic);
     }
 
     /** Subscribe a consumer to a specific stream or all streams under prefix */

@@ -10,6 +10,7 @@ class Event(TypedDict, total=False):
     datatype: str
     unit: Optional[str]
     value: Optional[float]
+    origin: str
 
     reconstructed_value: Optional[float]
     reconstruction_method: Optional[str]
@@ -26,6 +27,7 @@ def make_event(
     stream_id: str,
     value: Optional[float],
     datatype: str,
+    origin: str,
     unit: Optional[str] = None,
     sampled_ts: Optional[float] = None,
     event_ts: Optional[float] = None,
@@ -52,7 +54,7 @@ def make_event(
         "datatype": datatype,
         "unit": unit,
         "value": value,
-  
+        "origin": origin,
         "reconstructed_value": reconstructed_value,
         "reconstruction_method": reconstruction_method,
         "confidence": confidence,
@@ -63,17 +65,3 @@ def make_event(
         # always forward extras (at least an empty dict)
         "extras": extras if extras is not None else {},
     }
-
-def update_event_for_reconstruction(event: Event,
-                                reconstructed_value: Optional[float],
-                                method: str,
-                                confidence: float) -> Event:
-    updated = dict(event)
-    updated["arrival_ts"] = time.time()
-    updated["reconstructed_value"] = reconstructed_value
-    updated["reconstruction_method"] = method
-    updated["confidence"] = confidence
-    updated["reconstruction_flag"] = reconstructed_value is not None
-    updated["status"] = "reconstructed" if reconstructed_value is not None else "observed"
-    updated["value"] = event["value"] if event["value"] is not None else reconstructed_value
-    return updated

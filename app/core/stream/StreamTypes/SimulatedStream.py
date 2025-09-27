@@ -24,6 +24,6 @@ class SimulatedStream(Stream):
             "unit": self.unit,
             "datatype": self.datatype,
             "status": "observed",
-            "ground_truth": generated_value,
-            "extras": {}
+            "origin": "source",
+            "extras": {"ground_truth": generated_value}
         }

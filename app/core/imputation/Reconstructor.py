@@ -37,6 +37,7 @@ class Reconstructor(EventConsumer):
             "value": observed_value if observed_value is not None else prediction,
             "reconstructed_value": prediction,
             "reconstruction_flag": observed_value is None,
+            "origin": "reconstructed",
             "status": "reconstructed" if event.get("status") == "missing" else "observed",
             "reconstruction_method": (
                 self.predictor.name if observed_value is None else "observed"
