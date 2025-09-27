@@ -47,7 +47,6 @@ def main():
             event_stream.stop()
             logging.info("[MAIN] Stopping pipeline")
 
-    # --- Shutdown esper service ---
     stop_java(esper_service)
 
 
