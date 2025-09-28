@@ -7,7 +7,7 @@ from ..StreamRegistry import register_stream_type
 class SimulatedDroppingStream(Stream):
     def __init__(self, stream_id: str, unit="C", datatype="float", interval=1.0,
                  min_value: float = 15.0, max_value: float = 30.0,
-                 drop_chance: float = 0.25,  
+                 drop_chance: float = 0.1,  
                  **kwargs):
         super().__init__(stream_id, unit, datatype, interval)
         self.min_value = min_value

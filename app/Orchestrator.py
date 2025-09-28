@@ -1,4 +1,5 @@
 import logging
+import subprocess
 from app.core.runtime.EventStream import EventStream
 from app.core.runtime.Coordinator import Coordinator
 from app.core.utils.logger.Logger import CSVLogger
@@ -63,4 +64,8 @@ class Orchestrator:
             self.logger.close()
         if self.esper_proc:
             stop_java(self.esper_proc)
+        if self.server_proc:
+            self.server_proc.terminate()
+            self.server_proc.wait()
+            logging.info("[ORCHESTRATOR] Server stopped")
         logging.info("[ORCHESTRATOR] Shutdown complete")
