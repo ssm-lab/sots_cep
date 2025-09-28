@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 import numpy as np
 
 from .BasePredictor import BasePredictor

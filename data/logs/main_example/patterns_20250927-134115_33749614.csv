@@ -1,4 +1,0 @@
-# Logger: PatternLogger | Started: Sat Sep 27 13:41:15 EDT 2025
-fired_at,pattern_name,outcome,partition,stream_ids,event_ids
-2025-09-27 13:41:29.588,ConsistentIncrease,complete,reconstructed;reconstructed;reconstructed;,temp-1;temp-1;temp-1;,temp-1-1758994876208;temp-1-1758994877188;temp-1-1758994878193;
-2025-09-27 13:41:33.593,SpikeThenDrop,complete,reconstructed;reconstructed;reconstructed;,temp-1;temp-1;temp-1;,temp-1-1758994876208;temp-1-1758994877188;temp-1-1758994879188;

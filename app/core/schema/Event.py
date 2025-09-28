@@ -41,7 +41,6 @@ def make_event(
     extras: Optional[Dict[str, Any]] = None,
 ) -> Event:
     now = time.time()
-    sampled_ts = sampled_ts or now
     event_ts = event_ts or sampled_ts
     arrival_ts = arrival_ts or now
 

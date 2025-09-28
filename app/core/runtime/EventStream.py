@@ -3,6 +3,12 @@ from ..schema.Event import Event
 from .EventConsumer import EventConsumer
 from ..communication.Client import Client
 
+"""
+EventStream: Core event bus for the system.
+Handles publish/subscribe of events across partitions.
+Dispatches events to subscribed consumers.
+"""
+
 class EventStream:
     def __init__(self):
         self.partitions = {

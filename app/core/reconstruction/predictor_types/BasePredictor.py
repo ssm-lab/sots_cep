@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
-import numpy as np
-from ..PredictorRegistry import register_predictor
+
+"""
+Predictor: Interface for estimation models.
+Implemented by Kalman, etc. for reconstruction.
+Returns predictions + confidence for missing values.
+"""
 
 class BasePredictor(ABC):
     def __init__(self, name: str):

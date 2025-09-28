@@ -1,7 +1,7 @@
 import random, time
 from ...stream.Stream import Stream
 from ...schema.Event import Event
-from ...stream.StreamRegistry import register_stream_type
+from ..StreamRegistry import register_stream_type
 
 @register_stream_type("simulated_dropping_stream")
 class SimulatedDroppingStream(Stream):
@@ -29,5 +29,5 @@ class SimulatedDroppingStream(Stream):
             "datatype": self.datatype,
             "status": "observed",
             "origin": "source",
-            "extras": {"ground_truth": value}
+            "extras": {}
         }

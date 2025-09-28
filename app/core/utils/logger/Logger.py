@@ -4,10 +4,13 @@ import time
 import uuid
 from abc import ABC, abstractmethod
 
-from ..schema.Event import Event
-from ..runtime.EventConsumer import EventConsumer
+from ...schema.Event import Event
+from ...runtime.EventConsumer import EventConsumer
 
-
+"""
+Logger: Event consumer that logs to CSV files.
+Subscribes to partitions/topics of interest.
+"""
 class BaseLogger(EventConsumer, ABC):
     def __init__(self, output_dir="data/logs", name="all_partitions"):
         self.output_dir = output_dir
