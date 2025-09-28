@@ -1,5 +1,4 @@
 # Uncertainty-Aware Stream Processing for Systems of Digital Twins
-![Unit tests](https://github.com/faith176/sots_kalman_filters/actions/workflows/unit-tests.yml/badge.svg?branch=master)
 
 ## Project Overview
 This framework implements an pipeline for simulating, imputing, and processing data streams. It’s designed to support runtime data reliability in complex event processing (CEP) for systems of twinned systems.

@@ -14,12 +14,11 @@ def build_java(
     java_dir: str = os.path.join(os.getcwd(), "app/java"),
     clean: bool = False
 ):
-    """Run mvn package (with optional clean)."""
     logging.info(f"[BUILD] Running mvn {'clean ' if clean else ''}package in {java_dir}")
 
     mvn_cmd = shutil.which("mvn")
     if mvn_cmd is None:
-        logging.error("[BUILD] Maven not found on PATH. Please install Maven or add it to PATH.")
+        logging.error("[BUILD] Maven not found on PATH")
         raise RuntimeError("Maven not found")
 
     cmd = [mvn_cmd]
@@ -51,7 +50,6 @@ def start_java(
     args: list[str] = None,
     rebuild: bool = False
 ):
-    """Start a Java subprocess"""
     jar_path = os.path.join(java_dir, "target", jar_name)
 
     if rebuild or not os.path.exists(jar_path):
@@ -70,7 +68,6 @@ def start_java(
 
 
 def stop_java(proc):
-    """Stop a Java subprocess"""
     if proc:
         logging.info("[MAIN] Terminating subprocess...")
         proc.send_signal(signal.SIGTERM)
