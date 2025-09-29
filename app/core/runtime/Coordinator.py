@@ -7,7 +7,7 @@ from ..schema.Event import make_event
 from ..stream.StreamRegistry import get_stream_class
 from ..reconstruction.PredictorRegistry import get_predictor_class
 from ..reconstruction.Reconstructor import Reconstructor
-from ..utils.UtilityFunctions import _load_json
+from ..utils.util_funcs import _load_json
 
 # Auto load registries
 from ..reconstruction.predictor_types import *
@@ -88,7 +88,7 @@ class Coordinator:
 
             # Fill in missing event
             except TimeoutError:
-                logging.warning(f"[COORDINATOR] Timeout in {stream_id} at {event_time:.3f}")
+                logging.debug(f"[COORDINATOR] Timeout in {stream_id} at {event_time:.3f}")
                 reconstructor = self.reconstructors.get(stream_id)
                 if reconstructor:
                     missing_event = make_event(

@@ -1,10 +1,7 @@
 # Uncertainty-Aware Stream Processing for Systems of Digital Twins
 
 ## Project Overview
-This framework implements an pipeline for simulating, imputing, and processing data streams. It’s designed to support runtime data reliability in complex event processing (CEP) for systems of twinned systems.
-
-
-Update project requirements.txt with <pipreqs . --force> at root folder
+This framework provides a modular event processing pipeline for systems of digital twins contexts. It integrates real-time data streams, missing data reconstruction with uncertainty estimates, and Complex Event Processing (CEP) to enable reliability-aware situational awareness.
 
 ## Repository Structure
 - `/app` – Core project code
@@ -25,6 +22,13 @@ Update project requirements.txt with <pipreqs . --force> at root folder
 - Stop with Ctrl+C (logger will close and save the CSV)
 - Evaluate results: python app_examples/Main_Evaluation.py
 
+## Documentation
+
+## Extensibility
+- Replace ZeroMQ with any messaging layer (Kafka, RabbitMQ).
+- Swap out Esper CEP with other CEP engines or custom rule evaluators.
+- Add new predictors or stream types by extending base classes.
+- Subscribe external systems (dashboards, loggers) to partitions without changing the core pipeline.
 
 ## Example Workflow
 - Simulated stream generate observed data (with occasional dropouts).

@@ -6,7 +6,7 @@ from app.core.runtime.EventStream import EventStream
 from app.core.runtime.Coordinator import Coordinator
 from app.core.utils.logger.Logger import CSVLogger
 from app.JavaRunner import start_java, stop_java
-
+from app.core.communication.comm_types.ZMQClient import ZMQClient
 """
 Orchestrator: High-level controller for running the end-to-end pipeline.
 Starts Esper, logging, and the Coordinator to manage streams + reconstructors.
@@ -20,17 +20,20 @@ logging.basicConfig(
 
 class Orchestrator:
     def __init__(self, pattern_file, log_dir, streams_cfg, filters_cfg, base_run_name,
-                 use_java=True, rebuild=True, jar_name="sots-uncertainty-aware-cep-0.0.1-SNAPSHOT.jar"):
+                 client_type=ZMQClient,
+                 use_java=True, rebuild=True, 
+                 jar_name="sots-uncertainty-aware-cep-0.0.1-SNAPSHOT.jar"):
         self.pattern_file = pattern_file
         self.streams_cfg = streams_cfg
         self.filters_cfg = filters_cfg
         self.use_java = use_java
         self.rebuild = rebuild
         self.jar_name = jar_name
+        self.client_type = client_type
 
         self.esper_proc = None
         self.coordinator = None
-        self.event_stream = EventStream()
+        self.event_stream = EventStream(client_type=self.client_type)
         self.logger = None
         self.base_run_name = base_run_name
 
@@ -40,7 +43,6 @@ class Orchestrator:
         os.makedirs(self.run_dir, exist_ok=True)
 
     def start(self):
-        
         # Start up Esper
         if self.use_java:
             self.esper_proc = start_java(
