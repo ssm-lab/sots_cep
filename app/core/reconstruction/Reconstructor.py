@@ -36,7 +36,7 @@ class Reconstructor(EventConsumer):
                 self.predictor.name if observed_value is None else "observed"
             ),
             "confidence": (
-                self.predictor.confidence() if observed_value is None else 1.0
+                self.predictor.confidence()
             ),
             "reconstruction_time": time.time(),
         })
