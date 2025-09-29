@@ -72,10 +72,6 @@ class Coordinator:
             event_time = scheduler.wait_next()
             try:
                 raw = stream.generate_event()
-                # if raw is None:
-                #     # Just skip silently – no event, no reconstructor
-                #     logging.debug(f"[COORDINATOR] {stream_id} returned None at {event_time:.3f}, skipping")
-                #     continue
 
                 event = make_event(
                     stream_id,
@@ -83,9 +79,9 @@ class Coordinator:
                     unit=getattr(stream, "unit", None),
                     datatype=getattr(stream, "datatype", None),
                     sampled_ts=raw.get("sampled_ts", event_time),
-                    status="observed",
+                    status="coordinated",
                     source=stream.__class__.__name__,
-                    origin="observed",
+                    origin="source",
                     extras=raw.get("extras", {}),
                 )
                 self.event_stream.add_event(event, "observed", stream_id)
@@ -101,9 +97,9 @@ class Coordinator:
                         unit=getattr(stream, "unit", None),
                         datatype=getattr(stream, "datatype", None),
                         event_ts=event_time,
-                        status="missing",
+                        status="coordinated",
                         source=stream.__class__.__name__,
-                        origin="observed",
+                        origin="missing",
                         extras={}
                     )
                     reconstructor.handle_timeout(missing_event)
@@ -122,7 +118,7 @@ class Coordinator:
         for logger in self.loggers:
             for partition in list(self.event_stream.partitions.keys()):
                 self.event_stream.subscribe(logger, partition, "*")
-            logging.info(f"[COORDINATOR] Subscribed logger {logger.__class__.__name__}")
+            logging.debug(f"[COORDINATOR] Subscribed logger {logger.__class__.__name__}")
 
         # Build streams + reconstructors
         for stream_id, cfg in self.streams_cfg.items():
@@ -148,7 +144,7 @@ class Coordinator:
             self.threads[stream_id] = t
             t.start()
 
-            logging.info(f"[COORDINATOR] Started {stream_id} interval={interval:.1f}s")
+            logging.debug(f"[COORDINATOR] Started {stream_id} interval={interval:.1f}s")
 
     def stop(self, join_timeout: float = 2.0):
         self.running = False

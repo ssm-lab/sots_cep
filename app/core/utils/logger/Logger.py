@@ -12,10 +12,9 @@ Logger: Event consumer that logs to CSV files.
 Subscribes to partitions/topics of interest.
 """
 class BaseLogger(EventConsumer, ABC):
-    def __init__(self, output_dir="data/logs", name="all_partitions"):
-        self.output_dir = output_dir
-        os.makedirs(self.output_dir, exist_ok=True)
-        self.name = name
+    def __init__(self, run_dir: str):
+        os.makedirs(run_dir, exist_ok=True)
+        self.run_dir = run_dir
         self.records: list[Event] = []
 
     @abstractmethod
@@ -34,21 +33,19 @@ class BaseLogger(EventConsumer, ABC):
 
 
 class CSVLogger(BaseLogger):
-    def __init__(self, output_dir="data/logs", name="all_partitions"):
-        super().__init__(output_dir, name)
+    def __init__(self, run_dir: str):
+        super().__init__(run_dir)
 
-        run_id = uuid.uuid4().hex[:8]
-        timestamp = time.strftime("%Y%m%d-%H%M%S")
-        filename = f"{self.name}_{timestamp}_{run_id}.csv"
-
-        self.filepath = os.path.join(self.output_dir, filename)
+        self.filepath = os.path.join(self.run_dir, "events.csv")
         self.csvfile = None
         self.writer = None
 
-        # Get base schema from Event definition
+        # Schema fields
         self.base_fields = list(Event.__annotations__.keys())
         if "partition" not in self.base_fields:
             self.base_fields.insert(0, "partition")
+
+
 
     def _init_writer(self, event: Event):
         # Add any dynamic fields

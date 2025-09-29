@@ -1,116 +1,87 @@
 #!/usr/bin/env python
 import argparse
 import logging
-
 import zmq
-
-from .Memory import Memory
-
-
-__author__ = "Istvan David"
-__copyright__ = "Copyright 2021, GEODES"
-__credits__ = "Eugene Syriani"
-__license__ = "GPL-3.0"
 
 """
 Server component, responsible for:
--publishing the initial snapshot to joiners (via ROUTER/DEALER);
--pulling client updates (via PULL/PUSH);
--distributing client updates (via PUB/SUB).
+- pulling client updates (via PULL);
+- distributing client updates (via PUB).
 
-Run with 'python Server.py -log debug'.
+Run with 'python -m app.core.communication.Server --log debug'
 """
 
-
-class Server():
-    
+class Server:
     def __init__(self):
-        ctx = zmq.Context()
-        
-        self._snapshot = ctx.socket(zmq.ROUTER)
-        self._snapshot.bind("tcp://*:5556")
-        self._publisher = ctx.socket(zmq.PUB)
+        self._ctx = zmq.Context()
+
+        # Publisher side (for subscribers to connect to)
+        self._publisher = self._ctx.socket(zmq.PUB)
         self._publisher.bind("tcp://*:5557")
-        self._collector = ctx.socket(zmq.PULL)
+
+        # Collector side (for clients to PUSH into)
+        self._collector = self._ctx.socket(zmq.PULL)
         self._collector.bind("tcp://*:5558")
-        
+
         self._poller = zmq.Poller()
         self._poller.register(self._collector, zmq.POLLIN)
-        self._poller.register(self._snapshot, zmq.POLLIN)
-        
-        self._memory = Memory()
-    
+
     def run(self):
         logging.debug("Server running.")
-        
-        while True:
-            try:
+        try:
+            while True:
                 items = dict(self._poller.poll(1000))
-            except:
-                break
-            
-            # PULLed messages PUBLISHED by the clients
-            if self._collector in items:
-                message = self._collector.recv_multipart() # UPDATED from .recv()
-                logging.debug("Saving message: {}".format(message))
-                self._memory.saveMessage(message)
-                logging.debug("Publishing update")
-                self._publisher.send_multipart(message) # UPDATED from .send()
-            
-            # snapshot requests by joining clients # UPDATED from .recv()
-            if self._snapshot in items:
-                message = self._snapshot.recv_multipart()
-                identity = message[0]
-                request = message[1]
-                logging.debug("Identity: {}".format(identity))
-                logging.debug("Request: {}".format(request))
 
-                if request == b"request_snapshot":
-                    pass
-                else:
-                    print("Bad request, aborting.")
-                    break
+                if self._collector in items:
+                    message = self._collector.recv_multipart()
 
-                # Send saved messages as [identity, topic, payload]
-                for message in self._memory.getMessages():
-                    full_msg = [identity, *message]
-                    logging.debug("Sending snapshot message: {}".format(full_msg))
-                    self._snapshot.send_multipart(full_msg)
+                    if len(message) < 2:
+                        logging.warning("Malformed message: %s", message)
+                        continue
 
-                logging.debug("Sent state snapshot")
-                self._snapshot.send(identity, zmq.SNDMORE)
-                self._snapshot.send(b'finished_snapshot')
+                    self._publisher.send_multipart(message)
 
-    
-        logging.debug("Server interrupted. Shutting down.")
+        except KeyboardInterrupt:
+            logging.info("KeyboardInterrupt received. Shutting down...")
+        finally:
+            self.close()
+
+    def close(self):
+        logging.debug("Closing sockets and terminating context.")
+        try:
+            self._publisher.close(0)
+            self._collector.close(0)
+            self._ctx.term()
+        except Exception as e:
+            logging.error("Error during cleanup: %s", e)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-log",
         "--log",
         default="warning",
         help=("Provide logging level. "
-              "Example '--log debug', default='warning'."
-              )
-        )
+              "Example '--log debug', default='warning'.")
+    )
 
     options = parser.parse_args()
     levels = {
-        'critical': logging.CRITICAL,
-        'error': logging.ERROR,
-        'warn': logging.WARNING,
-        'warning': logging.WARNING,
-        'info': logging.INFO,
-        'debug': logging.DEBUG
+        "critical": logging.CRITICAL,
+        "error": logging.ERROR,
+        "warn": logging.WARNING,
+        "warning": logging.WARNING,
+        "info": logging.INFO,
+        "debug": logging.DEBUG,
     }
     level = levels.get(options.log.lower())
     if level is None:
         raise ValueError(
-            f"log level given: {options.log}"
-            f" -- must be one of: {' | '.join(levels.keys())}")
-    logging.basicConfig(format='[%(levelname)s] %(message)s', level=level)
-    
+            f"log level given: {options.log} "
+            f"-- must be one of: {' | '.join(levels.keys())}"
+        )
+    logging.basicConfig(format="[%(levelname)s] %(message)s", level=level)
+
     server = Server()
     server.run()

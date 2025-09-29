@@ -47,12 +47,15 @@ public class PatternLoader {
                 JsonObject pattern = element.getAsJsonObject();
                 String name = pattern.get("name").getAsString();
                 String epl = pattern.get("epl").getAsString();
-                loadPattern(epl, name);
+                String outcome = pattern.has("outcome") 
+                        ? pattern.get("outcome").getAsString() 
+                        : "complete";
+                loadPattern(epl, name, outcome);
             }
         }
     }
 
-    public void loadPattern(String epl, String name) throws Exception {
+    public void loadPattern(String epl, String name, String outcome) throws Exception {
         EPCompiled compiled = compiler.compile(epl, args);
         EPDeployment deployment = runtime.getDeploymentService().deploy(compiled);
 
@@ -74,20 +77,22 @@ public class PatternLoader {
                     StringBuilder partitions = new StringBuilder();
                     StringBuilder streamIds = new StringBuilder();
                     StringBuilder eventIds = new StringBuilder();
+                    StringBuilder confidences = new StringBuilder();
 
                     for (Event ev : matchedEvents) {
                         partitions.append(ev.getOrigin()).append(";");
                         streamIds.append(ev.getStreamId()).append(";");
                         eventIds.append(ev.getEventId()).append(";");
+                        confidences.append(ev.getConfidence()).append(";");
                     }
 
-                    String outcome = name.contains("Timeout") ? "partial" : "complete";
                     patternLogger.logPatternMatch(
                             s.getName(),
                             outcome,
                             partitions.toString(),
                             streamIds.toString(),
-                            eventIds.toString()
+                            eventIds.toString(),
+                            confidences.toString()
                     );
 
                     LOG.info(() -> "[CEP] " + s.getName() +

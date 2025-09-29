@@ -47,8 +47,9 @@ public class Client {
     public void publish(Event event, String streamId) {
         String topic = prefix + "." + streamId;
         String payload = gson.toJson(event);
-        publisher.sendMore(topic);
-        publisher.send(payload);
+        publisher.sendMore(topic.getBytes(StandardCharsets.UTF_8));
+        publisher.send(payload.getBytes(StandardCharsets.UTF_8));
+
     }
 
     /** Subscribe a consumer to a specific stream or all streams under prefix */

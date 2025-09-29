@@ -1,0 +1,57 @@
+[
+  {
+    "name": "Overspeeding",
+    "outcome": "complete",
+    "epl": "@Name('Overspeeding') select e as event from Event as e where e.status='reconstructed' and e.streamId='speed-1' and e.value > 25"
+  },
+  {
+    "name": "EngineOverheat",
+    "outcome": "complete",
+    "epl": "@Name('EngineOverheat') select e as event from Event as e where e.status='reconstructed' and e.streamId='engine-temp-1' and e.value > 28"
+  },
+  {
+    "name": "LowFuel",
+    "outcome": "complete",
+    "epl": "@Name('LowFuel') select e as event from Event as e where e.status='reconstructed' and e.streamId='fuel-1' and e.value < 15.5"
+  },
+  {
+    "name": "HighSpeedOverheat",
+    "outcome": "complete",
+    "epl": "@Name('HighSpeedOverheat') select a as speedEvent, b as tempEvent from pattern [every a=Event(status='reconstructed', streamId='speed-1', value > 20) -> b=Event(status='reconstructed', streamId='engine-temp-1', value > 27)]"
+  },
+  {
+    "name": "CriticalCondition",
+    "outcome": "complete",
+    "epl": "@Name('CriticalCondition') select s as speedEvent, t as tempEvent, f as fuelEvent from pattern [every s=Event(status='reconstructed', streamId='speed-1', value > 20) -> t=Event(status='reconstructed', streamId='engine-temp-1', value > 27) -> f=Event(status='reconstructed', streamId='fuel-1', value < 15.5)]"
+  },
+  {
+    "name": "NormalCruise",
+    "outcome": "complete",
+    "epl": "@Name('NormalCruise') select e as event from Event as e where e.status='reconstructed' and e.streamId='speed-1' and e.value between 15 and 25"
+  },
+  {
+    "name": "GradualFuelDrop",
+    "outcome": "complete",
+    "epl": "@Name('GradualFuelDrop') select a as firstEvent, b as secondEvent from pattern [every a=Event(status='reconstructed', streamId='fuel-1') -> b=Event(status='reconstructed', streamId='fuel-1', value < a.value)]"
+  },
+  {
+    "name": "WarmEngine",
+    "outcome": "complete",
+    "epl": "@Name('WarmEngine') select e as event from Event as e where e.status='reconstructed' and e.streamId='engine-temp-1' and e.value between 24 and 28"
+  },
+  {
+    "name": "StopAndGo",
+    "outcome": "complete",
+    "epl": "@Name('StopAndGo') select a as stop, b as go from pattern [every a=Event(status='reconstructed', streamId='speed-1', value < 16) -> b=Event(status='reconstructed', streamId='speed-1', value > 20)]"
+  },
+  {
+    "name": "SpeedOscillation",
+    "outcome": "complete",
+    "epl": "@Name('SpeedOscillation') select a as accel, b as brake from pattern [every a=Event(status='reconstructed', streamId='speed-1', value > 22) -> b=Event(status='reconstructed', streamId='speed-1', value < 18)]"
+  },
+  {
+    "name": "OverheatCooldown",
+    "outcome": "complete",
+    "epl": "@Name('OverheatCooldown') select hot as overheat, cool as cooldown from pattern [every hot=Event(status='reconstructed', streamId='engine-temp-1', value > 28) -> cool=Event(status='reconstructed', streamId='engine-temp-1', value < 25)]"
+  }
+]

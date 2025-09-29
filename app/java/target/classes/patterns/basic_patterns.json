@@ -1,18 +1,14 @@
 [
-	{
-	  "name": "SuddenJump",
-	  "epl": "@Name('SuddenJump') select a as firstEvent, b as secondEvent from pattern [every a=Event(origin='reconstructed') -> b=Event(origin='reconstructed' and (b.value - a.value > 5 or a.value - b.value > 5))]"
-	},
-	{
-	  "name": "ConsistentIncrease",
-	  "epl": "@Name('ConsistentIncrease') select a as firstEvent, b as secondEvent, c as thirdEvent from pattern [every a=Event(origin='reconstructed') -> b=Event(origin='reconstructed' and b.value > a.value) -> c=Event(origin='reconstructed' and c.value > b.value)]"
-	},
-	{
-	  "name": "SpikeThenDrop",
-	  "epl": "@Name('SpikeThenDrop') select a as rise, b as peak, c as drop from pattern [every a=Event(origin='reconstructed') -> b=Event(origin='reconstructed' and b.value > a.value) -> c=Event(origin='reconstructed' and c.value < b.value)]"
-	},
-	{
-	  "name": "Flatline",
-	  "epl": "@Name('Flatline') select a as firstEvent, b as secondEvent from pattern [every a=Event(origin='reconstructed') -> b=Event(origin='reconstructed' and b.value = a.value)]"
-	}		
-]
+  {
+    "name": "SuddenJump",
+    "epl": "@Name('SuddenJump') select a as firstEvent, b as secondEvent from pattern [every a=Event(origin='reconstructed') -> b=Event(origin='reconstructed' and (b.value - a.value > 5 or a.value - b.value > 5))]"
+  },
+  {
+    "name": "ConsistentIncrease",
+    "epl": "@Name('ConsistentIncrease') select a as firstEvent, b as secondEvent, c as thirdEvent from pattern [every a=Event(origin='reconstructed') -> b=Event(origin='reconstructed' and b.value > a.value) -> c=Event(origin='reconstructed' and c.value > b.value)]"
+  },
+  {
+    "name": "SpikeThenDrop",
+    "epl": "@Name('SpikeThenDrop') select a as rise, b as peak, c as drop from pattern [every a=Event(origin='reconstructed') -> b=Event(origin='reconstructed' and b.value > a.value) -> c=Event(origin='reconstructed' and c.value < b.value)]"
+  }
+  ]

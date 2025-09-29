@@ -4,12 +4,6 @@ import shutil
 import signal
 import subprocess
 
-logging.basicConfig(
-    format="[%(levelname)s] %(message)s",
-    level=logging.DEBUG
-)
-
-
 def build_java(
     java_dir: str = os.path.join(os.getcwd(), "app/java"),
     clean: bool = False

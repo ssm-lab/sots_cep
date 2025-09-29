@@ -1,3 +1,4 @@
+import copy
 import time
 import logging
 from ..runtime.EventStream import EventStream
@@ -25,13 +26,12 @@ class Reconstructor(EventConsumer):
         if observed_value is not None:
             prediction = self.predictor.update(observed_value)
 
-        processed: Event = {**event}
+        processed: Event = copy.deepcopy(event)
         processed.update({
             "value": observed_value if observed_value is not None else prediction,
             "reconstructed_value": prediction,
             "reconstruction_flag": observed_value is None,
-            "origin": "reconstructed",
-            "status": "reconstructed" if event.get("status") == "missing" else "observed",
+            "status": "reconstructed",
             "reconstruction_method": (
                 self.predictor.name if observed_value is None else "observed"
             ),
@@ -48,12 +48,11 @@ class Reconstructor(EventConsumer):
         logging.debug(f"[RECONSTRUCTOR-{self.stream_id}] handling timeout, reconstructing missing event")
         prediction = self.predictor.predict()
 
-        processed: Event = {**event}
+        processed: Event = copy.deepcopy(event)
         processed.update({
             "value": prediction,
             "reconstructed_value": prediction,
             "reconstruction_flag": True,
-            "origin": "reconstructed",
             "status": "reconstructed",
             "reconstruction_method": (
                 self.predictor.name

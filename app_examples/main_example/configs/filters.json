@@ -2,7 +2,7 @@
   "kf1": {
     "type": "KalmanFilter",
     "params": {
-      "initial_value": 20.0,
+      "initial_value": 50.0,
       "initial_rate": 0.0,
       "initial_acceleration": 0.0,
       "initial_variance": 1.0,
@@ -14,7 +14,7 @@
   "kf2": {
     "type": "KalmanFilter",
     "params": {
-      "initial_value": 50.0,
+      "initial_value": 90.0,
       "initial_rate": 0.0,
       "initial_acceleration": 0.0,
       "initial_variance": 2.0,
@@ -23,8 +23,16 @@
       "measurement_noise": 0.2
     }
   },
-  "last": {
-    "type": "LastValuePredictor",
-    "params": {}
+  "kf3": {
+    "type": "KalmanFilter",
+    "params": {
+      "initial_value": 100.0,          
+      "initial_rate": -0.01,            
+      "initial_acceleration": 0.0,
+      "initial_variance": 0.5,
+      "dt": 5.0,                       
+      "process_noise": 0.001,
+      "measurement_noise": 0.05
+    }
   }
 }

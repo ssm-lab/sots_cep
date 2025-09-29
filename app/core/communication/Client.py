@@ -1,5 +1,6 @@
 import logging
 import json
+import threading
 import zmq
 from ..schema.Event import Event
 from ..runtime.EventConsumer import EventConsumer
@@ -24,6 +25,7 @@ class Client:
         self._poller.register(self._subscriber, zmq.POLLIN)
 
         self.subscribers: dict[str, list[EventConsumer]] = {}
+        # self._lock = threading.Lock()
 
     def publish(self, event: Event, stream_id: str):
         topic = f"{self.prefix}.{stream_id}"
@@ -41,10 +43,8 @@ class Client:
             self._subscriber.setsockopt_string(zmq.SUBSCRIBE, topic)
 
         self.subscribers.setdefault(topic, []).append(consumer)
-        # logging.info(f"[{self.prefix.upper()}-CLIENT] Subscribed {consumer.__class__.__name__} to {topic}")
 
     def dispatch(self, timeout: int = 1000):
-        # processes one poll tick
         items = dict(self._poller.poll(timeout))
         if self._subscriber in items:
             topic, payload = self._subscriber.recv_multipart()
@@ -56,7 +56,8 @@ class Client:
             if topic in self.subscribers:
                 for consumer in self.subscribers[topic]:
                     consumer.consume_event(event)
-            # All
+
+            # Wildcard
             wildcard = f"{self.prefix}.*"
             if wildcard in self.subscribers:
                 for consumer in self.subscribers[wildcard]:
