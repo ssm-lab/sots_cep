@@ -1,59 +1,48 @@
-import csv
-import random, time
+import pandas as pd
 from app.core.stream.Stream import Stream
-from app.core.schema.Event import Event
+from app.core.schema.Event import Event, make_event
 from app.core.stream.StreamRegistry import register_stream_type
 
-@register_stream_type("experiment_stream", experimental=True)
-class ExperimentStream(Stream):
-    """
-    Stream that replays rows from a dataset for a specific Beach × Field.
-    Missing values are handled via `missing_strategy`.
-    """
+class EndOfDataset(Exception):
+    """Raised when a dataset stream has no more data to emit."""
+    pass
 
-    def __init__(self, stream_id: str, dataset_path: str, beach: str, field: str,
-                 unit: str = "", datatype: str = "float", interval: float = 1.0,
-                 missing_strategy: str = "mark-missing", **kwargs):
-        super().__init__(stream_id, unit, datatype, interval)
-        self.dataset_path = dataset_path
-        self.beach = beach
-        self.field = field
-        self.missing_strategy = missing_strategy
-
-        with open(dataset_path, newline="") as f:
-            reader = csv.DictReader(f)
-            # Filter only relevant rows
-            self.rows = [row for row in reader if row["Beach Name"] == beach]
-
+@register_stream_type("experiment_stream")
+class ExperimentStream:
+    def __init__(self, stream_id: str, df: pd.DataFrame, beach: str, col: str, unit=None, datatype="float"):
+        """
+        Each stream extracts rows for (beach, col).
+        df: full dataset with *_groundtruth columns
+        """
+        self.stream_id = stream_id
+        self.df = df[df["Beach"] == beach].reset_index(drop=True)
+        self.col = col
+        self.col_gt = f"{col}_groundtruth"
+        self.unit = unit
+        self.datatype = datatype
         self.index = 0
 
-    def generate_event(self) -> Event:
-        if self.index >= len(self.rows):
-            raise StopIteration(f"No more rows for {self.beach}-{self.field}")
+    def generate_event(self, event_time: float):
+        if self.index >= len(self.df):
+            raise EndOfDataset()
 
-        row = self.rows[self.index]
+        row = self.df.iloc[self.index]
         self.index += 1
 
-        raw_val = row[self.field]
-        try:
-            value = float(raw_val.replace(",", "")) if raw_val not in ("", "-100000", "-100,000") else None
-        except Exception:
-            value = None
+        ts = row["Timestamp"]
+        gt_value = row[self.col_gt]
+        obs_value = row[self.col]
 
-        status = "observed"
-        if value is None:
-            if self.missing_strategy == "mark-missing":
-                status = "missing"
-            elif self.missing_strategy == "skip":
-                raise TimeoutError("Skipped missing value")
+        # Groundtruth event
+        groundtruth = make_event(
+            self.stream_id, value=gt_value, unit=self.unit, datatype=self.datatype,
+            event_ts=ts, status="groundtruth", source="dataset", origin="groundtruth"
+        )
 
-        return {
-            "stream_id": self.stream_id,
-            "sampled_ts": time.time(),
-            "value": value,
-            "unit": self.unit,
-            "datatype": self.datatype,
-            "status": status,
-            "source": f"DatasetStream-{self.beach}",
-            "extras": {"ground_truth": value}
-        }
+        # Observed event
+        observed = None if pd.isna(obs_value) else make_event(
+            self.stream_id, value=obs_value, unit=self.unit, datatype=self.datatype,
+            event_ts=ts, status="coordinated", source="dataset", origin="source"
+        )
+
+        return observed, groundtruth

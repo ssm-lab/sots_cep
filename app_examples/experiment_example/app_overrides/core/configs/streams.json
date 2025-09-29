@@ -1,9 +1,0 @@
-{
-  "ChicagoBeaches": {
-    "type": "dataset_stream",
-    "dataset_path": "data/chicago_beach.csv",
-    "auto_discover": true,
-    "interval": 1.0,
-    "missing_strategy": "mark-missing"
-  }
-}
