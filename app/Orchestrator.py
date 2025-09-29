@@ -7,6 +7,10 @@ from app.core.runtime.Coordinator import Coordinator
 from app.core.utils.logger.Logger import CSVLogger
 from app.JavaRunner import start_java, stop_java
 from app.core.communication.comm_types.ZMQClient import ZMQClient
+from app.core.communication.comm_types.ZMQServer import ZMQServer
+from app.core.communication.Server import Server
+import threading
+
 """
 Orchestrator: High-level controller for running the end-to-end pipeline.
 Starts Esper, logging, and the Coordinator to manage streams + reconstructors.
@@ -20,7 +24,7 @@ logging.basicConfig(
 
 class Orchestrator:
     def __init__(self, pattern_file, log_dir, streams_cfg, filters_cfg, base_run_name,
-                 client_type=ZMQClient,
+                 client_type=ZMQClient, server_type=ZMQServer,
                  use_java=True, rebuild=True, 
                  jar_name="sots-uncertainty-aware-cep-0.0.1-SNAPSHOT.jar"):
         self.pattern_file = pattern_file
@@ -37,12 +41,19 @@ class Orchestrator:
         self.logger = None
         self.base_run_name = base_run_name
 
+        self.server = server_type()
+        self.server_thread = None
+
+
         # Generate run folder name
         timestamp = time.strftime("%Y%m%d-%H%M%S")
         self.run_dir = os.path.join(log_dir, f"{base_run_name}_{timestamp}")
         os.makedirs(self.run_dir, exist_ok=True)
 
     def start(self):
+        # Start ZMQ Server in background
+        self.server.run(in_thread=True)
+
         # Start up Esper
         if self.use_java:
             self.esper_proc = start_java(
@@ -79,5 +90,6 @@ class Orchestrator:
             self.logger.close()
         if self.esper_proc:
             stop_java(self.esper_proc)
-            logging.info("[ORCHESTRATOR] Server stopped")
+        if self.server:
+            self.server.stop()
         logging.info("[ORCHESTRATOR] Shutdown complete")
