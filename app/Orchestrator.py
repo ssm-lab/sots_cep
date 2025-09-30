@@ -9,6 +9,8 @@ from app.core.communication.comm_types.ZMQClient import ZMQClient
 from app.core.communication.comm_types.ZMQServer import ZMQServer
 from app.core.communication.Server import Server
 
+__author__ = "Feyi Adesanya"
+
 """
 Orchestrator: High-level controller for running the end-to-end pipeline.
 Starts CEP engine, logging, and the Coordinator to manage streams + reconstructors.

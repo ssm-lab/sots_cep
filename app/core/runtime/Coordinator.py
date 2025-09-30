@@ -7,17 +7,13 @@ from ..schema.Event import make_event
 from ..stream.StreamRegistry import get_stream_class
 from ..reconstruction.PredictorRegistry import get_predictor_class
 from ..reconstruction.Reconstructor import Reconstructor
-from ..utils.util_funcs import _load_json
+from ..utils.UtilsFuncs import _load_json
 
 # Auto load registries
 from ..reconstruction.predictor_types import *
 from ..stream.stream_types import *
 
-"""
-Coordinator: Central manager for streams and reconstructors.
-Builds components from configs and drives stream scheduling.
-Subscribes reconstructors and runs event loop threads.
-"""
+__author__ = "Feyi Adesanya"
 
 class TickScheduler:
     def __init__(self, interval: float, start_epoch: float = None, grace: float = 0.1):
@@ -38,6 +34,23 @@ class TickScheduler:
 
 
 class Coordinator:
+    """
+    Central manager for streams and reconstructors.
+    Builds components from configuration files.
+    Manages scheduling and lifecycles of components.
+
+    Parameters
+    ----------
+    event_stream : EventStream
+        Shared event bus instance.
+    streams_config_path : str
+        Path to streams configuration JSON.
+    filters_config_path : str
+        Path to filter configuration JSON.
+    loggers : list, optional
+        List of logger consumers to attach.
+    """
+
     def __init__(self, event_stream, streams_config_path: str, filters_config_path: str, loggers: List[object] = None):
         self.event_stream = event_stream
         self.streams_cfg = _load_json(streams_config_path)
@@ -110,6 +123,7 @@ class Coordinator:
 
     # Lifecycle -----------------------
     def start(self):
+        """Start all streams and reconstructors."""
         if self.running:
             return
         self.running = True
@@ -147,6 +161,7 @@ class Coordinator:
             logging.debug(f"[COORDINATOR] Started {stream_id} interval={interval:.1f}s")
 
     def stop(self, join_timeout: float = 2.0):
+        """Stop all streams and clean up resources."""
         self.running = False
 
         for sid, t in self.threads.items():

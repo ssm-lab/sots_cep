@@ -6,19 +6,31 @@ from ..schema.Event import Event
 from .predictor_types.BasePredictor import BasePredictor
 from ..runtime.EventConsumer import EventConsumer
 
-"""
-Reconstructor: Wraps a predictor for imputing missing data.
-Subscribes to observed events for one stream.
-Publishes reconstructed events back to the EventStream.
-"""
+__author__ = "Feyi Adesanya"
 
 class Reconstructor(EventConsumer):
+    """
+    Wraps a predictor to impute missing data.
+    Subscribes to observed events for a stream and publishes
+    reconstructed events back on the EventStream.
+
+    Parameters
+    ----------
+    stream_id : str
+        Identifier of the stream to reconstruct.
+    predictor : BasePredictor
+        The predictor instance used for imputation.
+    event_stream : EventStream
+        Event bus for publishing reconstructed events.
+    """
+    
     def __init__(self, stream_id: str, predictor: BasePredictor, event_stream: EventStream):
         self.stream_id = stream_id
         self.predictor = predictor
         self.event_stream = event_stream
 
     def consume_event(self, event: Event):
+        """Consume an observed event and appends data on imputation."""
         logging.debug(f"[RECONSTRUCTOR-{self.stream_id}] Processing event: {event}")
         observed_value = event.get("value")
 
@@ -45,6 +57,7 @@ class Reconstructor(EventConsumer):
         return processed
     
     def handle_timeout(self, event: Event):
+        """Reconstruct an event when a timeout (gap) occurs."""
         logging.debug(f"[RECONSTRUCTOR-{self.stream_id}] handling timeout, reconstructing missing event")
         prediction = self.predictor.predict()
 

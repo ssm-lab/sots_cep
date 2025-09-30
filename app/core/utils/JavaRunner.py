@@ -4,6 +4,20 @@ import shutil
 import signal
 import subprocess
 
+__author__ = "Feyi Adesanya"
+
+"""
+Utility functions for starting and stopping the Java CEP process.
+
+Functions
+---------
+start_java(main_class, jar_name, java_dir, args, rebuild)
+    Launches the Java process.
+stop_java(proc)
+    Terminates the Java process.
+"""
+
+
 def build_java(
     java_dir: str = os.path.join(os.getcwd(), "app/java"),
     clean: bool = False
@@ -44,6 +58,8 @@ def start_java(
     args: list[str] = None,
     rebuild: bool = False
 ):
+    """ Launches the Java process. """
+
     jar_path = os.path.join(java_dir, "target", jar_name)
 
     if rebuild or not os.path.exists(jar_path):
@@ -62,6 +78,7 @@ def start_java(
 
 
 def stop_java(proc):
+    """ Terminates the Java process. """
     if proc:
         logging.info("[MAIN] Terminating subprocess...")
         proc.send_signal(signal.SIGTERM)

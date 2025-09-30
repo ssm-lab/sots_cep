@@ -1,7 +1,8 @@
 import random, time
 from ..Stream import Stream
-from ...schema.Event import Event
 from ..StreamRegistry import register_stream_type
+
+__author__ = "Feyi Adesanya"
 
 @register_stream_type("simulated")
 class SimulatedStream(Stream):

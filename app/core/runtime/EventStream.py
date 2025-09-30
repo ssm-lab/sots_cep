@@ -4,12 +4,20 @@ from app.core.runtime.EventConsumer import EventConsumer
 from app.core.schema.Event import Event
 from app.core.communication.Client import Client
 
+__author__ = "Feyi Adesanya"
+
 class EventStream:
     """
-    EventStream: Core event bus for the system.
+    Core event bus for the system.
     Handles publish/subscribe of events across partitions and streams.
     Uses a pluggable MessagingClient backend (e.g., ZMQClient, KafkaClient).
+
+    Parameters
+    ----------
+    client_type : type[Client]
+        Messaging client implementation to use (e.g. ZMQClient).
     """
+
 
     def __init__(self, client_type: Type[Client]):
         # dict[partition -> dict[stream_id -> Client]]

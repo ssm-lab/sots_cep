@@ -1,6 +1,8 @@
 import logging
 from app.core.utils.JavaRunner import start_java, stop_java
 
+__author__ = "Feyi Adesanya"
+
 class EsperCEPEngine:
     def __init__(self, pattern_file, run_dir,
                  jar_name="sots-uncertainty-aware-cep-0.0.1-SNAPSHOT.jar",

@@ -3,6 +3,8 @@ import numpy as np
 from .BasePredictor import BasePredictor
 from ..PredictorRegistry import register_predictor
 
+__author__ = "Feyi Adesanya"
+
 @register_predictor("KalmanFilter")
 class KalmanFilter(BasePredictor):
     def __init__(self, initial_value=0.0, initial_rate=0.0,

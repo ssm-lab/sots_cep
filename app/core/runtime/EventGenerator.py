@@ -1,15 +1,15 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
+from ..schema.Event import Event
 
-"""
-EventGenerator: Interface for producing events.
-Implemented by streams to define how data is generated.
-Coordinator schedules calls to this.
-"""
+__author__ = "Feyi Adesanya"
 
 class EventGenerator(ABC):
+    """
+    Abstract interface for generating events from data sources.
+    """
     @abstractmethod
-    def generate_event(self) -> Optional[Dict[str, Any]]:
+    def generate_event(self) -> Event:
         """
         Produce the next event payload for this source.
         """

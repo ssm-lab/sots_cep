@@ -1,6 +1,8 @@
 from typing import Any, Dict, TypedDict, Optional
 import time
 
+__author__ = "Feyi Adesanya"
+
 class Event(TypedDict, total=False):
     stream_id: str
     event_id: str

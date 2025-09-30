@@ -1,7 +1,9 @@
 import zmq
 import logging
-from app.core.utils.util_funcs import _deserialize_event, _serialize_event
+from app.core.utils.UtilsFuncs import _deserialize_event, _serialize_event
 from ..Client import Client
+
+__author__ = "Feyi Adesanya"
 
 class ZMQClient(Client):
     def __init__(self, partition: str, pub_endpoint="tcp://localhost:5558", sub_endpoint="tcp://localhost:5557"):

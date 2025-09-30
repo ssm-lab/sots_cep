@@ -2,6 +2,8 @@ import zmq
 import logging
 from ..Server import Server
 
+__author__ = "Feyi Adesanya"
+
 class ZMQServer(Server):
     def __init__(self, pub_endpoint="tcp://*:5557", pull_endpoint="tcp://*:5558"):
         super().__init__()

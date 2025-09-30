@@ -2,8 +2,19 @@ import logging
 import threading
 from abc import ABC, abstractmethod
 
+__author__ = "Istvan David"
+__copyright__ = "Copyright 2021, GEODES"
+__credits__ = "Eugene Syriani"
+__modified__ = "Feyi Adesanya"
+__license__ = "GPL-3.0"
 
 class Server(ABC):
+    """
+    Abstract base for messaging servers.
+
+    Runs a loop to collect and publish messages between clients.
+    """
+     
     def __init__(self):
         self._running = False
         self._thread: threading.Thread | None = None
@@ -19,11 +30,10 @@ class Server(ABC):
 
     @abstractmethod
     def _loop(self):
-        """Main server loop. Must be implemented by subclasses."""
+        """Main server loop."""
         pass
 
     def stop(self):
-        """Stop the server gracefully. Idempotent."""
         if self._closed:
             return
         self._closed = True
@@ -41,7 +51,7 @@ class Server(ABC):
 
     @abstractmethod
     def _cleanup(self):
-        """Cleanup resources like sockets, contexts, etc."""
+        """Cleanup resources used."""
         pass
 
     def close(self):

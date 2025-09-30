@@ -1,6 +1,13 @@
 import json
 from ..schema.Event import Event
 
+__author__ = "Feyi Adesanya"
+
+"""
+General utility functions.
+Includes helpers for event serialization, deserialization, and config loading.
+"""
+
 def _load_json(path: str) -> dict:
         with open(path, "r") as f:
             return json.load(f)
