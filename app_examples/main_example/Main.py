@@ -6,7 +6,7 @@ def main():
         pattern_file="patterns/main_example_patterns.json",
         log_dir="data/logs/main_example",
         streams_cfg="app_examples/main_example/configs/streams.json",
-        filters_cfg="app_examples/main_example/configs/filters.json",
+        predictors_cfg="app_examples/main_example/configs/predictors.json",
         base_run_name="run",
         cep_engine_cls=EsperCEPEngine,
         cep_engine_kwargs={

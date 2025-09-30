@@ -42,7 +42,7 @@ This section explains the core classes and their responsibilities.
   - Builds event streams from configs.  
   - Starts/stops reconstructors and generators.  
   - Handles threading and scheduling.  
-- **Design Choice**: Makes experiments reproducible and modular.
+- **Design Choice**: Handles initialization of events and core classes
 
 #### EventStream
 - **Purpose**: Core event bus abstraction.  
@@ -119,7 +119,7 @@ This section explains the core classes and their responsibilities.
   - `extras`: Optional metadata for ground truth or annotations.  
 
 ---
-## Utils Layer
+## Utils
 ### `app/core/utils/`
 #### JavaRunner
 - **Purpose**: Utility for running Java-based CEP engines.  

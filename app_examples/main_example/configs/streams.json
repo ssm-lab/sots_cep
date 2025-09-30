@@ -4,38 +4,44 @@
     "unit": "km/h",
     "datatype": "float",
     "interval": 1.0,
-    "min": 0.0,
-    "max": 160.0,
-    "start_value": 20.0,
-    "drift": 2.0,
-    "noise": 5.0,
-    "drop_chance": 0.15,
-    "filter_template": "kf1"
+    "params": {
+      "min": 0.0,
+      "max": 160.0,
+      "start_value": 20.0,
+      "drift": 2.0,
+      "noise": 5.0,
+      "drop_chance": 0.15
+    },
+    "predictor_template": "kf1"
   },
   "engine-temp-1": {
     "type": "simulated",
     "unit": "C",
     "datatype": "float",
     "interval": 1.0,
-    "min": 70.0,
-    "max": 120.0,
-    "start_value": 25.0,
-    "drift": 0.3,
-    "noise": 1.5,
-    "drop_chance": 0.1,
-    "filter_template": "kf2"
+    "params": {
+      "min": 70.0,
+      "max": 120.0,
+      "start_value": 25.0,
+      "drift": 0.3,
+      "noise": 1.5,
+      "drop_chance": 0.1
+    },
+    "predictor_template": "kf2"
   },
   "fuel-1": {
     "type": "simulated",
     "unit": "%",
     "datatype": "float",
     "interval": 5.0,
-    "min": 0.0,
-    "max": 100.0,
-    "start_value": 50.0,
-    "drift": -0.2,
-    "noise": 0.1,
-    "drop_chance": 0.05,
-    "filter_template": "kf3"
+    "params": {
+      "min": 0.0,
+      "max": 100.0,
+      "start_value": 50.0,
+      "drift": -0.2,
+      "noise": 0.1,
+      "drop_chance": 0.05
+    },
+    "predictor_template": "kf3"
   }
 }

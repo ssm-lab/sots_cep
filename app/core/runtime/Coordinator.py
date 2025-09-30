@@ -45,16 +45,16 @@ class Coordinator:
         Shared event bus instance.
     streams_config_path : str
         Path to streams configuration JSON.
-    filters_config_path : str
+    predictors_config_path : str
         Path to filter configuration JSON.
     loggers : list, optional
         List of logger consumers to attach.
     """
 
-    def __init__(self, event_stream, streams_config_path: str, filters_config_path: str, loggers: List[object] = None):
+    def __init__(self, event_stream, streams_config_path: str, predictors_config_path: str, loggers: List[object] = None):
         self.event_stream = event_stream
         self.streams_cfg = _load_json(streams_config_path)
-        self.filters_cfg = _load_json(filters_config_path)
+        self.predictors_cfg = _load_json(predictors_config_path)
 
         self.streams: Dict[str, object] = {}
         self.schedulers: Dict[str, TickScheduler] = {}
@@ -66,13 +66,22 @@ class Coordinator:
 
     # Build phase -----------------------
     def _build_stream(self, stream_id: str, cfg: dict):
+        """Instantiate a stream from config with params support."""
         cls = get_stream_class(cfg.get("type", "simulated"))
-        return cls(stream_id=stream_id, **cfg)
+        params = cfg.get("params", {})
 
-    def _build_predictor(self, filter_template: str):
-        cfg = self.filters_cfg.get(filter_template)
+        return cls(
+            stream_id=stream_id,
+            unit=cfg.get("unit"),
+            datatype=cfg.get("datatype", "float"),
+            interval=cfg.get("interval", 1.0),
+            params = params
+        )
+
+    def _build_predictor(self, predictor_template: str):
+        cfg = self.predictors_cfg.get(predictor_template)
         if cfg is None:
-            raise ValueError(f"[COORDINATOR] Missing filter template '{filter_template}'")
+            raise ValueError(f"[COORDINATOR] Missing filter template '{predictor_template}'")
         cls = get_predictor_class(cfg["type"])
         return cls(**cfg.get("params", {}))
 
@@ -143,7 +152,7 @@ class Coordinator:
             self.streams[stream_id] = stream
             self.schedulers[stream_id] = scheduler
 
-            predictor = self._build_predictor(cfg.get("filter_template"))
+            predictor = self._build_predictor(cfg.get("predictor_template"))
             reconstructor = self._build_reconstructor(stream_id, predictor)
             self.reconstructors[stream_id] = reconstructor
 

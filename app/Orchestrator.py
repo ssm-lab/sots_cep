@@ -23,12 +23,12 @@ logging.basicConfig(
 )
 
 class Orchestrator:
-    def __init__(self, pattern_file, log_dir, streams_cfg, filters_cfg, base_run_name,
+    def __init__(self, pattern_file, log_dir, streams_cfg, predictors_cfg, base_run_name,
                  client_type=ZMQClient, server_type=ZMQServer,
                  cep_engine_cls=None, cep_engine_kwargs=None):
         self.pattern_file = pattern_file
         self.streams_cfg = streams_cfg
-        self.filters_cfg = filters_cfg
+        self.predictors_cfg = predictors_cfg
         self.base_run_name = base_run_name
 
         self.client_type = client_type
@@ -72,7 +72,7 @@ class Orchestrator:
         self.coordinator = Coordinator(
             event_stream=self.event_stream,
             streams_config_path=self.streams_cfg,
-            filters_config_path=self.filters_cfg,
+            predictors_config_path=self.predictors_cfg,
         )
         self.coordinator.start()
 

@@ -6,24 +6,21 @@ __author__ = "Feyi Adesanya"
 
 @register_stream_type("simulated")
 class SimulatedStream(Stream):
-    def __init__(self, stream_id: str, unit="C", datatype="float", interval=1.0,
-                 min_value: float = 15.0, max_value: float = 30.0,
-                 start_value: float = None,
-                 drop_chance: float = 0.1,
-                 drift: float = 0.2,
-                 noise: float = 0.5,
-                 **kwargs):
-        super().__init__(stream_id, unit, datatype, interval)
-        self.min_value = min_value
-        self.max_value = max_value
-        self.drop_chance = drop_chance
-        self.drift = drift
-        self.noise = noise
+    def __init__(self, stream_id: str, unit="C", datatype="float", interval=1.0, params=None):
+        super().__init__(stream_id, unit, datatype, interval, params)
+        params = params or {}
 
+        self.min_value = params.get("min", 15.0)
+        self.max_value = params.get("max", 30.0)
+        self.drift = params.get("drift", 0.2)
+        self.noise = params.get("noise", 0.5)
+        self.drop_chance = params.get("drop_chance", 0.1)
+
+        start_value = params.get("start_value", None)
         if start_value is not None:
             self.current_value = max(self.min_value, min(start_value, self.max_value))
         else:
-            self.current_value = random.uniform(min_value, max_value)
+            self.current_value = random.uniform(self.min_value, self.max_value)
 
     def generate_event(self):
         drift_step = random.uniform(-self.drift, self.drift)
