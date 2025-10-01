@@ -4,7 +4,7 @@ import time
 
 from app.core.runtime.EventStream import EventStream
 from app.core.runtime.Coordinator import Coordinator
-from app.core.utils.logger.Logger import CSVLogger
+from app.core.utils.EventListener.Logger import CSVLogger
 from app.core.communication.comm_types.ZMQClient import ZMQClient
 from app.core.communication.comm_types.ZMQServer import ZMQServer
 from app.core.communication.Server import Server
