@@ -67,5 +67,5 @@ The CEP engine listens to the **reconstructed partition** and continuously evalu
 - When conditions are met (e.g., `WarmEngine` pattern), it emits a match.  
 
 ### 5. Logging  
-- The **CSVLogger** subscribes to all partitions.  
+- The **Logger** subscribes to all partitions.  
 - Each event is written to CSV for offline evaluation.  

@@ -4,17 +4,30 @@ This section explains how to quickly run the demo and how to plug in your own ar
 
 ---
 
-## 1. Install Dependencies  
+## 1. Setup
 
+Activate a virtual environment (Recommended to prevent conflicts)
+-  Create and activate a Python virtual environment:
+  ```bash
+  python -m venv venv
+  ```
+- Activate the virtual environment
+  ```bash
+  source venv/bin/activate   # On Linux/Mac
+  venv\Scripts\activate      # On Windows
+  ```
+  
+Install Dependancies
 ```bash
+pip install --upgrade pip
 pip install -r requirements.txt
 ```  
-
 
 To run the default Esper CEP engine, you need:
 
 Java 21 (set via maven-compiler-plugin in the build configuration).
 Maven 3.6+ (to build and package the JAR with dependencies).
+
 
 ---
 
