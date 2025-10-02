@@ -27,6 +27,7 @@ class Event(TypedDict, total=False):
 
 def make_event(
     stream_id: str,
+    event_id: str,
     value: Optional[float],
     datatype: str,
     origin: str,
@@ -48,7 +49,7 @@ def make_event(
 
     return {
         "stream_id": stream_id,
-        "event_id": f"{stream_id}-{int(event_ts * 1000)}",
+        "event_id": event_id,
         "sampled_ts": sampled_ts,
         "event_ts": event_ts,
         "arrival_ts": arrival_ts,

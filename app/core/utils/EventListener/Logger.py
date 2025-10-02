@@ -1,7 +1,6 @@
 import csv
 import os
 import time
-import uuid
 from abc import ABC, abstractmethod
 
 from ...schema.Event import Event
@@ -9,7 +8,7 @@ from ...runtime.EventConsumer import EventConsumer
 
 """
 Logger: Event consumer that logs to CSV files.
-Subscribes to partitions/topics of interest.
+Subscribes to topics of interest.
 """
 class BaseLogger(EventConsumer, ABC):
     def __init__(self, run_dir: str):
@@ -40,15 +39,11 @@ class CSVLogger(BaseLogger):
         self.csvfile = None
         self.writer = None
 
-        # Schema fields
+        # Schema fields directly from Event definition
         self.base_fields = list(Event.__annotations__.keys())
-        if "partition" not in self.base_fields:
-            self.base_fields.insert(0, "partition")
-
-
 
     def _init_writer(self, event: Event):
-        # Add any dynamic fields
+        # Add any dynamic fields (extras, reconstruction metadata, etc.)
         extra_fields = set(event.keys()) - set(self.base_fields)
         all_fields = self.base_fields + sorted(extra_fields)
 
@@ -59,14 +54,10 @@ class CSVLogger(BaseLogger):
         self.writer.writeheader()
 
     def consume_event(self, event: Event):
-        topic = event.get("__topic__", "")
-        partition = topic.split(".")[0] if topic else "unknown"
-        event_with_partition = {"partition": partition, **event}
-
         if self.writer is None:
-            self._init_writer(event_with_partition)
+            self._init_writer(event)
 
-        row = {field: event_with_partition.get(field) for field in self.writer.fieldnames}
+        row = {field: event.get(field) for field in self.writer.fieldnames}
         self.records.append(row)
         self.writer.writerow(row)
         self.csvfile.flush()

@@ -90,20 +90,24 @@ class Coordinator:
 
     # Stream loop -----------------------
     def _run_stream(self, stream_id: str, scheduler: TickScheduler, stream):
+        counter = 0
         while self.running:
             event_time = scheduler.wait_next()
+            event_id = f"{stream_id}_{counter}"
+            counter += 1
             try:
                 raw = stream.generate_event()
 
                 event = make_event(
                     stream_id,
+                    event_id=event_id,
                     value=raw.get("value"),
                     unit=getattr(stream, "unit", None),
                     datatype=getattr(stream, "datatype", None),
                     sampled_ts=raw.get("sampled_ts", event_time),
-                    status="coordinated",
-                    source=stream.__class__.__name__,
+                    status="observed",
                     origin="source",
+                    source=stream.__class__.__name__,
                     extras=raw.get("extras", {}),
                 )
                 self.event_stream.add_event(event, "observed", stream_id)
@@ -115,11 +119,12 @@ class Coordinator:
                 if reconstructor:
                     missing_event = make_event(
                         stream_id,
+                        event_id=event_id,
                         value=None,
                         unit=getattr(stream, "unit", None),
                         datatype=getattr(stream, "datatype", None),
                         event_ts=event_time,
-                        status="coordinated",
+                        status="none",
                         source=stream.__class__.__name__,
                         origin="missing",
                         extras={}

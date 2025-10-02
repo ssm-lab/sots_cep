@@ -1,0 +1,20 @@
+# Logger: CSVLogger | Started: Thu Oct  2 19:01:05 2025
+stream_id,event_id,sampled_ts,arrival_ts,event_ts,datatype,unit,value,origin,reconstructed_value,reconstruction_method,confidence,reconstruction_flag,status,source,extras
+speed-1,speed-1_0,1759446065.723862,1759446065.723862,1759446065.723862,float,km/h,20.6949602116511,source,,,,,observed,SimulatedStream,{}
+engine-temp-1,engine-temp-1_0,,1759446065.723862,1759446065.7218444,float,C,90.0,missing,90.0,KalmanFilter,0.17857142857142858,True,reconstructed,SimulatedStream,{}
+speed-1,speed-1_1,1759446066.7239904,1759446066.7239904,1759446066.7239904,float,km/h,23.652189893280067,source,,,,,observed,SimulatedStream,{}
+speed-1,speed-1_0,1759446065.723862,1759446065.723862,1759446065.723862,float,km/h,20.6949602116511,source,21.91600353616564,observed,0.9125475285171102,False,reconstructed,SimulatedStream,{}
+engine-temp-1,engine-temp-1_1,1759446066.7239904,1759446066.7239904,1759446066.7239904,float,C,70.26234502616477,source,,,,,observed,SimulatedStream,{}
+engine-temp-1,engine-temp-1_1,1759446066.7239904,1759446066.7239904,1759446066.7239904,float,C,70.26234502616477,source,70.47543711765016,observed,0.834835511491663,False,reconstructed,SimulatedStream,{}
+speed-1,speed-1_2,1759446067.729399,1759446067.729399,1759446067.729399,float,km/h,26.715214596541987,source,,,,,observed,SimulatedStream,{}
+speed-1,speed-1_1,1759446066.7239904,1759446066.7239904,1759446066.7239904,float,km/h,23.652189893280067,source,22.700655497970153,observed,0.912507339988256,False,reconstructed,SimulatedStream,{}
+engine-temp-1,engine-temp-1_2,1759446067.729399,1759446067.729399,1759446067.729399,float,C,71.38828960226047,source,,,,,observed,SimulatedStream,{}
+engine-temp-1,engine-temp-1_2,1759446067.729399,1759446067.729399,1759446067.729399,float,C,71.38828960226047,source,70.73557854339025,observed,0.8390323644980353,False,reconstructed,SimulatedStream,{}
+speed-1,speed-1_3,1759446068.725927,1759446068.725927,1759446068.725927,float,km/h,20.399933232879796,source,,,,,observed,SimulatedStream,{}
+fuel-1,fuel-1_0,1759446069.738518,1759446069.738518,1759446069.738518,float,%,49.97932013549721,source,50.00672355298893,observed,0.9524058233219136,False,reconstructed,SimulatedStream,{}
+engine-temp-1,engine-temp-1_3,1759446068.725927,1759446068.725927,1759446068.725927,float,C,71.41271339479107,source,,,,,observed,SimulatedStream,{}
+engine-temp-1,engine-temp-1_5,,1759446070.7314997,1759446070.7218444,float,C,72.20860974233345,missing,72.20860974233345,KalmanFilter,0.3116393072341993,True,reconstructed,SimulatedStream,{}
+speed-1,speed-1_4,1759446069.722485,1759446069.722485,1759446069.722485,float,km/h,19.6247715780483,source,,,,,observed,SimulatedStream,{}
+speed-1,speed-1_6,,1759446071.7235146,1759446071.7140043,float,km/h,26.538609392059897,missing,26.538609392059897,KalmanFilter,0.43046793304755515,True,reconstructed,SimulatedStream,{}
+engine-temp-1,engine-temp-1_4,1759446069.722485,1759446069.722485,1759446069.722485,float,C,71.6084758481175,source,,,,,observed,SimulatedStream,{}
+engine-temp-1,engine-temp-1_7,,1759446072.7366328,1759446072.7218444,float,C,76.36599336473985,missing,76.36599336473985,KalmanFilter,0.08722002284670868,True,reconstructed,SimulatedStream,{}
