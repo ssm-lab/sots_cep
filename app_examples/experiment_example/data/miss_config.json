@@ -1,0 +1,71 @@
+{
+  "dataset_path": "app_examples/experiment_example/data/processed/preprocessed_2015_5_9.csv",
+  "experiments": [
+    {
+      "name": "oracle",
+      "rate": 0.0,
+      "mode": "None",
+      "value_cols": []
+    },
+
+    {
+      "name": "mcar_10",
+      "rate": 0.1,
+      "mode": "MCAR",
+      "value_cols": []
+    },
+    {
+      "name": "mcar_20",
+      "rate": 0.2,
+      "mode": "MCAR",
+      "value_cols": []
+    },
+    {
+      "name": "mcar_30",
+      "rate": 0.3,
+      "mode": "MCAR",
+      "value_cols": []
+    },
+
+    {
+      "name": "mar_10",
+      "rate": 0.1,
+      "mode": "MAR",
+      "block_size": 12,
+      "value_cols": []
+    },
+    {
+      "name": "mar_20",
+      "rate": 0.2,
+      "mode": "MAR",
+      "block_size": 12,
+      "value_cols": []
+    },
+    {
+      "name": "mar_30",
+      "rate": 0.3,
+      "mode": "MAR",
+      "block_size": 12,
+      "value_cols": []
+    },
+
+    {
+      "name": "mnar_10",
+      "rate": 0.1,
+      "mode": "MNAR",
+      "value_cols": []
+    },
+    {
+      "name": "mnar_20",
+      "rate": 0.2,
+      "mode": "MNAR",
+      "value_cols": []
+    },
+    {
+      "name": "mnar_30",
+      "rate": 0.3,
+      "mode": "MNAR",
+      "value_cols": []
+    }
+  ]
+}
