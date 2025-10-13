@@ -3,10 +3,7 @@
     "type": "KalmanFilter",
     "params": {
       "initial_value": 50.0,
-      "initial_rate": 0.0,
-      "initial_acceleration": 0.0,
-      "initial_variance": 1.0,
-      "dt": 1.0,
+      "dt": 0.1,
       "process_noise": 0.05,
       "measurement_noise": 0.1
     }
@@ -15,10 +12,7 @@
     "type": "KalmanFilter",
     "params": {
       "initial_value": 90.0,
-      "initial_rate": 0.0,
-      "initial_acceleration": 0.0,
-      "initial_variance": 2.0,
-      "dt": 1.0,
+      "dt": 0.1,
       "process_noise": 0.1,
       "measurement_noise": 0.2
     }
@@ -26,11 +20,8 @@
   "kf3": {
     "type": "KalmanFilter",
     "params": {
-      "initial_value": 100.0,          
-      "initial_rate": -0.01,            
-      "initial_acceleration": 0.0,
-      "initial_variance": 0.5,
-      "dt": 5.0,                       
+      "initial_value": 100.0,
+      "dt": 0.1,
       "process_noise": 0.001,
       "measurement_noise": 0.05
     }

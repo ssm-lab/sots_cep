@@ -139,7 +139,6 @@ def main():
             "Turbidity",
             "Wave Height",
             "Wave Period",
-            "Battery Life"
         ]
 
         processed_df = injector.inject(df, DEFAULT_VALUE_COLS, group_col="Beach Name")

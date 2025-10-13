@@ -71,12 +71,15 @@ def filter_year(
 
     drop_cols = [col for col, rate in missing_report.items() if rate > DROP_THRESHOLD]
     if drop_cols:
-        logging.warning(f"Dropping columns above {DROP_THRESHOLD:.0%} missingness: {drop_cols}")
+        logging.warning(f"\nDropping columns above {DROP_THRESHOLD:.0%} missingness: {drop_cols}")
         df = df.drop(columns=drop_cols)
+
+    # Remove unnecessary cols
+    df = df.drop(columns=['Battery Life', 'Measurement Timestamp Label'])
 
     # Save
     df.to_csv(os.path.join(output_path,  f"preprocessed_{year}_{start_month}_{end_month}.csv"), index=False)
-    logging.info(f"Preprocessed dataset saved to {output_path}")
+    logging.info(f"\nPreprocessed dataset saved to {output_path}")
 
     return df
 

@@ -2,33 +2,54 @@ import logging
 from app.core.runtime.Coordinator import Coordinator
 from ..stream.StreamTypes.ExperimentStream import EndOfDataset
 
-# Auto load registries
+# Auto-load registered types
 from ..stream.StreamTypes import *
 
+LOG = logging.getLogger(__name__)
+
 class ExperimentCoordinator(Coordinator):
+    """
+    Coordinator for dataset-driven experiments.
+    Handles both observed and missing data,
+    and advances predictors during structural gaps without emitting events.
+    """
+
     def _run_stream(self, stream_id, scheduler, stream):
+        LOG.info(f"[ExperimentCoordinator] Starting dataset replay for {stream_id}")
+        reconstructor = self.reconstructors.get(stream_id)
+        if not reconstructor:
+            LOG.warning(f"[ExperimentCoordinator] No reconstructor for {stream_id}")
+            return
+
         while self.running:
             event_time = scheduler.wait_next()
             try:
-                observed, groundtruth = stream.generate_event(event_time)
+                event, structural = stream.generate_event(event_time)
 
-                # Always publish ground truth
-                self.event_stream.add_event(groundtruth, "groundtruth", stream_id)
+                # Case 1: structural gap → advance predictor, no emission
+                if structural:
+                    reconstructor.advance_without_emission(event_time)
+                    continue
 
-                if observed is not None:
-                    # Normal observed case
-                    self.event_stream.add_event(observed, "observed", stream_id)
-                else:
-                    # Missing: forward to reconstructor
-                    missing_event = {**groundtruth,
-                                     "origin": "missing",
-                                     "value": None}
-                    reconstructor = self.reconstructors.get(stream_id)
-                    if reconstructor:
-                        reconstructor.handle_timeout(missing_event)
+                # Case 2: missing (no observed value)
+                if event is None:
+                    LOG.debug(f"[ExperimentCoordinator] Missing data for {stream_id} at {event_time}")
+                    missing_event = {
+                        "stream_id": stream_id,
+                        "origin": "missing",
+                        "value": None,
+                        "event_ts": event_time,
+                    }
+                    reconstructor.handle_timeout(missing_event)
+                    continue
+
+                # Case 3: normal observation
+                self.event_stream.add_event(event, "observed", stream_id)
 
             except EndOfDataset:
-                logging.info(f"[COORD] End of dataset for {stream_id}")
+                LOG.info(f"[ExperimentCoordinator] End of dataset for {stream_id}")
                 break
             except Exception as e:
-                logging.exception(f"[EXPERIMENT COORD] Error in {stream_id}: {e}")
+                LOG.exception(f"[ExperimentCoordinator] Error in {stream_id}: {e}")
+
+        LOG.info(f"[ExperimentCoordinator] Stream {stream_id} stopped.")

@@ -2,7 +2,7 @@
   {
     "name": "Overspeeding",
     "type": "atomic",
-    "epl": "@Name('Overspeeding') select e from Event as e where e.streamId='speed-1' and e.value > 25 and confidence > 0.68"
+    "epl": "@Name('Overspeeding') select e from Event as e where e.streamId='speed-1' and e.value > 25 and confidence > 0.75"
   },
   {
     "name": "EngineOverheat",
@@ -12,12 +12,12 @@
   {
     "name": "LowFuel",
     "type": "atomic",
-    "epl": "@Name('LowFuel') select e from Event as e where e.streamId='fuel-1' and e.value < 40 and confidence > 0.5"
+    "epl": "@Name('LowFuel') select e from Event as e where e.streamId='fuel-1' and e.value < 40 and confidence > 0.75"
   },
   {
     "name": "HighSpeedOverheat",
     "type": "complex",
-    "epl": "@Name('HighSpeedOverheat') select a as over, b as heat from pattern [every a=PatternRecordStream(patternName='Overspeeding' and confidence>0.5) -> b=PatternRecordStream(patternName='EngineOverheat' and confidence>0.85)]",
+    "epl": "@Name('HighSpeedOverheat') select a as over, b as heat from pattern [every a=PatternRecordStream(patternName='Overspeeding' and confidence>0.75) -> b=PatternRecordStream(patternName='EngineOverheat' and confidence>0.85)]",
     "confidence": { "aggregation": "avg" }
   },
   {

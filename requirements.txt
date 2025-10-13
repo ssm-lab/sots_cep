@@ -7,3 +7,4 @@ pandas==2.3.3
 pytest==8.4.1
 pyzmq==27.1.0
 scipy==1.16.2
+filterpy==1.17.0
