@@ -31,16 +31,14 @@ class Reconstructor(EventConsumer):
 
         processed: Event = copy.deepcopy(event)
         processed.update({
-            "value": observed_value if observed_value is not None else prediction,
+            "value": observed_value,
             "reconstructed_value": prediction,
             "reconstruction_flag": False,
             "status": "reconstructed",
             "reconstruction_method": (
-                self.predictor.name if observed_value is None else "observed"
+                self.predictor.name
             ),
-            "confidence": (
-                self.predictor.confidence()
-            ),
+            "confidence": (1.0),
             "reconstruction_time": time.time(),
         })
 
@@ -61,9 +59,7 @@ class Reconstructor(EventConsumer):
             "reconstruction_method": (
                 self.predictor.name
             ),
-            "confidence": (
-                self.predictor.confidence()
-            ),
+            "confidence": (self.predictor.confidence()),
             "reconstruction_time": time.time(),
         })
 

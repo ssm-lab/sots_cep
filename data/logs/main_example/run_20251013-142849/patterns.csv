@@ -1,5 +1,0 @@
-# Logger: PatternLogger | Started: Mon Oct 13 14:28:54 EDT 2025
-fired_at,pattern_name,pattern_type,contributing_patterns,num_events,confidence,sources,event_ids
-2025-10-13 14:28:56.753,EngineOverheat,atomic,,1,0.8348,source,engine-temp-1_1
-2025-10-13 14:28:59.980,EngineOverheat,atomic,,1,0.8343,source,engine-temp-1_2
-2025-10-13 14:29:03.109,EngineOverheat,atomic,,1,0.8486,source,engine-temp-1_4

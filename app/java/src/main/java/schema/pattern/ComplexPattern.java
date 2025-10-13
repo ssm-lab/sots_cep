@@ -1,38 +1,26 @@
 package schema.pattern;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
- * Represents a composite pattern formed from multiple subpatterns,
- * which may be atomic or other complex patterns.
+ * Represents a higher-level (complex) pattern composed of other patterns.
+ * Each subpattern contributes its own confidence and set of events.
+ * The aggregated confidence is propagated from the subpatterns.
  */
-
 public class ComplexPattern extends Pattern {
+    private final List<String> subpatternNames = new ArrayList<>();
+    private final List<Double> subpatternConfidences = new ArrayList<>();
 
     public ComplexPattern(String name, List<Pattern> subpatterns) {
-        super(
-            name,
-            "complex",
-            subpatterns.stream()
-                       .flatMap(p -> p.getEvents().stream())
-                       .collect(Collectors.toList()),
-            subpatterns.stream()
-                       .flatMap(p -> p.getConfidences().stream())
-                       .collect(Collectors.toList()),
-            0.0,  // Manager now decides confidence
-            subpatterns.stream()
-                       .flatMap(p -> p.getSources().stream())
-                       .distinct()
-                       .collect(Collectors.toList()),
-            subpatterns.stream()
-                       .map(Pattern::getPatternName)
-                       .collect(Collectors.toList())
-        );
+        super(name, "complex", 0.0);
+
+        for (Pattern sub : subpatterns) {
+            this.subpatternNames.add(sub.getPatternName());
+            this.subpatternConfidences.add(sub.getConfidence());
+            this.eventsNested.addAll(sub.getEventsNested());
+        }
     }
 
-    @Override
-    public int countEvents() {
-        return events.size();
-    }
+    public List<String> getSubpatternNames() { return subpatternNames; }
+    public List<Double> getSubpatternConfidences() { return subpatternConfidences; }
 }

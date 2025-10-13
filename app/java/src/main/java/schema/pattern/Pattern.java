@@ -3,45 +3,38 @@ package schema.pattern;
 import schema.event.Event;
 import java.util.*;
 
-
 /**
- * Base representation of a detected pattern within the CEP layer
+ * Base class representing a generic pattern match (atomic or complex).
+ * Stores name, type, confidence, and nested event structure so that
+ * downstream components can trace which events contributed to each match.
  */
-
-
-
 public abstract class Pattern {
     protected String patternName;
-    protected String patternType;
-    protected List<Event> events;
-    protected List<Double> confidences;
-    public double confidence;
-    protected List<String> sources;
-    protected List<String> contributingPatterns;
+    protected String patternType; // "atomic" or "complex"
+    protected double confidence;
 
-    public Pattern(String patternName,
-                         String patternType,
-                         List<Event> events,
-                         List<Double> confidences,
-                         double confidence,
-                         List<String> sources,
-                         List<String> contributingPatterns) {
-        this.patternName = patternName;
-        this.patternType = patternType;
-        this.events = events;
-        this.confidences = confidences;
+    /** Nested event groups — each sublist corresponds to one subpattern’s events */
+    protected List<List<Event>> eventsNested = new ArrayList<>();
+
+    public Pattern(String name, String type, double confidence) {
+        this.patternName = name;
+        this.patternType = type;
         this.confidence = confidence;
-        this.sources = sources;
-        this.contributingPatterns = contributingPatterns;
     }
 
     public String getPatternName() { return patternName; }
     public String getPatternType() { return patternType; }
-    public List<Event> getEvents() { return events; }
-    public List<Double> getConfidences() { return confidences; }
     public double getConfidence() { return confidence; }
-    public List<String> getSources() { return sources; }
-    public List<String> getContributingPatterns() { return contributingPatterns; }
+    public void setConfidence(double confidence) { this.confidence = confidence; }
 
-    public abstract int countEvents();
+    public List<List<Event>> getEventsNested() { return eventsNested; }
+
+    /** Total number of individual events across all nested groups. */
+    public int countAllEvents() {
+        return eventsNested.stream().mapToInt(List::size).sum();
+    }
+
+    public int countSubPatterns() {
+        return eventsNested.size();
+    }
 }
