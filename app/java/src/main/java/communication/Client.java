@@ -1,8 +1,9 @@
-package messaging;
+package communication;
 
 import com.google.gson.Gson;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import event.Event;
+
 import org.zeromq.ZMQ;
 
 import java.nio.charset.StandardCharsets;
@@ -10,6 +11,16 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import schema.event.Event;
+
+
+/**
+ * The Client class manages ZeroMQ-based communication using PUB/SUB sockets.
+ * It serializes and publishes outgoing events, and converts received messages
+ * into {@link schema.event.Event} instances that are dispatched to registered consumers.
+ */
+
 
 public class Client {
     private static final Logger LOG = Logger.getLogger(Client.class.getName());
@@ -22,7 +33,6 @@ public class Client {
     private final ZMQ.Poller poller;
     private final ObjectMapper mapper;
 
-    // topic -> list of consumers
     private final Map<String, List<BiConsumer<String, Event>>> consumers = new HashMap<>();
 
     public Client(String prefix,
@@ -60,14 +70,13 @@ public class Client {
         LOG.info(() -> "[Client-" + prefix + "] Subscribed to " + topic);
     }
 
-    /** Dispatch one round of events (non-blocking with timeout) */
+    /** Dispatch one round of events */
     public void dispatch(int timeoutMs) {
         try {
             int rc = poller.poll(timeoutMs);
             if (rc > 0 && poller.pollin(0)) {
                 String topic = subscriber.recvStr();
                 String payload = subscriber.recvStr();
-//                Event event = gson.fromJson(payload, Event.class);
                 Event event = this.mapper.readValue(payload, Event.class);
 
                 // forward to all matching consumers

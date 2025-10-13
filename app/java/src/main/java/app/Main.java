@@ -1,41 +1,38 @@
 package app;
 
-import cep.EsperSetup;
-import patterns.PatternLoader;
+import cep.esper.EsperCEPEngine;
 import logger.PatternLogger;
+import patterns.esper.EsperPatternManager;
 import runtime.EventStream;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-    	if (args.length < 2) {
-            System.err.println("Usage: Main <patternFile> <runDir>");
+        if (args.length < 2) {
+            System.err.println("Missing arguments, ensure you pass: <patterncfg> <runDir>");
             System.exit(1);
         }
-    	
-    	String patternFile = args.length > 0 ? args[0] : "patterns/basic_patterns.json";
-        String runDir = args.length > 1 ? args[1] : "data/logs";
-        
-        EventStream eventStream = new EventStream("tcp://localhost:5557", "tcp://localhost:5558");
-        EsperSetup esper = new EsperSetup();
 
-        eventStream.subscribe((topic, event) -> {
-            esper.getRuntime().getEventService().sendEventBean(event, "Event");
-        }, "reconstructed", "*");
-        
-        eventStream.subscribe((topic, event) -> {
-            esper.getRuntime().getEventService().sendEventBean(event, "Event");
-        }, "groundtruth", "*");
+        String patternFile = args[0];
+        String runDir = args[1];
 
+        // Initialize the engine
+        EsperCEPEngine engine = new EsperCEPEngine();
+        engine.initialize();
 
-        try (PatternLogger patternLogger = new PatternLogger(runDir)) {
-            PatternLoader loader = new PatternLoader(
-                    esper.getConfiguration(),
-                    esper.getRuntime(),
-                    patternLogger
-            );
+        // Initialize pattern manager
+        try (PatternLogger logger = new PatternLogger(runDir)) {
+            EsperPatternManager manager = new EsperPatternManager(engine, logger);
+            manager.initialize(patternFile);
 
-            loader.loadPatternsFromFile(patternFile);
-            eventStream.dispatch(1000, false);
+            // Setup event stream
+            EventStream stream = new EventStream("tcp://localhost:5557", "tcp://localhost:5558");
+            stream.subscribe((topic, event) -> engine.handleEvent(event), "reconstructed", "*");
+            stream.subscribe((topic, event) -> engine.handleEvent(event), "groundtruth", "*");
+
+            // Run loop
+            stream.dispatch(100, false);
         }
+
+        engine.shutdown();
     }
 }

@@ -1,38 +1,52 @@
 package logger;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 
+import schema.pattern.Pattern;
+import schema.event.Event;
+
+/**
+ * The PatternLogger handles logging of detected pattern matches
+ * (both atomic and complex) into a CSV file
+ */
 
 public class PatternLogger implements AutoCloseable {
-    private final String filepath;
     private final PrintWriter writer;
 
     public PatternLogger(String runDir) throws IOException {
-    	Files.createDirectories(Paths.get(runDir));
-    	this.filepath = Paths.get(runDir, "patterns.csv").toString();
-        this.writer = new PrintWriter(new FileWriter(filepath, false));
+        Files.createDirectories(Paths.get(runDir));
+        Path file = Paths.get(runDir, "patterns.csv");
+        this.writer = new PrintWriter(new FileWriter(file.toFile(), false));
 
         writer.println("# Logger: PatternLogger | Started: " + new Date());
-        writer.println("fired_at,pattern_name,outcome,partition,stream_ids,event_ids,confidences");
+        writer.println("fired_at,pattern_name,pattern_type,contributing_patterns,"
+                + "num_events,confidence,sources,event_ids");
     }
 
-
-    public synchronized void logPatternMatch(String patternName,
-                                             String outcome,
-                                             String partition,
-                                             String streamIds,
-                                             String eventIds,
-                                             String confidences) {
+    public synchronized void log(Pattern record) {
         String firedAt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
-        writer.printf("%s,%s,%s,%s,%s,%s,%s%n",
-                firedAt, patternName, outcome, partition, streamIds, eventIds, confidences);
+
+        String contributing = String.join(";", record.getContributingPatterns());
+        String sources = String.join(";", record.getSources());
+        String eventIds = record.getEvents().stream()
+                                .map(Event::getEventId)
+                                .map(Object::toString)
+                                .reduce((a, b) -> a + ";" + b)
+                                .orElse("");
+
+        writer.printf("%s,%s,%s,%s,%d,%.4f,%s,%s%n",
+                firedAt,
+                record.getPatternName(),
+                record.getPatternType(),
+                contributing,
+                record.countEvents(),
+                record.getConfidence(),
+                sources,
+                eventIds);
+
         writer.flush();
     }
 

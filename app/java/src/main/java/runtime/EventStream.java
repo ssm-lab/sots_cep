@@ -1,12 +1,18 @@
 package runtime;
-import messaging.Client;
-
-import event.Event;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.logging.Logger;
+
+import communication.Client;
+import schema.event.Event;
+
+/**
+ * The EventStream controls communication across event partitions (e.g., observed) using ZeroMQ clients.
+ * It manages both event publication and subscription, allowing different pipeline
+ * components to exchange {@link schema.event.Event} objects
+ */
 
 public class EventStream {
     private static final Logger LOG = Logger.getLogger(EventStream.class.getName());
@@ -16,8 +22,6 @@ public class EventStream {
     public EventStream(String subscriberEndpoint, String publisherEndpoint) {
         partitions.put("observed", new Client("observed", subscriberEndpoint, publisherEndpoint));
         partitions.put("reconstructed", new Client("reconstructed", subscriberEndpoint, publisherEndpoint));
-        partitions.put("matched", new Client("matched", subscriberEndpoint, publisherEndpoint));
-        partitions.put("late", new Client("late", subscriberEndpoint, publisherEndpoint));
         partitions.put("groundtruth", new Client("groundtruth", subscriberEndpoint, publisherEndpoint));
     }
 

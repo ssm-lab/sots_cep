@@ -1,0 +1,8 @@
+# Logger: CSVLogger | Started: Mon Oct 13 14:28:55 2025
+stream_id,event_id,sampled_ts,arrival_ts,event_ts,datatype,unit,value,origin,reconstructed_value,reconstruction_method,confidence,reconstruction_flag,status,source,extras
+speed-1,speed-1_0,1760380135.5801046,1760380135.5801046,1760380135.5801046,float,km/h,17.136662051601725,source,,,,,observed,SimulatedStream,{}
+speed-1,speed-1_0,1760380135.5801046,1760380135.5801046,1760380135.5801046,float,km/h,17.136662051601725,source,18.505967799451657,observed,0.9125475285171102,False,reconstructed,SimulatedStream,{}
+speed-1,speed-1_1,1760380136.5855198,1760380136.5855198,1760380136.5855198,float,km/h,18.059537152277525,source,,,,,observed,SimulatedStream,{}
+engine-temp-1,engine-temp-1_0,,1760380135.5952535,1760380135.5784168,float,C,90.0,missing,90.0,KalmanFilter,0.17857142857142858,True,reconstructed,SimulatedStream,{}
+engine-temp-1,engine-temp-1_1,1760380136.5855198,1760380136.5855198,1760380136.5855198,float,C,71.99583540890983,source,,,,,observed,SimulatedStream,{}
+engine-temp-1,engine-temp-1_1,1760380136.5855198,1760380136.5855198,1760380136.5855198,float,C,71.99583540890983,source,72.19021235456262,observed,0.834835511491663,False,reconstructed,SimulatedStream,{}

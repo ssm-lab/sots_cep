@@ -33,7 +33,7 @@ class Reconstructor(EventConsumer):
         processed.update({
             "value": observed_value if observed_value is not None else prediction,
             "reconstructed_value": prediction,
-            "reconstruction_flag": observed_value is None,
+            "reconstruction_flag": False,
             "status": "reconstructed",
             "reconstruction_method": (
                 self.predictor.name if observed_value is None else "observed"

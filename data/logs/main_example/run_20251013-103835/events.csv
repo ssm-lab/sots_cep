@@ -1,9 +1,0 @@
-# Logger: CSVLogger | Started: Mon Oct 13 10:38:43 2025
-stream_id,event_id,sampled_ts,arrival_ts,event_ts,datatype,unit,value,origin,reconstructed_value,reconstruction_method,confidence,reconstruction_flag,status,source,extras,reconstruction_time
-speed-1,speed-1_0,,1760366321.542208,1760366321.5289571,float,km/h,50.0,missing,50.0,KalmanFilter,0.30303030303030304,True,reconstructed,SimulatedStream,{},1760366321.5435772
-engine-temp-1,engine-temp-1_0,1760366321.5484607,1760366321.5484607,1760366321.5484607,float,C,71.8872765282358,source,,,,,observed,SimulatedStream,{},
-speed-1,speed-1_1,1760366322.5312414,1760366322.5312414,1760366322.5312414,float,km/h,19.40599942548266,source,19.736299026826973,observed,0.9099840353678007,False,reconstructed,SimulatedStream,{},1760366322.5426583
-speed-1,speed-1_1,1760366322.5312414,1760366322.5312414,1760366322.5312414,float,km/h,19.40599942548266,source,,,,,observed,SimulatedStream,{},
-engine-temp-1,engine-temp-1_0,1760366321.5484607,1760366321.5484607,1760366321.5484607,float,C,71.8872765282358,source,72.64197333955931,observed,0.8391608391608391,False,reconstructed,SimulatedStream,{},1760366322.5436716
-engine-temp-1,engine-temp-1_1,1760366322.547688,1760366322.547688,1760366322.547688,float,C,71.35355785747404,source,,,,,observed,SimulatedStream,{},
-engine-temp-1,engine-temp-1_3,,1760366324.5456905,1760366324.5334146,float,C,59.43477914139792,missing,59.43477914139792,KalmanFilter,0.17679558011049723,True,reconstructed,SimulatedStream,{},1760366324.5456905
