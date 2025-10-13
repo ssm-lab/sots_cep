@@ -74,6 +74,40 @@ class MissingnessInjector:
         return uncertain_df
 
 
+# Complete full 24hr readings timelines and flag structural gaps
+def expand_to_hourly(
+    df,
+    value_cols,
+    timestamp_col="Measurement Timestamp",
+    group_col="Beach Name"
+):
+    all_groups = []
+    for group_name, group in df.groupby(group_col):
+        group = group.copy()
+
+        # Ensure timestamp is datetime
+        group[timestamp_col] = pd.to_datetime(group[timestamp_col], errors="coerce")
+        group = group.set_index(timestamp_col)
+
+        full_index = pd.date_range(
+            start=group.index.min().floor("h"),
+            end=group.index.max().ceil("h"),
+            freq="h"
+        )
+
+        expanded = group.reindex(full_index)
+
+        expanded[group_col] = group_name
+
+        # Structural gap = when all value cols are missing (true missing row)
+        expanded["structural_gap"] = expanded[value_cols].isna().all(axis=1).astype(int)
+
+        all_groups.append(
+            expanded.reset_index().rename(columns={"index": timestamp_col})
+        )
+
+    return pd.concat(all_groups).reset_index(drop=True)
+
 
 CONFIG_PATH = "app_examples/experiment_example/data/miss_config.json"
 OUTPUT_DIR = "app_examples/experiment_example/data/processed/experiment_dfs"
@@ -109,10 +143,11 @@ def main():
         ]
 
         processed_df = injector.inject(df, DEFAULT_VALUE_COLS, group_col="Beach Name")
+        df_final = expand_to_hourly(processed_df, timestamp_col="Measurement Timestamp", group_col="Beach Name", value_cols=DEFAULT_VALUE_COLS)
 
         filename = f"{exp['name']}_rate{rate}_{mode}.csv"
         out_path = os.path.join(OUTPUT_DIR, filename)
-        processed_df.to_csv(out_path, index=False)
+        df_final.to_csv(out_path, index=False)
 
         logging.debug(f"[INFO] Saved processed dataset: {out_path}")
 

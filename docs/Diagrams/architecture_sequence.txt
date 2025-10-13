@@ -1,0 +1,34 @@
+@startuml
+title End-to-End Event Flow
+
+actor Researcher as Rsr
+participant "Stream" as S
+participant "Coordinator" as C
+participant "EventStream" as ES
+participant "Reconstructor" as Rc
+participant "Predictor" as P
+participant "CEP Engine" as CEP
+
+== Event Generation ==
+Rsr -> S : Initiate data collection
+S -> C : generate_event()
+C -> ES : publish(event, "observed")
+
+== Reconstruction ==
+ES -> Rc : dispatch(event, "observed")
+
+alt Observed event
+    Rc -> P : update(event)
+    Rc -> ES : publish(event + metadata, "reconstructed")
+else Missing event
+    C -> Rc : handle_timeout(missing_event)
+    Rc -> P : predict()
+    P --> Rc : reconstructed_value + confidence
+    Rc -> ES : publish(reconstructed_event + metadata, "reconstructed")
+end
+
+== CEP Processing ==
+ES -> CEP : dispatch(event, "reconstructed")
+CEP -> CEP : evaluate_patterns()
+CEP --> Rsr : output complex events\n(logs + detections)
+@enduml
