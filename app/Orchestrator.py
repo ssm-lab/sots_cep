@@ -23,43 +23,42 @@ logging.basicConfig(
 )
 
 class Orchestrator:
-    def __init__(self, pattern_file, log_dir, streams_cfg, predictors_cfg, base_run_name,
+    def __init__(self, pattern_cfg, log_dir, streams_cfg, predictors_cfg, base_run_name,
                  client_type=ZMQClient, server_type=ZMQServer,
-                 cep_engine_cls=None, cep_engine_kwargs=None):
-        self.pattern_file = pattern_file
+                 bridge=None, bridge_kwargs=None):
+        self.pattern_cfg = pattern_cfg
         self.streams_cfg = streams_cfg
         self.predictors_cfg = predictors_cfg
         self.base_run_name = base_run_name
 
         self.client_type = client_type
         self.server: Server = server_type()
-        self.server_thread = None
 
-        self.esper_proc = None
         self.coordinator = None
         self.event_stream = EventStream(client_type=self.client_type)
         self.logger = None
+
+        self.bridge = bridge
+        self.bridge_kwargs = bridge_kwargs or {}
+        self.cep_engine = None
 
         # Generate run folder
         timestamp = time.strftime("%Y%m%d-%H%M%S")
         self.run_dir = os.path.join(log_dir, f"{base_run_name}_{timestamp}")
         os.makedirs(self.run_dir, exist_ok=True)
-
-        # CEP engine
-        self.cep_engine_cls = cep_engine_cls
-        self.cep_engine_kwargs = cep_engine_kwargs or {}
-        self.cep_engine = None
+        
 
     def start(self):
         # Start server
         self.server.run(in_thread=True)
+        print(self.pattern_cfg)
 
-        # Start CEP engine if provided
-        if self.cep_engine_cls:
-            self.cep_engine = self.cep_engine_cls(
-                pattern_file=self.pattern_file,
+        # Start up bridge
+        if self.bridge:
+            self.cep_engine = self.bridge(
+                pattern_cfg=self.pattern_cfg,
                 run_dir=self.run_dir,
-                **self.cep_engine_kwargs
+                **self.bridge_kwargs
             )
             self.cep_engine.start()
 

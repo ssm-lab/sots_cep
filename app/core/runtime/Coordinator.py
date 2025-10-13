@@ -38,17 +38,6 @@ class Coordinator:
     Central manager for streams and reconstructors.
     Builds components from configuration files.
     Manages scheduling and lifecycles of components.
-
-    Parameters
-    ----------
-    event_stream : EventStream
-        Shared event bus instance.
-    streams_config_path : str
-        Path to streams configuration JSON.
-    predictors_config_path : str
-        Path to filter configuration JSON.
-    loggers : list, optional
-        List of logger consumers to attach.
     """
 
     def __init__(self, event_stream, streams_config_path: str, predictors_config_path: str, loggers: List[object] = None):

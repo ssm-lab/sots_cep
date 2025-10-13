@@ -13,15 +13,6 @@ class Reconstructor(EventConsumer):
     Wraps a predictor to impute missing data.
     Subscribes to observed events for a stream and publishes
     reconstructed events back on the EventStream.
-
-    Parameters
-    ----------
-    stream_id : str
-        Identifier of the stream to reconstruct.
-    predictor : BasePredictor
-        The predictor instance used for imputation.
-    event_stream : EventStream
-        Event bus for publishing reconstructed events.
     """
     
     def __init__(self, stream_id: str, predictor: BasePredictor, event_stream: EventStream):

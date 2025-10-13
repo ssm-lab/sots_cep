@@ -1,0 +1,7 @@
+# Logger: PatternLogger | Started: Mon Oct 13 10:38:41 EDT 2025
+fired_at,pattern_name,outcome,partition,stream_ids,event_ids,confidences
+2025-10-13 10:38:42.043,Overspeeding,complete,missing;,speed-1;,speed-1_0;,0.30303030303030304;
+2025-10-13 10:38:46.051,NormalCruise,complete,source;,speed-1;,speed-1_1;,0.9099840353678007;
+2025-10-13 10:38:50.057,EngineOverheat,complete,source;,engine-temp-1;,engine-temp-1_0;,0.8391608391608391;
+2025-10-13 10:38:50.058,HighSpeedOverheat,complete,missing;source;,speed-1;engine-temp-1;,speed-1_0;engine-temp-1_0;,0.30303030303030304;0.8391608391608391;
+2025-10-13 10:38:54.062,EngineOverheat,complete,missing;,engine-temp-1;,engine-temp-1_3;,0.17679558011049723;

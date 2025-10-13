@@ -11,13 +11,7 @@ class EventStream:
     Core event bus for the system.
     Handles publish/subscribe of events across partitions and streams.
     Uses a pluggable MessagingClient backend (e.g., ZMQClient, KafkaClient).
-
-    Parameters
-    ----------
-    client_type : type[Client]
-        Messaging client implementation to use (e.g. ZMQClient).
     """
-
 
     def __init__(self, client_type: Type[Client]):
         # dict[partition -> dict[stream_id -> Client]]

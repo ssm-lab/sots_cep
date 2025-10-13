@@ -7,16 +7,8 @@ import subprocess
 __author__ = "Feyi Adesanya"
 
 """
-Utility functions for starting and stopping the Java CEP process.
-
-Functions
----------
-start_java(main_class, jar_name, java_dir, args, rebuild)
-    Launches the Java process.
-stop_java(proc)
-    Terminates the Java process.
+Utility functions for starting and stopping a Java process.
 """
-
 
 def build_java(
     java_dir: str = os.path.join(os.getcwd(), "app/java"),

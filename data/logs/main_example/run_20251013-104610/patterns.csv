@@ -1,0 +1,21 @@
+# Logger: PatternLogger | Started: Mon Oct 13 10:46:16 EDT 2025
+fired_at,pattern_name,outcome,partition,stream_ids,event_ids,confidences
+2025-10-13 10:46:17.335,Overspeeding,complete,source;,speed-1;,speed-1_0;,0.9125475285171102;
+2025-10-13 10:46:21.344,EngineOverheat,complete,source;,engine-temp-1;,engine-temp-1_0;,0.8391608391608391;
+2025-10-13 10:46:21.344,HighSpeedOverheat,complete,source;source;,speed-1;engine-temp-1;,speed-1_0;engine-temp-1_0;,0.9125475285171102;0.8391608391608391;
+2025-10-13 10:46:25.347,EngineOverheat,complete,missing;,engine-temp-1;,engine-temp-1_2;,0.17679558011049723;
+2025-10-13 10:46:29.353,NormalCruise,complete,missing;,speed-1;,speed-1_3;,0.3004694835680751;
+2025-10-13 10:46:29.353,SpeedOscillation,complete,source;missing;,speed-1;speed-1;,speed-1_0;speed-1_3;,0.9125475285171102;0.3004694835680751;
+2025-10-13 10:46:33.361,Overspeeding,complete,source;,speed-1;,speed-1_1;,0.9096641967523261;
+2025-10-13 10:46:33.362,StopAndGo,complete,missing;source;,speed-1;speed-1;,speed-1_3;speed-1_1;,0.3004694835680751;0.9096641967523261;
+2025-10-13 10:46:37.366,EngineOverheat,complete,source;,engine-temp-1;,engine-temp-1_1;,0.8342972816657039;
+2025-10-13 10:46:37.366,HighSpeedOverheat,complete,source;source;,speed-1;engine-temp-1;,speed-1_1;engine-temp-1_1;,0.9096641967523261;0.8342972816657039;
+2025-10-13 10:46:45.373,Overspeeding,complete,source;,speed-1;,speed-1_2;,0.9162039479227502;
+2025-10-13 10:46:49.379,EngineOverheat,complete,source;,engine-temp-1;,engine-temp-1_3;,0.8453656443633601;
+2025-10-13 10:46:49.381,HighSpeedOverheat,complete,source;source;,speed-1;engine-temp-1;,speed-1_2;engine-temp-1_3;,0.9162039479227502;0.8453656443633601;
+2025-10-13 10:46:53.385,Overspeeding,complete,missing;,speed-1;,speed-1_11;,0.5260345445373646;
+2025-10-13 10:46:57.392,EngineOverheat,complete,missing;,engine-temp-1;,engine-temp-1_11;,0.3568839029353354;
+2025-10-13 10:46:57.393,HighSpeedOverheat,complete,missing;missing;,speed-1;engine-temp-1;,speed-1_11;engine-temp-1_11;,0.5260345445373646;0.3568839029353354;
+2025-10-13 10:47:01.398,NormalCruise,complete,source;,speed-1;,speed-1_4;,0.9110517011364755;
+2025-10-13 10:47:05.403,EngineOverheat,complete,source;,engine-temp-1;,engine-temp-1_4;,0.8366344867679116;
+2025-10-13 10:47:05.403,HighSpeedOverheat,complete,source;source;,speed-1;engine-temp-1;,speed-1_4;engine-temp-1_4;,0.9110517011364755;0.8366344867679116;
