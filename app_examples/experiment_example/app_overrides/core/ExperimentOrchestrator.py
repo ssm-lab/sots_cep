@@ -54,6 +54,7 @@ class ExperimentOrchestrator(Orchestrator):
         """Run full experiment pipeline with ExperimentCoordinator."""
         # Start ZMQ server
         self.server.run(in_thread=True)
+        time.sleep(5)
 
         # Start up Java bridge
         if self.bridge:
@@ -63,6 +64,7 @@ class ExperimentOrchestrator(Orchestrator):
                 **self.bridge_kwargs
             )
             self.cep_engine.start()
+        time.sleep(7)
 
 
         # self.logger = CSVLogger(self.run_dir)
@@ -75,7 +77,7 @@ class ExperimentOrchestrator(Orchestrator):
             streams_config_path=self.streams_cfg,
             predictors_config_path=self.predictors_cfg,
         )
-        time.sleep(1)
+        time.sleep(5)
         self.coordinator.start()
 
         try:

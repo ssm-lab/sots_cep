@@ -53,6 +53,8 @@ class Coordinator:
         self.loggers = loggers or []
         self.running = False
 
+        self.setup()
+
     # Build phase -----------------------
     def _build_stream(self, stream_id: str, cfg: dict):
         """Instantiate a stream from config with params support."""
@@ -125,19 +127,15 @@ class Coordinator:
 
 
     # Lifecycle -----------------------
-    def start(self):
-        """Start all streams and reconstructors."""
-        if self.running:
-            return
-        self.running = True
-
-        # Attach loggers
+    def setup(self):
+        """Prepare streams, reconstructors, and loggers but do not start producing events."""
+        # Attach loggers first
         for logger in self.loggers:
             for partition in list(self.event_stream.partitions.keys()):
                 self.event_stream.subscribe(logger, partition, "*")
             logging.debug(f"[COORDINATOR] Subscribed logger {logger.__class__.__name__}")
 
-        # Build streams + reconstructors
+        # Build streams + reconstructors (but don’t start threads)
         for stream_id, cfg in self.streams_cfg.items():
             stream = self._build_stream(stream_id, cfg)
             interval = getattr(stream, "interval", None) or cfg.get("interval", 1.0)
@@ -150,8 +148,20 @@ class Coordinator:
             reconstructor = self._build_reconstructor(stream_id, predictor)
             self.reconstructors[stream_id] = reconstructor
 
+            # Subscribe reconstructor to its observed stream
             self.event_stream.subscribe(reconstructor, "observed", stream_id)
+            logging.debug(f"[COORDINATOR] Setup complete for {stream_id}")
 
+
+    def start(self):
+        """Start the event generation threads after setup."""
+        if self.running:
+            logging.warning("[COORDINATOR] Already running.")
+            return
+        self.running = True
+
+        for stream_id, stream in self.streams.items():
+            scheduler = self.schedulers[stream_id]
             t = threading.Thread(
                 target=self._run_stream,
                 args=(stream_id, scheduler, stream),
@@ -160,8 +170,9 @@ class Coordinator:
             )
             self.threads[stream_id] = t
             t.start()
+            logging.info(f"[COORDINATOR] Started stream {stream_id}")
 
-            logging.debug(f"[COORDINATOR] Started {stream_id} interval={interval:.1f}s")
+
 
     def stop(self, join_timeout: float = 2.0):
         """Stop all streams and clean up resources."""

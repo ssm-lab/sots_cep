@@ -7,7 +7,6 @@ def register_stream_type(name):
     return decorator
 
 def get_stream_class(name):
-    print(_registry.keys())
     cls = _registry.get(name)
     if cls is None:
         raise ValueError(f"Unknown stream type: {name}")

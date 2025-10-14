@@ -96,7 +96,7 @@ class ExperimentBatchOrchestrator:
                     "type": "experiment_stream",
                     "unit": unit,
                     "datatype": "float",
-                    "interval": 0.02,
+                    "interval": 0.25,
                     "params": {
                         "file": str(dataset_file),
                         "beach": beach,

@@ -3,7 +3,7 @@
     "type": "simulated",
     "unit": "km/h",
     "datatype": "float",
-    "interval": 1.0,
+    "interval": 0.5,
     "params": {
       "min": 0.0,
       "max": 160.0,
@@ -33,7 +33,7 @@
     "type": "simulated",
     "unit": "%",
     "datatype": "float",
-    "interval": 5.0,
+    "interval": 0.75,
     "params": {
       "min": 0.0,
       "max": 100.0,
