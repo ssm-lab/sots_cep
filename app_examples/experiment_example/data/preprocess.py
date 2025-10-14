@@ -78,7 +78,7 @@ class MissingnessInjector:
 def expand_to_hourly(
     df,
     value_cols,
-    timestamp_col="Measurement Timestamp",
+    timestamp_col="Readable Timestamp",
     group_col="Beach Name"
 ):
     all_groups = []
@@ -142,7 +142,7 @@ def main():
         ]
 
         processed_df = injector.inject(df, DEFAULT_VALUE_COLS, group_col="Beach Name")
-        df_final = expand_to_hourly(processed_df, timestamp_col="Measurement Timestamp", group_col="Beach Name", value_cols=DEFAULT_VALUE_COLS)
+        df_final = expand_to_hourly(processed_df, timestamp_col="Readable Timestamp", group_col="Beach Name", value_cols=DEFAULT_VALUE_COLS)
 
         filename = f"{exp['name']}_rate{rate}_{mode}.csv"
         out_path = os.path.join(OUTPUT_DIR, filename)

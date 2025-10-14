@@ -1,0 +1,42 @@
+{
+  "kf_water_temp": {
+    "type": "KalmanFilter",
+    "params": {
+      "initial_value": 10.0,
+      "dt": 3600.0,
+      "process_noise": 0.0001,
+      "measurement_noise": 0.2,
+      "mode": "acceleration"
+    }
+  },
+  "kf_turbidity": {
+    "type": "KalmanFilter",
+    "params": {
+      "initial_value": 1,
+      "dt": 3600.0,
+      "process_noise": 0.001,
+      "measurement_noise": 0.3,
+      "mode": "acceleration"
+    }
+  },
+  "kf_wave_height": {
+    "type": "KalmanFilter",
+    "params": {
+      "initial_value": 0.2,
+      "dt": 3600.0,
+      "process_noise": 0.005,
+      "measurement_noise": 0.4,
+      "mode": "acceleration"
+    }
+  },
+  "kf_wave_period": {
+    "type": "KalmanFilter",
+    "params": {
+      "initial_value": 3.0,
+      "dt": 3600.0,
+      "process_noise": 0.001,
+      "measurement_noise": 0.25,
+      "mode": "acceleration"
+    }
+  }
+}

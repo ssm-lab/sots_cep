@@ -7,13 +7,14 @@ import runtime.EventStream;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        if (args.length < 2) {
-            System.err.println("Missing arguments, ensure you pass: <patterncfg> <runDir>");
+        if (args.length < 3) {
+            System.err.println("Missing arguments, ensure you pass: <patterncfg> <runDir> <logMatches>");
             System.exit(1);
         }
 
         String patternFile = args[0];
         String runDir = args[1];
+        Boolean logMatches = Boolean.parseBoolean(args[2]);
 
         // Initialize the engine
         EsperCEPEngine engine = new EsperCEPEngine();
@@ -21,7 +22,7 @@ public class Main {
 
         // Initialize pattern manager
         try (PatternLogger logger = new PatternLogger(runDir)) {
-            EsperPatternManager manager = new EsperPatternManager(engine, logger);
+            EsperPatternManager manager = new EsperPatternManager(engine, logger, logMatches);
             manager.initialize(patternFile);
 
             // Setup event stream
@@ -30,7 +31,7 @@ public class Main {
             stream.subscribe((topic, event) -> engine.handleEvent(event), "groundtruth", "*");
 
             // Run loop
-            stream.dispatch(100, false);
+            stream.dispatch(5, false);
         }
 
         engine.shutdown();

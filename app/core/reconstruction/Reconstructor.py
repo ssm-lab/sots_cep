@@ -66,5 +66,5 @@ class Reconstructor(EventConsumer):
         self.event_stream.add_event(processed, "reconstructed", self.stream_id)
 
 
-    def advance_without_event(self, timestamp: float):
+    def advance_without_event(self):
         self.predictor.predict()

@@ -1,18 +1,12 @@
 [
   {
-    "name": "CompletedMatchGroundTruth",
-    "epl": "@Name('CompletedMatchGroundTruth') select a as firstEvent, b as secondEvent from pattern [every a=Event(status='groundtruth') -> b=Event(status='groundtruth')]"
+    "name": "HighWaterTemp",
+    "type": "atomic",
+    "epl": "@Name('HighWaterTemp') select e from Event as e where e.streamId like '%Water_Temperature%' and e.value > 30 and e.confidence > 0.75"
   },
   {
-    "name": "CompletedMatchReconstructed",
-    "epl": "@Name('CompletedMatchReconstructed') select a as firstEvent, b as secondEvent from pattern [every a=Event(status in ('observed','reconstructed')) -> b=Event(status in ('observed','reconstructed'))]"
-  },
-  {
-    "name": "TimeoutMatchGroundTruth",
-    "epl": "@Name('TimeoutMatchGroundTruth') select a as firstEvent, b as secondEvent from pattern [every a=Event(status='groundtruth') -> (b=Event(status='groundtruth') or timer:interval(5 sec))]"
-  },
-  {
-    "name": "TimeoutMatchReconstructed",
-    "epl": "@Name('TimeoutMatchReconstructed') select a as firstEvent, b as secondEvent from pattern [every a=Event(status in ('observed','reconstructed')) -> (b=Event(status in ('observed','reconstructed')) or timer:interval(5 sec))]"
+    "name": "HighTurbidity",
+    "type": "atomic",
+    "epl": "@Name('HighTurbidity') select e from Event as e where e.streamId like '%Turbidity%' and e.value > 15 and e.confidence > 0.75"
   }
-]
+ ]

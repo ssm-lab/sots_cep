@@ -51,7 +51,6 @@ class Orchestrator:
     def start(self):
         # Start server
         self.server.run(in_thread=True)
-        print(self.pattern_cfg)
 
         # Start up bridge
         if self.bridge:

@@ -15,12 +15,15 @@ class SimulatedStream(Stream):
         self.drift = params.get("drift", 0.2)
         self.noise = params.get("noise", 0.5)
         self.drop_chance = params.get("drop_chance", 0.1)
+        self.mandatory_count = params.get("mandatory_count", 3)
 
         start_value = params.get("start_value", None)
         if start_value is not None:
             self.current_value = max(self.min_value, min(start_value, self.max_value))
         else:
             self.current_value = random.uniform(self.min_value, self.max_value)
+
+        self.generated_count = 0
 
     def generate_event(self):
         drift_step = random.uniform(-self.drift, self.drift)
@@ -29,8 +32,11 @@ class SimulatedStream(Stream):
         self.current_value += drift_step + noise_step
         self.current_value = max(self.min_value, min(self.current_value, self.max_value))
 
-        if random.random() < self.drop_chance:
-            raise TimeoutError("Simulated dropped")
+        self.generated_count += 1
+
+        if self.generated_count > self.mandatory_count:
+            if random.random() < self.drop_chance:
+                raise TimeoutError("Simulated dropped")
 
         return {
             "stream_id": self.stream_id,

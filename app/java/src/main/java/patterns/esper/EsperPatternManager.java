@@ -30,10 +30,12 @@ public class EsperPatternManager extends PatternManager<EsperCEPEngine> {
     private final PatternLogger patternLogger;
     private final EPCompiler compiler = EPCompilerProvider.getCompiler();
     private List<PatternDef> patterns;
+    private Boolean logMatches;
 
-    public EsperPatternManager(EsperCEPEngine engine, PatternLogger logger) {
+    public EsperPatternManager(EsperCEPEngine engine, PatternLogger logger, Boolean logMatches) {
         super(engine);
         this.patternLogger = logger;
+        this.logMatches = logMatches;
     }
 
     private static class PatternDef {
@@ -129,8 +131,10 @@ public class EsperPatternManager extends PatternManager<EsperCEPEngine> {
 
                 patternLogger.log(record);
                 rt.getEventService().sendEventBean(record, "PatternRecordStream");
-                LOG.info("[CEP] Fired " + def.type + " " + def.name +
-                        " | confidence=" + record.getConfidence());
+                if (logMatches) {
+	                LOG.info("[CEP] Fired " + def.type + " " + def.name +
+	                        " | confidence=" + record.getConfidence());
+                };
             });
         }
     }

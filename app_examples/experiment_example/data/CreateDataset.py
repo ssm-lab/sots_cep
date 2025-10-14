@@ -32,6 +32,7 @@ def filter_year(
         format="%m/%d/%Y %I:%M:%S %p",
         errors="coerce"
     )
+    
     df = df.dropna(subset=[timestamp_col])
 
     # Filter by year, season, and selected beaches
@@ -42,8 +43,15 @@ def filter_year(
         (df[group_col].isin(BEACHES))
     ]
 
+    df["Readable Timestamp"] = df[timestamp_col]
+    print(df.columns)
+    df[timestamp_col] = df[timestamp_col].apply(lambda x: float(x.timestamp()))
+
     # Sort
     df = df.sort_values([group_col, timestamp_col]).reset_index(drop=True)
+
+    
+
 
     # Convert numeric cols
     NUMERIC_COLS = [
@@ -83,7 +91,7 @@ def filter_year(
 
     return df
 
-def analyze_and_preprocess(df, timestamp_col="Measurement Timestamp", group_col="Beach Name", output_dir="data/processed"):
+def analyze_and_preprocess(df, timestamp_col="Readable Timestamp", group_col="Beach Name", output_dir="data/processed"):
     os.makedirs(output_dir, exist_ok=True)
 
     df["Date"] = df[timestamp_col].dt.date

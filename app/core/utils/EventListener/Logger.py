@@ -1,7 +1,5 @@
-import csv
-import os
-import time
 from abc import ABC, abstractmethod
+import threading, queue, csv, os, time
 
 from ...schema.Event import Event
 from ...runtime.EventConsumer import EventConsumer
@@ -60,8 +58,79 @@ class CSVLogger(BaseLogger):
         row = {field: event.get(field) for field in self.writer.fieldnames}
         self.records.append(row)
         self.writer.writerow(row)
-        self.csvfile.flush()
+        # self.csvfile.flush()
+        # Flush every 100 events
+        if len(self.records) % 1000 == 0:
+            self.csvfile.flush()
 
     def close(self):
         if self.csvfile:
             self.csvfile.close()
+
+
+class AsyncCSVLogger:
+    def __init__(self, run_dir, flush_every=5000, flush_interval=0.05):
+        os.makedirs(run_dir, exist_ok=True)
+        self.filepath = os.path.join(run_dir, "events.csv")
+        self.csvfile = open(self.filepath, "w", buffering=1024*1024)  # 1MB buffer
+        self._queue = queue.Queue(maxsize=100_000)
+        self.flush_every = flush_every
+        self.flush_interval = flush_interval
+        self._last_flush = time.time()
+        self._stop = False
+        self._initialized = False   # <-- track header init
+        self.fields = []
+
+        self.thread = threading.Thread(target=self._writer_loop, daemon=True)
+        self.thread.start()
+
+    def _init_writer(self, event):
+        from ...schema.Event import Event
+        base_fields = list(Event.__annotations__.keys())
+        extra_fields = set(event.keys()) - set(base_fields)
+        self.fields = base_fields + sorted(extra_fields)
+        header = ",".join(self.fields)
+        self.csvfile.write(f"# Started {time.ctime()}\n{header}\n")
+        self._initialized = True  # <-- mark it done
+
+    def consume_event(self, event):
+        if not self._initialized:  # <-- only once
+            self._init_writer(event)
+        try:
+            self._queue.put_nowait(event)
+        except queue.Full:
+            # Optional: handle dropped events (monitor)
+            pass
+
+    def _writer_loop(self):
+        batch = []
+        while not self._stop or not self._queue.empty():
+            try:
+                event = self._queue.get(timeout=self.flush_interval)
+                batch.append(event)
+                if len(batch) >= self.flush_every:
+                    self._flush_batch(batch)
+                    batch.clear()
+            except queue.Empty:
+                if batch:
+                    self._flush_batch(batch)
+                    batch.clear()
+
+    def _flush_batch(self, batch):
+        lines = []
+        for e in batch:
+            line = ",".join(str(e.get(f, "")) for f in self.fields)
+            lines.append(line)
+        self.csvfile.write("\n".join(lines) + "\n")
+
+        # Controlled flush frequency
+        if time.time() - self._last_flush > 10.0:
+            self.csvfile.flush()
+            self._last_flush = time.time()
+
+    def close(self):
+        self._stop = True
+        self.thread.join()
+        self.csvfile.flush()
+        self.csvfile.close()
+

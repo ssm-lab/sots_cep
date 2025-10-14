@@ -27,8 +27,8 @@ class Client(ABC):
         pass
 
     @abstractmethod
-    def dispatch(self, timeout: int = 1000):
-        """Poll for new events and forward them to consumers."""
+    def poll_once(self, timeout: int):
+        """Poll for new events"""
         pass
 
     @abstractmethod

@@ -38,14 +38,12 @@ class EventStream:
         client = self._get_client(partition, stream_id)
         client.subscribe_to(stream_id, consumer)
 
-    def dispatch(self, timeout: int = 1000, once: bool = False):
+    def dispatch(self, timeout: int = 1):
         self._running = True
         while self._running:
             for partition_clients in self.partitions.values():
                 for client in partition_clients.values():
-                    client.dispatch(timeout=timeout)
-            if once:
-                break
+                    client.poll_once(timeout=timeout)
 
     def stop(self):
         logging.info("[EVENTSTREAM] Stopping dispatch loop.")

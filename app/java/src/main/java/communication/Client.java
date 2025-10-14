@@ -77,6 +77,10 @@ public class Client {
             if (rc > 0 && poller.pollin(0)) {
                 String topic = subscriber.recvStr();
                 String payload = subscriber.recvStr();
+//                System.out.println("TOPIC");
+//                System.out.println(topic);
+//                System.out.println("PAYLOAD");
+//                System.out.println(payload);
                 Event event = this.mapper.readValue(payload, Event.class);
 
                 // forward to all matching consumers
