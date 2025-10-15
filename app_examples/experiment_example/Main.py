@@ -48,7 +48,7 @@ class ExperimentBatchOrchestrator:
             "jar_name": "sots-uncertainty-aware-cep-0.0.1-SNAPSHOT.jar",
             "java_dir": "app/java",
             "rebuild": False,
-            "log_matches": "True"
+            "log_matches": "False"
         }
 
     def run_all(self):

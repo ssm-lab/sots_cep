@@ -8,7 +8,7 @@ YEAR = 2015
 START_MONTH = 5
 END_MONTH = 9
 BEACHES = ["Calumet Beach", "Montrose Beach", "63rd Street Beach"]
-DROP_THRESHOLD = 0.05
+DROP_THRESHOLD = 0  # no columns dropped unless completely missing
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
@@ -27,15 +27,14 @@ def remove_anomalies(df: pd.DataFrame) -> pd.DataFrame:
     total_replacements = 0
     per_col_counts = {}
 
-    # Replace known sentinel negatives (e.g., -99999, -100000)
+    # Replace known sentinel negatives (e.g., -99999)
     for col in numeric_cols:
         if col not in df.columns:
             continue
-
         invalid_mask = df[col] < -1000
         sentinel_count = invalid_mask.sum()
         if sentinel_count > 0:
-            logging.warning(f"[CLEANUP] {col}: {sentinel_count} sentinel values replaced (e.g., -99999).")
+            logging.warning(f"[CLEANUP] {col}: {sentinel_count} sentinel values replaced.")
             df.loc[invalid_mask, col] = np.nan
             per_col_counts[col] = per_col_counts.get(col, 0) + sentinel_count
             total_replacements += sentinel_count
@@ -45,7 +44,7 @@ def remove_anomalies(df: pd.DataFrame) -> pd.DataFrame:
         "Water Temperature": lambda x: x < 0,
         "Turbidity": lambda x: x < 0,
         "Wave Height": lambda x: x < 0,
-        "Wave Period": lambda x: x <= 0
+        "Wave Period": lambda x: x <= 0,
     }
 
     for col, rule in phys_rules.items():
@@ -195,6 +194,16 @@ def filter_year(
     # Remove anomalies and report how many were dropped
     df = remove_anomalies(df)
 
+    # Drop rows missing *any* key attributes
+    COMPLETE_ATTRS = ["Water Temperature", "Turbidity", "Wave Height", "Wave Period"]
+    before_rows = len(df)
+    df = df.dropna(subset=COMPLETE_ATTRS)
+    after_rows = len(df)
+    logging.info(f"[CLEANUP] Dropped {before_rows - after_rows} rows with incomplete attribute sets ({(before_rows - after_rows) / before_rows:.2%}).")
+
+    # Sort globally by time (across all beaches)
+    df = df.sort_values("Measurement Timestamp").reset_index(drop=True)
+
     # Save cleaned dataset
     os.makedirs(output_path, exist_ok=True)
     cleaned_path = os.path.join(output_path, f"preprocessed_{year}_{start_month}_{end_month}.csv")
@@ -204,6 +213,9 @@ def filter_year(
     return df
 
 
+# -------------------------------------------------------------------------
+# Run Preprocessor
+# -------------------------------------------------------------------------
 if __name__ == "__main__":
     dataset_path = "app_examples/experiment_example/data/original/Beach_Water_Quality_-_Automated_Sensors_20250918.csv"
     output_path = "app_examples/experiment_example/data/processed"
