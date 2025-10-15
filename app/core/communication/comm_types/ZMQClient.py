@@ -76,6 +76,7 @@ import zmq
 import logging
 from app.core.utils.UtilsFuncs import _deserialize_event, _serialize_event
 from ..Client import Client
+import threading
 
 class ZMQClient(Client):
     def __init__(self, partition: str, pub_endpoint="tcp://localhost:5558", sub_endpoint="tcp://localhost:5557"):
@@ -98,11 +99,18 @@ class ZMQClient(Client):
         self.poller.register(self.subscriber, zmq.POLLIN)
 
         self.consumers: dict[str, list] = {}
+        self._send_lock = threading.Lock()
 
     def publish(self, event, stream_id: str):
         topic = f"{self.partition}.{stream_id}".encode()
         payload = _serialize_event(event)
-        self.publisher.send_multipart([topic, payload], zmq.NOBLOCK)
+        with self._send_lock:
+            try:
+                self.publisher.send_multipart([topic, payload], flags=zmq.NOBLOCK)
+                # self.publisher.send_multipart([topic, payload])
+            except zmq.Again:
+                logging.warning(f"[ZMQClient-{self.partition}] Dropped message for {topic.decode()}")
+
 
     def subscribe_to(self, stream_id: str, consumer):
         if stream_id == "*":

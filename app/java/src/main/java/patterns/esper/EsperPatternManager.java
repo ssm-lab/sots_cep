@@ -17,12 +17,10 @@ import logger.PatternLogger;
 import patterns.PatternManager;
 import com.google.gson.*;
 
-
-
 /**
  * Manages pattern lifecycle for Esper CEP — loading from JSON,
  * compiling and deploying patterns, and propagating confidence
- * between atomic and complex layers.
+ * between atomic and complex layers with hierarchical provenance tracking.
  */
 public class EsperPatternManager extends PatternManager<EsperCEPEngine> {
     private static final Logger LOG = Logger.getLogger(EsperPatternManager.class.getName());
@@ -30,7 +28,7 @@ public class EsperPatternManager extends PatternManager<EsperCEPEngine> {
     private final PatternLogger patternLogger;
     private final EPCompiler compiler = EPCompilerProvider.getCompiler();
     private List<PatternDef> patterns;
-    private Boolean logMatches;
+    private final Boolean logMatches;
 
     public EsperPatternManager(EsperCEPEngine engine, PatternLogger logger, Boolean logMatches) {
         super(engine);
@@ -38,11 +36,15 @@ public class EsperPatternManager extends PatternManager<EsperCEPEngine> {
         this.logMatches = logMatches;
     }
 
+    // ---------------------------------------------------------------------
+    // Internal helper classes for JSON loading
+    // ---------------------------------------------------------------------
     private static class PatternDef {
-        String name, epl, type;
+        String name, description, epl, type;
         ConfidenceRule confidence;
-        PatternDef(String n, String e, String t, ConfidenceRule c) {
-            name = n; epl = e; type = t; confidence = c;
+
+        PatternDef(String n, String q, String e, String t, ConfidenceRule c) {
+            name = n; description = q; epl = e; type = t; confidence = c;
         }
     }
 
@@ -51,6 +53,9 @@ public class EsperPatternManager extends PatternManager<EsperCEPEngine> {
         ConfidenceRule(String m) { method = m; }
     }
 
+    // ---------------------------------------------------------------------
+    // Load pattern definitions from JSON
+    // ---------------------------------------------------------------------
     @Override
     public void loadPatterns(String resource) throws Exception {
         Gson gson = new Gson();
@@ -63,6 +68,7 @@ public class EsperPatternManager extends PatternManager<EsperCEPEngine> {
             for (JsonElement e : arr) {
                 var o = e.getAsJsonObject();
                 String name = o.get("name").getAsString();
+                String description = o.get("description").getAsString();
                 String epl = o.get("epl").getAsString();
                 String type = o.has("type") ? o.get("type").getAsString() : "atomic";
 
@@ -71,7 +77,7 @@ public class EsperPatternManager extends PatternManager<EsperCEPEngine> {
                     var conf = o.getAsJsonObject("confidence");
                     confRule = new ConfidenceRule(conf.get("aggregation").getAsString());
                 }
-                defs.add(new PatternDef(name, epl, type, confRule));
+                defs.add(new PatternDef(name, description, epl, type, confRule));
             }
         }
 
@@ -79,6 +85,9 @@ public class EsperPatternManager extends PatternManager<EsperCEPEngine> {
         LOG.info("[EsperPatternManager] Loaded " + defs.size() + " patterns");
     }
 
+    // ---------------------------------------------------------------------
+    // Deploy compiled EPLs to Esper runtime
+    // ---------------------------------------------------------------------
     @Override
     public void deployPatterns() throws Exception {
         EPRuntime rt = engine.getRuntime();
@@ -94,10 +103,9 @@ public class EsperPatternManager extends PatternManager<EsperCEPEngine> {
         LOG.info("[EsperPatternManager] Deployed " + patterns.size() + " patterns.");
     }
 
-    /**
-     * Attaches listeners for each deployed EPL statement to propagate
-     * and log pattern detections with confidence propagation.
-     */
+    // ---------------------------------------------------------------------
+    // Listener for pattern detections
+    // ---------------------------------------------------------------------
     private void attachListener(PatternDef def, EPDeployment dep, EPRuntime rt) {
         for (EPStatement stmt : dep.getStatements()) {
             stmt.addListener((newData, oldData, s, r) -> {
@@ -129,36 +137,35 @@ public class EsperPatternManager extends PatternManager<EsperCEPEngine> {
                     record.setConfidence(conf);
                 }
 
+                // Log and emit
                 patternLogger.log(record);
                 rt.getEventService().sendEventBean(record, "PatternRecordStream");
+
                 if (logMatches) {
-	                LOG.info("[CEP] Fired " + def.type + " " + def.name +
-	                        " | confidence=" + record.getConfidence());
-                };
+                    LOG.info(String.format("[CEP] Fired %s %s | conf=%.3f | stream=%s",
+                            def.type, def.name, record.getConfidence(), record.getStreamIdsAsString()));
+                }
             });
         }
     }
 
-    /**
-     * Aggregates confidence values according to the selected method.
-     * Supports "avg", "min", "max", and "most_recent" (most recent imputed value < 1.0).
-     */
+
+    // ---------------------------------------------------------------------
+    // Confidence aggregation rule
+    // ---------------------------------------------------------------------
     private double aggregate(List<Double> vals, ConfidenceRule rule) {
-        if (vals.isEmpty() || rule == null) return 0.0;
+        if (vals == null || vals.isEmpty() || rule == null) return 0.0;
 
         return switch (rule.method) {
             case "min" -> vals.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
             case "max" -> vals.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
             case "avg" -> vals.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
             case "most_recent" -> {
-                // Find the most recent imputed (confidence < 1.0) value, scanning backward
+                // Find the most recent imputed (confidence < 1.0) value
                 for (int i = vals.size() - 1; i >= 0; i--) {
                     double v = vals.get(i);
-                    if (v < 1.0) {
-                        yield v; // Return immediately when found
-                    }
+                    if (v < 1.0) yield v;
                 }
-                // If none were imputed, fallback to the most recent value overall
                 yield vals.get(vals.size() - 1);
             }
             default -> vals.get(vals.size() - 1);

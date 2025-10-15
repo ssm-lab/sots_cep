@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.zeromq.ZMQ;
+import org.zeromq.ZMsg;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -75,22 +76,41 @@ public class Client {
         try {
             int rc = poller.poll(timeoutMs);
             if (rc > 0 && poller.pollin(0)) {
-                String topic = subscriber.recvStr();
-                String payload = subscriber.recvStr();
-//                System.out.println("TOPIC");
-//                System.out.println(topic);
-//                System.out.println("PAYLOAD");
-//                System.out.println(payload);
-                Event event = this.mapper.readValue(payload, Event.class);
+                // Receive the entire multipart message atomically
+                ZMsg msg = ZMsg.recvMsg(subscriber);
 
-                // forward to all matching consumers
-                consumers.forEach((subscribedTopic, handlers) -> {
-                    if (topic.startsWith(subscribedTopic)) {
-                        for (BiConsumer<String, Event> handler : handlers) {
-                            handler.accept(topic, event);
+                if (msg == null || msg.size() < 2) {
+                    LOG.warning("[Client-" + prefix + "] Malformed message (null or incomplete): " 
+                                + (msg == null ? "null" : msg.toString()));
+                    return;
+                }
+
+                // Extract topic and payload frames
+                String topic = msg.popString();
+                String payload = msg.popString();
+
+                if (topic == null || payload == null) {
+                    LOG.warning("[Client-" + prefix + "] Malformed message (missing topic/payload): " 
+                                + msg.toString());
+                    return;
+                }
+
+                try {
+                    Event event = this.mapper.readValue(payload, Event.class);
+
+                    // Forward to all matching consumers
+                    consumers.forEach((subscribedTopic, handlers) -> {
+                        if (topic.startsWith(subscribedTopic)) {
+                            for (BiConsumer<String, Event> handler : handlers) {
+                                handler.accept(topic, event);
+                            }
                         }
-                    }
-                });
+                    });
+                } catch (Exception parseError) {
+                    LOG.log(Level.WARNING, "[Client-" + prefix + "] JSON parse error on payload: " + payload, parseError);
+                } finally {
+                    msg.destroy();
+                }
             }
         } catch (Exception e) {
             LOG.log(Level.WARNING, "[Client-" + prefix + "] Dispatch error", e);

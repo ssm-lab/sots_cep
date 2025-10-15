@@ -4,19 +4,27 @@
     {
       "name": "oracle",
       "rate": 0.0,
-      "mode": "None",
+      "mode": "ORACLE",
       "value_cols": []
     },
 
     {
-      "name": "mcar_10",
-      "rate": 0.1,
-      "mode": "MCAR",
-      "value_cols": []
+    "name": "structural_15",
+    "rate": 0.2,
+    "mode": "STRUCTURAL",
+    "value_cols": []
     },
+
     {
-      "name": "mcar_20",
-      "rate": 0.2,
+    "name": "structural_30",
+    "rate": 0.3,
+    "mode": "STRUCTURAL",
+    "value_cols": []
+    },
+
+    {
+      "name": "mcar_15",
+      "rate": 0.15,
       "mode": "MCAR",
       "value_cols": []
     },
@@ -28,19 +36,13 @@
     },
 
     {
-      "name": "mar_10",
-      "rate": 0.1,
+      "name": "mar_15",
+      "rate": 0.15,
       "mode": "MAR",
       "block_size": 12,
       "value_cols": []
     },
-    {
-      "name": "mar_20",
-      "rate": 0.2,
-      "mode": "MAR",
-      "block_size": 12,
-      "value_cols": []
-    },
+    
     {
       "name": "mar_30",
       "rate": 0.3,
@@ -50,17 +52,11 @@
     },
 
     {
-      "name": "mnar_10",
-      "rate": 0.1,
+      "name": "mnar_15",
+      "rate": 0.15,
       "mode": "MNAR",
       "value_cols": []
-    },
-    {
-      "name": "mnar_20",
-      "rate": 0.2,
-      "mode": "MNAR",
-      "value_cols": []
-    },
+    }, 
     {
       "name": "mnar_30",
       "rate": 0.3,

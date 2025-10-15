@@ -51,7 +51,7 @@ class Orchestrator:
     def start(self):
         # Start server
         self.server.run(in_thread=True)
-        time.sleep(5)
+        time.sleep(3)
 
         # Start up bridge
         if self.bridge:
@@ -61,7 +61,7 @@ class Orchestrator:
                 **self.bridge_kwargs
             )
             self.cep_engine.start()
-        time.sleep(7)
+        time.sleep(3)
 
         # Setup logger
         self.logger = CSVLogger(self.run_dir)
@@ -74,11 +74,11 @@ class Orchestrator:
             streams_config_path=self.streams_cfg,
             predictors_config_path=self.predictors_cfg,
         )
-        time.sleep(5)
+        time.sleep(3)
         self.coordinator.start()
 
         try:
-            self.event_stream.dispatch(timeout=1000)
+            self.event_stream.dispatch(timeout=5)
         except KeyboardInterrupt:
             self.stop()
 

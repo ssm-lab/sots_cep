@@ -13,6 +13,12 @@ public abstract class Pattern {
     protected String patternType; // "atomic" or "complex"
     protected double confidence;
 
+    /** Representative stream ID for Esper joins */
+    protected String streamId;
+
+    /** Set of all contributing stream IDs (traceability) */
+    protected Set<String> streamIds = new HashSet<>();
+
     /** Nested event groups — each sublist corresponds to one subpattern’s events */
     protected List<List<Event>> eventsNested = new ArrayList<>();
 
@@ -22,10 +28,17 @@ public abstract class Pattern {
         this.confidence = confidence;
     }
 
+    // ---------------- Getters / Setters ----------------
     public String getPatternName() { return patternName; }
     public String getPatternType() { return patternType; }
     public double getConfidence() { return confidence; }
     public void setConfidence(double confidence) { this.confidence = confidence; }
+
+    public String getStreamId() { return streamId; }
+    public void setStreamId(String streamId) { this.streamId = streamId; }
+
+    public Set<String> getStreamIds() { return streamIds; }
+    public void addStreamId(String id) { if (id != null) this.streamIds.add(id); }
 
     public List<List<Event>> getEventsNested() { return eventsNested; }
 
@@ -34,7 +47,19 @@ public abstract class Pattern {
         return eventsNested.stream().mapToInt(List::size).sum();
     }
 
+    /** Number of direct subpattern groups (for complex patterns). */
     public int countSubPatterns() {
         return eventsNested.size();
+    }
+
+    /** Comma-separated streamIds for logging */
+    public String getStreamIdsAsString() {
+        return String.join(",", streamIds);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%s | type=%s | conf=%.3f | streams=%s]",
+                patternName, patternType, confidence, getStreamIdsAsString());
     }
 }

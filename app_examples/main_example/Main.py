@@ -11,7 +11,7 @@ def main():
         bridge_kwargs={
             "jar_name": "sots-uncertainty-aware-cep-0.0.1-SNAPSHOT.jar",
             "java_dir": "app/java",
-            "rebuild": True
+            "rebuild": False
         }
     )
     orch.start()

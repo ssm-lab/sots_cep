@@ -28,7 +28,6 @@ public class Main {
             // Setup event stream
             EventStream stream = new EventStream("tcp://localhost:5557", "tcp://localhost:5558");
             stream.subscribe((topic, event) -> engine.handleEvent(event), "reconstructed", "*");
-            stream.subscribe((topic, event) -> engine.handleEvent(event), "groundtruth", "*");
 
             // Run loop
             stream.dispatch(5, false);

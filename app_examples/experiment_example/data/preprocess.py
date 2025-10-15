@@ -1,9 +1,6 @@
 import json
 import logging
 import os
-import numpy as np
-import pandas as pd
-from typing import Union, List
 
 import numpy as np
 import pandas as pd
@@ -12,7 +9,7 @@ from typing import Union, List, Optional
 class MissingnessInjector:
     def __init__(self, rate: float, mode: str = "MCAR", seed: int = 42, block_size: int = 12):
         self.rate = rate
-        self.mode = mode.upper()
+        self.mode = mode.upper() if mode else None
         self.seed = seed
         self.block_size = block_size
         np.random.seed(self.seed)
@@ -39,39 +36,68 @@ class MissingnessInjector:
         uncertain_df = df.copy()
         n = len(uncertain_df)
 
+        # Initialize structural_gap column (0 = no gap, 1 = structural missing)
+        uncertain_df["structural_gap"] = 0
+
         for col in value_cols:
             uncertain_df[f"{col}_groundtruth"] = uncertain_df[col].copy()
-            k = int(self.rate * n)  # number of rows to drop
+            k = int(self.rate * n)
             if k == 0:
                 continue
 
+            # MCAR
             if self.mode == "MCAR":
                 drop_idx = np.random.choice(n, size=k, replace=False)
                 uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc(col)] = np.nan
 
+            # MAR 
             elif self.mode == "MAR":
                 drop_idx = []
                 while len(drop_idx) < k:
                     start = np.random.randint(0, max(1, n - self.block_size))
                     end = min(start + self.block_size, n)
                     drop_idx.extend(range(start, end))
-                drop_idx = drop_idx[:k]  # trim extra
+                drop_idx = drop_idx[:k]
                 uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc(col)] = np.nan
 
+            # MNAR
             elif self.mode == "MNAR":
                 ref_values = pd.to_numeric(uncertain_df[col], errors="coerce")
+
+                # Skip if all missing
                 if ref_values.isnull().all():
                     continue
-                probs = (ref_values - ref_values.min()) / (ref_values.max() - ref_values.min() + 1e-9)
-                probs = probs / probs.sum()  # normalize
-                drop_idx = np.random.choice(n, size=k, replace=False, p=probs)
+
+                # Compute preliminary probabilities ignoring NaN
+                valid_mask = ~ref_values.isna()
+                valid_values = ref_values[valid_mask]
+
+                probs = (valid_values - valid_values.min()) / (valid_values.max() - valid_values.min() + 1e-9)
+                probs = probs / probs.sum()  # normalize to 1
+
+                # Choose only among valid indices
+                valid_indices = np.where(valid_mask)[0]
+                drop_valid_idx = np.random.choice(valid_indices, size=k, replace=False, p=probs)
+                uncertain_df.iloc[drop_valid_idx, uncertain_df.columns.get_loc(col)] = np.nan
+
+
+            # STRUCTURAL: mark all dropped points as permanent structural gaps
+            elif self.mode == "STRUCTURAL":
+                drop_idx = np.random.choice(n, size=k, replace=False)
                 uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc(col)] = np.nan
-            elif self.mode == None:
-                return uncertain_df # oracle, nothing missing
+                # Mark them as structural gaps
+                uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc("structural_gap")] = 1
+
+
+            # ORACLE
+            elif self.mode is None or self.mode == "ORACLE":
+                return uncertain_df
+
             else:
                 raise ValueError(f"Unknown missingness mode: {self.mode}")
 
         return uncertain_df
+
 
 
 # Complete full 24hr readings timelines and flag structural gaps
@@ -144,7 +170,8 @@ def main():
         processed_df = injector.inject(df, DEFAULT_VALUE_COLS, group_col="Beach Name")
         df_final = expand_to_hourly(processed_df, timestamp_col="Readable Timestamp", group_col="Beach Name", value_cols=DEFAULT_VALUE_COLS)
 
-        filename = f"{exp['name']}_rate{rate}_{mode}.csv"
+        # filename = f"{exp['name']}_rate{rate}_{mode}.csv"
+        filename = f"{exp['name']}.csv"
         out_path = os.path.join(OUTPUT_DIR, filename)
         df_final.to_csv(out_path, index=False)
 

@@ -4,7 +4,7 @@ import logging
 import os
 from pathlib import Path
 
-from .app_overrides.core.ExperimentOrchestrator import ExperimentOrchestrator
+from .app_overrides.ExperimentOrchestrator import ExperimentOrchestrator
 from app.core.bridge.JavaCEPBridge import JavaCEPBridge
 
 LOG = logging.getLogger(__name__)
@@ -19,16 +19,15 @@ ATTRIBUTES = [
 ]
 
 DATASETS = [
-    "mar_10_rate0.1_MAR",
-    "mar_20_rate0.2_MAR",
-    "mar_30_rate0.3_MAR",
-    "mcar_10_rate0.1_MCAR",
-    "mcar_20_rate0.2_MCAR",
-    "mcar_30_rate0.3_MCAR",
-    "mnar_10_rate0.1_MNAR",
-    "mnar_20_rate0.2_MNAR",
-    "mnar_30_rate0.3_MNAR",
-    "oracle_rate0.0_None"
+    "mar_15",
+    "mar_30",
+    "mcar_15",
+    "mcar_30",
+    "mnar_15",
+    "mnar_30",
+    "structural_15",
+    "structural_30",
+    "oracle"
 ]
 
 
@@ -48,14 +47,13 @@ class ExperimentBatchOrchestrator:
         self.bridge_kwargs = bridge_kwargs or {
             "jar_name": "sots-uncertainty-aware-cep-0.0.1-SNAPSHOT.jar",
             "java_dir": "app/java",
-            "rebuild": True,
-            "log_matches": "False"
+            "rebuild": False,
+            "log_matches": "True"
         }
 
     def run_all(self):
-        # Loop over all datasets (use slice for testing)
         # for dataset_name in DATASETS:
-        for dataset_name in ["mnar_30_rate0.3_MNAR"]:
+        for dataset_name in ["mnar_30"]:
             LOG.info(f"===== Starting Experiment: {dataset_name} =====")
 
             dataset_file = self.base_data_dir / f"{dataset_name}.csv"
@@ -96,7 +94,7 @@ class ExperimentBatchOrchestrator:
                     "type": "experiment_stream",
                     "unit": unit,
                     "datatype": "float",
-                    "interval": 0.25,
+                    "interval": 0.1,
                     "params": {
                         "file": str(dataset_file),
                         "beach": beach,

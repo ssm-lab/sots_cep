@@ -40,9 +40,13 @@ class ExperimentStream:
 
         if self.col not in self.df.columns:
             raise ValueError(f"Column '{self.col}' not found for beach '{self.beach}' in {self.file}")
+        
+        self.count = 0
 
     def generate_event(self):
         """Emit next observed event or indicate structural gap."""
+        self.count += 1
+
         if self.index >= len(self.df):
             raise EndOfDataset()
 
@@ -54,6 +58,8 @@ class ExperimentStream:
         obs_value_groundtruth = row[f"{self.col}_groundtruth"]
         structural_gap = int(row.get("structural_gap", 0))
         event_id = row.get("Measurement ID", self.index)
+        col_name = str(self.col).replace(" ", "_")
+        event_id =f"{event_id}_{col_name}"
 
         # Structural gap = advance predictor only, no event emitted
         if structural_gap == 1:
