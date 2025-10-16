@@ -19,7 +19,7 @@ gdf = gpd.GeoDataFrame(
 
 # Plot
 fig, ax = plt.subplots(figsize=(7, 7))
-gdf.plot(ax=ax, color="dodgerblue", markersize=120, edgecolor="black", zorder=3)
+gdf.plot(ax=ax, color="lightblue", markersize=120, edgecolor="black", zorder=3)
 
 # Add basemap
 ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, zoom=12)

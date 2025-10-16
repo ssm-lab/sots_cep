@@ -11,12 +11,20 @@ LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 BEACHES = ["Calumet Beach", "Montrose Beach", "63rd Street Beach"]
-ATTRIBUTES = [
+ATTRIBUTES_KF = [
     ("Water Temperature", "C", "kf_water_temp"),
     ("Turbidity", "NTU", "kf_turbidity"),
     ("Wave Height", "m", "kf_wave_height"),
     ("Wave Period", "s", "kf_wave_period")
 ]
+
+ATTRIBUTES_PF = [
+    ("Water Temperature", "C", "pf_water_temp"),
+    ("Turbidity", "NTU", "pf_turbidity"),
+    ("Wave Height", "m", "pf_wave_height"),
+    ("Wave Period", "s", "pf_wave_period")
+]
+
 
 DATASETS = [
     "oracle",
@@ -49,7 +57,7 @@ class ExperimentBatchOrchestrator:
             LOG.info(f"===== Starting Experiment: {dataset_name} =====")
 
             dataset_file = self.base_data_dir / f"{dataset_name}.csv"
-            streams_config_path = self._generate_streams_config(dataset_file)
+            streams_config_path = self._generate_streams_config(dataset_file, attributes=ATTRIBUTES_KF)
 
             orch = ExperimentOrchestrator(
                 pattern_cfg=self.pattern_cfg,
@@ -73,14 +81,14 @@ class ExperimentBatchOrchestrator:
                 orch.stop()
 
             LOG.info(f"===== Completed Experiment: {dataset_name} =====")
-            time.sleep(10)  # cooldown before next run
+            time.sleep(15)  # cooldown before next run
 
-    def _generate_streams_config(self, dataset_file: Path):
+    def _generate_streams_config(self, dataset_file: Path, attributes: dict = ATTRIBUTES_KF):
         """Dynamically generate and write the streams config for one dataset."""
         cfg = {}
 
         for beach in BEACHES:
-            for col_name, unit, predictor in ATTRIBUTES:
+            for col_name, unit, predictor in attributes:
                 stream_id = f"{beach.replace(' ', '_')}_{col_name.replace(' ', '_')}"
                 cfg[stream_id] = {
                     "type": "experiment_stream",

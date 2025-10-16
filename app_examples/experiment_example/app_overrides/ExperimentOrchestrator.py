@@ -61,7 +61,7 @@ class ExperimentOrchestrator:
         # --- start messaging server
         self.server = self.server_type()
         self.server.run(in_thread=True)
-        time.sleep(2)
+        time.sleep(3)
 
         # --- start CEP engine
         if self.bridge:
@@ -86,7 +86,7 @@ class ExperimentOrchestrator:
             on_complete=self._on_dataset_complete,
             interval=0.05,  # slightly safer default
         )
-        time.sleep(2)
+        time.sleep(3)
 
         # --- start event dispatch loop
         self.dispatch_thread = threading.Thread(

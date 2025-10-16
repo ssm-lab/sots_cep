@@ -6,6 +6,7 @@ from app.core.reconstruction.predictor_types.Filters import KalmanFilter, Partic
 #   pytest -s tests/test_predictors.py
 
 def test_kalman_filter_confidence_progression():
+    # Initialize filter with tuned parameters for visible progression
     predictor = KalmanFilter(Q=0.35, R=0.002, dt=1.0, mode="position")
 
     # Initial update to establish state
@@ -13,7 +14,7 @@ def test_kalman_filter_confidence_progression():
     base_conf = predictor.confidence()
     assert 0.0 <= base_conf <= 1.0
 
-    # Missing data: prediction-only
+    # --- Missing data: prediction-only intervals ---
     decay_confidences = []
     for _ in range(10):
         predictor.predict()
@@ -22,7 +23,7 @@ def test_kalman_filter_confidence_progression():
     # Confidence should have decreased
     assert decay_confidences[-1] < base_conf
 
-    # Recovery
+    # --- Recovery: measurements resume ---
     rebound_confidences = []
     for _ in range(5):
         predictor.update(10.0)
@@ -42,11 +43,6 @@ def test_kalman_filter_confidence_progression():
 
 
 def test_particle_filter_confidence_progression():
-    """
-    Verify that the Particle Filter's confidence decreases when predictions are made
-    without observations and increases once updates resume.
-    """
-
     predictor = ParticleFilter(num_particles=500, process_std=0.2, meas_std=0.05, initial_value=10.0)
 
     # Initial update
