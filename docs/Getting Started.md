@@ -185,17 +185,17 @@ Streams reference them by name through the **`predictor_template`** field.
   "kf1": {
     "type": "KalmanPredictor",
     "params": {
-      "initial_variance": 1.0,
-      "process_noise": 0.01,
-      "measurement_noise": 0.1
+      "dt": 0.01,
+      "Q": 0.01,
+      "R": 0.1
     }
   },
   "kf2": {
     "type": "KalmanPredictor",
     "params": {
-      "initial_variance": 2.0,
-      "process_noise": 0.05,
-      "measurement_noise": 0.2
+      "dt": 0.2,
+      "Q": 0.001,
+      "R": 0.1
     }
   }
 }
@@ -238,7 +238,7 @@ Then reference in `predictors.json`:
 {
   "mypredictor_template":{
     "type": "mypredictor",
-    "params": { "alpha": 0.9 }
+    "params": { }
   }
 }
 ```  

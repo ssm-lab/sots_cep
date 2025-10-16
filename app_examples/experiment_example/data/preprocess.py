@@ -10,11 +10,9 @@ logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 class MissingnessInjector:
     """
-    Injects artificial missingness (MCAR, MAR, MNAR, STRUCTURAL) into
-    already expanded datasets. Skips rows with structural_gap == 1.
+    Injects artificial missingness (MCAR, MAR, MNAR, STRUCTURAL) into datasets
     """
-
-    def __init__(self, rate: float, mode: str = "MCAR", seed: int = 42, block_size: int = 12):
+    def __init__(self, rate: float, mode: str = "MCAR", seed: int = 42, block_size: int = 3):
         self.rate = rate
         self.mode = mode.upper() if mode else None
         self.seed = seed

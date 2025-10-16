@@ -2,41 +2,77 @@
   "kf_water_temp": {
     "type": "KalmanFilter",
     "params": {
-      "initial_value": 11.0,
+      "initial_value": 11.1,
       "dt": 1.0,
-      "process_noise": 0.01,
-      "measurement_noise": 0.3,
-      "mode": "acceleration"
+      "Q": 0.75,
+      "R": 0.001,
+      "mode": "position"
     }
   },
   "kf_turbidity": {
     "type": "KalmanFilter",
     "params": {
-      "initial_value": 1.0,
+      "initial_value": 0.0,
       "dt": 1.0,
-      "process_noise": 0.01,
-      "measurement_noise": 0.3,
-      "mode": "acceleration"
+      "Q": 0.75,
+      "R": 0.001,
+      "mode": "position"
     }
   },
   "kf_wave_height": {
     "type": "KalmanFilter",
     "params": {
-      "initial_value": 0.2,
+      "initial_value": 0.072,
       "dt": 1.0,
-      "process_noise": 0.01,
-      "measurement_noise": 0.3,
-      "mode": "acceleration"
+      "Q": 0.75,
+      "R": 0.001,
+      "mode": "position"
     }
   },
   "kf_wave_period": {
     "type": "KalmanFilter",
     "params": {
-      "initial_value": 3.0,
+      "initial_value": 2.0,
       "dt": 1.0,
-      "process_noise": 0.01,
-      "measurement_noise": 0.3,
-      "mode": "acceleration"
+      "Q": 0.75,
+      "R": 0.001,
+      "mode": "position"
+    }
+  },
+  "pf_water_temp": {
+    "type": "ParticleFilter",
+    "params": {
+      "initial_value": 11.1,
+      "process_std": 0.300,
+      "meas_std": 0.030,
+      "num_particles": 1000
+    }
+  },
+  "pf_turbidity": {
+    "type": "ParticleFilter",
+    "params": {
+      "initial_value": 0.0,
+      "process_std": 0.300,
+      "meas_std": 0.005,
+      "num_particles": 1000
+    }
+  },
+  "pf_wave_height": {
+    "type": "ParticleFilter",
+    "params": {
+      "initial_value": 0.072,
+      "process_std": 0.050,
+      "meas_std": 0.002,
+      "num_particles": 1000
+    }
+  },
+  "pf_wave_period": {
+    "type": "ParticleFilter",
+    "params": {
+      "initial_value": 2.0,
+      "process_std": 0.300,
+      "meas_std": 0.030,
+      "num_particles": 750
     }
   }
 }

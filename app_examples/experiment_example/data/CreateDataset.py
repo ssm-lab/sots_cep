@@ -13,9 +13,6 @@ DROP_THRESHOLD = 0  # no columns dropped unless completely missing
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 
-# -------------------------------------------------------------------------
-# Helper: Remove anomalies
-# -------------------------------------------------------------------------
 def remove_anomalies(df: pd.DataFrame) -> pd.DataFrame:
     """
     Cleans extreme outliers or sensor error codes from numeric columns.
@@ -86,9 +83,7 @@ def remove_anomalies(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-# -------------------------------------------------------------------------
-# Helper: Compute statistics for pattern thresholds
-# -------------------------------------------------------------------------
+
 def compute_attribute_stats(df: pd.DataFrame, output_path: str, year, start_month, end_month):
     ATTRS = ["Water Temperature", "Turbidity", "Wave Height", "Wave Period"]
 
@@ -127,9 +122,6 @@ def compute_attribute_stats(df: pd.DataFrame, output_path: str, year, start_mont
     return global_stats
 
 
-# -------------------------------------------------------------------------
-# Main Preprocessing
-# -------------------------------------------------------------------------
 def filter_year(
     file_path: str,
     year: int = YEAR,
@@ -213,9 +205,6 @@ def filter_year(
     return df
 
 
-# -------------------------------------------------------------------------
-# Run Preprocessor
-# -------------------------------------------------------------------------
 if __name__ == "__main__":
     dataset_path = "app_examples/experiment_example/data/original/Beach_Water_Quality_-_Automated_Sensors_20250918.csv"
     output_path = "app_examples/experiment_example/data/processed"
