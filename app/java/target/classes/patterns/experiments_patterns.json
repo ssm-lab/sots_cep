@@ -1,155 +1,105 @@
 [
-  // =========================
-  // ATOMIC PATTERNS
-  // =========================
+
+
   {
-    "name": "HighWaterTemp_75",
+    "name": "Calumet_HighTurbidity_85",
     "type": "atomic",
-    "description": "Triggers when water temperature at any beach exceeds 24 °C with confidence > 0.75 (≈95th percentile of near-surface summer temperatures).",
-    "epl": "@Name('HighWaterTemp_75') select e from Event as e where e.streamId like '%Water_Temperature%' and e.value > 24 and confidence > 0.75"
+    "description": "Turbidity > 8.5 NTU at Calumet Beach with confidence > 0.85.",
+    "epl": "@Name('Calumet_HighTurbidity_85') select e from Event as e where e.streamId like '%Calumet%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.85"
   },
   {
-    "name": "HighWaterTemp_85",
+    "name": "Calumet_WaterTempDrop_85",
     "type": "atomic",
-    "description": "Same threshold (> 24 °C) but with confidence > 0.85, representing stronger evidence of thermal anomaly.",
-    "epl": "@Name('HighWaterTemp_85') select e from Event as e where e.streamId like '%Water_Temperature%' and e.value > 24 and confidence > 0.85"
+    "description": "Water temperature < 22 °C at Calumet Beach with confidence > 0.85.",
+    "epl": "@Name('Calumet_WaterTempDrop_85') select e from Event as e where e.streamId like '%Calumet%' and e.streamId like '%Water_Temperature%' and e.value < 22 and confidence > 0.85"
   },
   {
-    "name": "HighWaterTemp_95",
+    "name": "Calumet_HighWave_85",
     "type": "atomic",
-    "description": "High-confidence (> 0.95) thermal anomaly (> 24 °C) typical of stagnation or heat-wave conditions.",
-    "epl": "@Name('HighWaterTemp_95') select e from Event as e where e.streamId like '%Water_Temperature%' and e.value > 24 and confidence > 0.95"
+    "description": "Wave height > 0.35 m at Calumet Beach with confidence > 0.85.",
+    "epl": "@Name('Calumet_HighWave_85') select e from Event as e where e.streamId like '%Calumet%' and e.streamId like '%Wave_Height%' and e.value > 0.35 and confidence > 0.85"
   },
 
   {
-    "name": "HighTurbidity_75",
+    "name": "Montrose_HighTurbidity_85",
     "type": "atomic",
-    "description": "Turbidity > 8.5 NTU with confidence > 0.75 (≈95th percentile), often due to rainfall or sediment resuspension.",
-    "epl": "@Name('HighTurbidity_75') select e from Event as e where e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.75"
+    "description": "Turbidity > 8.5 NTU at Montrose Beach with confidence > 0.85.",
+    "epl": "@Name('Montrose_HighTurbidity_85') select e from Event as e where e.streamId like '%Montrose%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.85"
   },
   {
-    "name": "HighTurbidity_85",
+    "name": "Montrose_WaterTempDrop_85",
     "type": "atomic",
-    "description": "Same threshold (> 8.5 NTU) but confidence > 0.85, implying stronger evidence of disturbance.",
-    "epl": "@Name('HighTurbidity_85') select e from Event as e where e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.85"
+    "description": "Water temperature < 22 °C at Montrose Beach with confidence > 0.85.",
+    "epl": "@Name('Montrose_WaterTempDrop_85') select e from Event as e where e.streamId like '%Montrose%' and e.streamId like '%Water_Temperature%' and e.value < 22 and confidence > 0.85"
   },
   {
-    "name": "HighTurbidity_95",
+    "name": "Montrose_HighWave_85",
     "type": "atomic",
-    "description": "High-confidence (> 0.95) turbidity spike (> 8.5 NTU), signaling heavy particulate or pollution influx.",
-    "epl": "@Name('HighTurbidity_95') select e from Event as e where e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.95"
+    "description": "Wave height > 0.35 m at Montrose Beach with confidence > 0.85.",
+    "epl": "@Name('Montrose_HighWave_85') select e from Event as e where e.streamId like '%Montrose%' and e.streamId like '%Wave_Height%' and e.value > 0.35 and confidence > 0.85"
   },
 
   {
-    "name": "HighWaveHeight_75",
+    "name": "63rd_HighTurbidity_85",
     "type": "atomic",
-    "description": "Wave height > 0.35 m (≈95th percentile) with confidence > 0.75 — typical of strong winds or storm surges.",
-    "epl": "@Name('HighWaveHeight_75') select e from Event as e where e.streamId like '%Wave_Height%' and e.value > 0.35 and confidence > 0.75"
+    "description": "Turbidity > 8.5 NTU at 63rd Street Beach with confidence > 0.85.",
+    "epl": "@Name('63rd_HighTurbidity_85') select e from Event as e where e.streamId like '%63rd%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.85"
   },
   {
-    "name": "HighWaveHeight_85",
+    "name": "63rd_WaterTempDrop_85",
     "type": "atomic",
-    "description": "Same threshold but with confidence > 0.85, indicating persistent rough conditions.",
-    "epl": "@Name('HighWaveHeight_85') select e from Event as e where e.streamId like '%Wave_Height%' and e.value > 0.35 and confidence > 0.85"
+    "description": "Water temperature < 22 °C at 63rd Street Beach with confidence > 0.85.",
+    "epl": "@Name('63rd_WaterTempDrop_85') select e from Event as e where e.streamId like '%63rd%' and e.streamId like '%Water_Temperature%' and e.value < 22 and confidence > 0.85"
   },
   {
-    "name": "HighWaveHeight_95",
+    "name": "63rd_HighWave_85",
     "type": "atomic",
-    "description": "High-confidence (> 0.95) wave height anomaly (> 0.35 m) — sustained energetic waves typical of strong storms.",
-    "epl": "@Name('HighWaveHeight_95') select e from Event as e where e.streamId like '%Wave_Height%' and e.value > 0.35 and confidence > 0.95"
+    "description": "Wave height > 0.35 m at 63rd Street Beach with confidence > 0.85.",
+    "epl": "@Name('63rd_HighWave_85') select e from Event as e where e.streamId like '%63rd%' and e.streamId like '%Wave_Height%' and e.value > 0.35 and confidence > 0.85"
+  },
+
+
+  {
+    "name": "Calumet_LocalAlert_85",
+    "type": "complex",
+    "description": "High turbidity and low temperature at Calumet Beach within 20 s.",
+    "epl": "@Name('Calumet_LocalAlert_85') select a as turb, b as temp from pattern [every (a=PatternRecordStream(patternName='Calumet_HighTurbidity_85') and b=PatternRecordStream(patternName='Calumet_WaterTempDrop_85')) where timer:within(20 sec)]",
+    "confidence": { "aggregation": "avg" }
+  },
+  {
+    "name": "Montrose_LocalAlert_85",
+    "type": "complex",
+    "description": "High turbidity and low temperature at Montrose Beach within 20 s.",
+    "epl": "@Name('Montrose_LocalAlert_85') select a as turb, b as temp from pattern [every (a=PatternRecordStream(patternName='Montrose_HighTurbidity_85') and b=PatternRecordStream(patternName='Montrose_WaterTempDrop_85')) where timer:within(20 sec)]",
+    "confidence": { "aggregation": "avg" }
+  },
+  {
+    "name": "63rd_LocalAlert_85",
+    "type": "complex",
+    "description": "High turbidity and low temperature at 63rd Street Beach within 20 s.",
+    "epl": "@Name('63rd_LocalAlert_85') select a as turb, b as temp from pattern [every (a=PatternRecordStream(patternName='63rd_HighTurbidity_85') and b=PatternRecordStream(patternName='63rd_WaterTempDrop_85')) where timer:within(20 sec)]",
+    "confidence": { "aggregation": "avg" }
   },
 
   {
-    "name": "LongWavePeriod_75",
-    "type": "atomic",
-    "description": "Detects long-period oscillations (> 7 s) with confidence > 0.75, often linked to distant-fetch waves or harbor seiches.",
-    "epl": "@Name('LongWavePeriod_75') select e from Event as e where e.streamId like '%Wave_Period%' and e.value > 7 and confidence > 0.75"
-  },
-  {
-    "name": "LongWavePeriod_85",
-    "type": "atomic",
-    "description": "Same threshold (> 7 s) but confidence > 0.85 — identifies organized swell patterns.",
-    "epl": "@Name('LongWavePeriod_85') select e from Event as e where e.streamId like '%Wave_Period%' and e.value > 7 and confidence > 0.85"
-  },
-  {
-    "name": "LongWavePeriod_95",
-    "type": "atomic",
-    "description": "High-confidence long-period wave (> 7 s, > 0.95 conf) representing regional resonance or seiche behavior.",
-    "epl": "@Name('LongWavePeriod_95') select e from Event as e where e.streamId like '%Wave_Period%' and e.value > 7 and confidence > 0.95"
-  },
-
-  // =========================
-  // COMPLEX — SAME-BEACH CORRELATION
-  // =========================
-  {
-    "name": "BeachAlert_75",
+    "name": "MontroseToCalumet_AlertSpread_85",
     "type": "complex",
-    "description": "Concurrent warm (> 24 °C) and turbid (> 8.5 NTU) conditions at the same beach within 10 s (confidence > 0.75).",
-    "epl": "@Name('BeachAlert_75') select a as temp, b as turb from pattern [every a=PatternRecordStream(patternName='HighWaterTemp_75') -> b=PatternRecordStream(patternName='HighTurbidity_75' and ((a.streamId like '%Calumet_Beach%' and b.streamId like '%Calumet_Beach%') or (a.streamId like '%Montrose_Beach%' and b.streamId like '%Montrose_Beach%') or (a.streamId like '%63rd_Street_Beach%' and b.streamId like '%63rd_Street_Beach%'))) where timer:within(10 sec)]",
+    "description": "Montrose local alert followed by Calumet local alert within 30 s.",
+    "epl": "@Name('MontroseToCalumet_AlertSpread_85') select a as north, b as south from pattern [every (a=PatternRecordStream(patternName='Montrose_LocalAlert_85') -> b=PatternRecordStream(patternName='Calumet_LocalAlert_85') where timer:within(30 sec))]",
     "confidence": { "aggregation": "avg" }
   },
   {
-    "name": "BeachAlert_85",
+    "name": "CalumetTo63rd_AlertSpread_85",
     "type": "complex",
-    "description": "Same as BeachAlert_75 but confidence > 0.85 — stronger local water-quality degradation.",
-    "epl": "@Name('BeachAlert_85') select a as temp, b as turb from pattern [every a=PatternRecordStream(patternName='HighWaterTemp_85') -> b=PatternRecordStream(patternName='HighTurbidity_85' and ((a.streamId like '%Calumet_Beach%' and b.streamId like '%Calumet_Beach%') or (a.streamId like '%Montrose_Beach%' and b.streamId like '%Montrose_Beach%') or (a.streamId like '%63rd_Street_Beach%' and b.streamId like '%63rd_Street_Beach%'))) where timer:within(10 sec)]",
+    "description": "Calumet local alert followed by 63rd Street local alert within 30 s.",
+    "epl": "@Name('CalumetTo63rd_AlertSpread_85') select a as mid, b as south from pattern [every (a=PatternRecordStream(patternName='Calumet_LocalAlert_85') -> b=PatternRecordStream(patternName='63rd_LocalAlert_85') where timer:within(30 sec))]",
     "confidence": { "aggregation": "avg" }
   },
   {
-    "name": "BeachAlert_95",
+    "name": "Regional_TripleAlert_85",
     "type": "complex",
-    "description": "High-confidence co-occurrence of heat and turbidity (> 0.95 conf) within 10 s, indicating significant ecological stress.",
-    "epl": "@Name('BeachAlert_95') select a as temp, b as turb from pattern [every a=PatternRecordStream(patternName='HighWaterTemp_95') -> b=PatternRecordStream(patternName='HighTurbidity_95' and ((a.streamId like '%Calumet_Beach%' and b.streamId like '%Calumet_Beach%') or (a.streamId like '%Montrose_Beach%' and b.streamId like '%Montrose_Beach%') or (a.streamId like '%63rd_Street_Beach%' and b.streamId like '%63rd_Street_Beach%'))) where timer:within(10 sec)]",
-    "confidence": { "aggregation": "avg" }
-  },
-
-  // =========================
-  // DISTRIBUTED — CROSS-BEACH CORRELATION
-  // =========================
-  {
-    "name": "NorthSouthSpread_75",
-    "type": "complex",
-    "description": "Turbidity rise (> 8.5 NTU) first at Montrose (north) then Calumet (south) within 10 s (confidence > 0.75).",
-    "epl": "@Name('NorthSouthSpread_75') select a as north, b as south from pattern [every a=PatternRecordStream(patternName='HighTurbidity_75' and a.streamId like '%Montrose_Beach%') -> b=PatternRecordStream(patternName='HighTurbidity_75' and b.streamId like '%Calumet_Beach%') where timer:within(10 sec)]",
-    "confidence": { "aggregation": "avg" }
-  },
-  {
-    "name": "NorthSouthSpread_85",
-    "type": "complex",
-    "description": "Same spatial correlation as _75 but with confidence > 0.85 — stronger directional turbidity front.",
-    "epl": "@Name('NorthSouthSpread_85') select a as north, b as south from pattern [every a=PatternRecordStream(patternName='HighTurbidity_85' and a.streamId like '%Montrose_Beach%') -> b=PatternRecordStream(patternName='HighTurbidity_85' and b.streamId like '%Calumet_Beach%') where timer:within(10 sec)]",
-    "confidence": { "aggregation": "avg" }
-  },
-  {
-    "name": "NorthSouthSpread_95",
-    "type": "complex",
-    "description": "High-confidence (> 0.95) turbidity propagation between Montrose and Calumet within 10 s — large-scale forcing indicator.",
-    "epl": "@Name('NorthSouthSpread_95') select a as north, b as south from pattern [every a=PatternRecordStream(patternName='HighTurbidity_95' and a.streamId like '%Montrose_Beach%') -> b=PatternRecordStream(patternName='HighTurbidity_95' and b.streamId like '%Calumet_Beach%') where timer:within(10 sec)]",
-    "confidence": { "aggregation": "avg" }
-  },
-
-  // =========================
-  // SEVERE COMPOSITE — MULTI-FACTOR STRESS
-  // =========================
-  {
-    "name": "SevereCondition_75",
-    "type": "complex",
-    "description": "Simultaneous Water Temp > 24 °C, Turbidity > 8.5 NTU, and Wave Height > 0.35 m at the same beach within 10 s (confidence > 0.75).",
-    "epl": "@Name('SevereCondition_75') select a as temp, b as turb, c as wave from pattern [every a=PatternRecordStream(patternName='HighWaterTemp_75') -> b=PatternRecordStream(patternName='HighTurbidity_75' and ((a.streamId like '%Calumet_Beach%' and b.streamId like '%Calumet_Beach%') or (a.streamId like '%Montrose_Beach%' and b.streamId like '%Montrose_Beach%') or (a.streamId like '%63rd_Street_Beach%' and b.streamId like '%63rd_Street_Beach%'))) -> c=PatternRecordStream(patternName='HighWaveHeight_75' and ((a.streamId like '%Calumet_Beach%' and c.streamId like '%Calumet_Beach%') or (a.streamId like '%Montrose_Beach%' and c.streamId like '%Montrose_Beach%') or (a.streamId like '%63rd_Street_Beach%' and c.streamId like '%63rd_Street_Beach%'))) where timer:within(10 sec)]",
-    "confidence": { "aggregation": "avg" }
-  },
-  {
-    "name": "SevereCondition_85",
-    "type": "complex",
-    "description": "Same tri-modal condition as _75 but with confidence > 0.85 — sustained multi-factor stress.",
-    "epl": "@Name('SevereCondition_85') select a as temp, b as turb, c as wave from pattern [every a=PatternRecordStream(patternName='HighWaterTemp_85') -> b=PatternRecordStream(patternName='HighTurbidity_85' and ((a.streamId like '%Calumet_Beach%' and b.streamId like '%Calumet_Beach%') or (a.streamId like '%Montrose_Beach%' and b.streamId like '%Montrose_Beach%') or (a.streamId like '%63rd_Street_Beach%' and b.streamId like '%63rd_Street_Beach%'))) -> c=PatternRecordStream(patternName='HighWaveHeight_85' and ((a.streamId like '%Calumet_Beach%' and c.streamId like '%Calumet_Beach%') or (a.streamId like '%Montrose_Beach%' and c.streamId like '%Montrose_Beach%') or (a.streamId like '%63rd_Street_Beach%' and c.streamId like '%63rd_Street_Beach%'))) where timer:within(10 sec)]",
-    "confidence": { "aggregation": "avg" }
-  },
-  {
-    "name": "SevereCondition_95",
-    "type": "complex",
-    "description": "High-confidence triple-stress (> 0.95 conf) within 10 s — combines heat, turbidity, and waves (extreme instability indicator).",
-    "epl": "@Name('SevereCondition_95') select a as temp, b as turb, c as wave from pattern [every a=PatternRecordStream(patternName='HighWaterTemp_95') -> b=PatternRecordStream(patternName='HighTurbidity_95' and ((a.streamId like '%Calumet_Beach%' and b.streamId like '%Calumet_Beach%') or (a.streamId like '%Montrose_Beach%' and b.streamId like '%Montrose_Beach%') or (a.streamId like '%63rd_Street_Beach%' and b.streamId like '%63rd_Street_Beach%'))) -> c=PatternRecordStream(patternName='HighWaveHeight_95' and ((a.streamId like '%Calumet_Beach%' and c.streamId like '%Calumet_Beach%') or (a.streamId like '%Montrose_Beach%' and c.streamId like '%Montrose_Beach%') or (a.streamId like '%63rd_Street_Beach%' and c.streamId like '%63rd_Street_Beach%'))) where timer:within(10 sec)]",
+    "description": "All three beaches experience local alerts within 45 s — broad-scale event.",
+    "epl": "@Name('Regional_TripleAlert_85') select a as north, b as mid, c as south from pattern [every (a=PatternRecordStream(patternName='Montrose_LocalAlert_85') and b=PatternRecordStream(patternName='Calumet_LocalAlert_85') and c=PatternRecordStream(patternName='63rd_LocalAlert_85')) where timer:within(45 sec)]",
     "confidence": { "aggregation": "avg" }
   }
 ]

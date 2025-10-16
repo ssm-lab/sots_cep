@@ -20,9 +20,7 @@ public class EventStream {
     private boolean running = false;
 
     public EventStream(String subscriberEndpoint, String publisherEndpoint) {
-        partitions.put("observed", new Client("observed", subscriberEndpoint, publisherEndpoint));
         partitions.put("reconstructed", new Client("reconstructed", subscriberEndpoint, publisherEndpoint));
-        partitions.put("groundtruth", new Client("groundtruth", subscriberEndpoint, publisherEndpoint));
     }
 
     public void addEvent(Event event, String partition, String streamId) {

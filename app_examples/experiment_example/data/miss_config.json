@@ -9,8 +9,8 @@
     },
 
     {
-    "name": "structural_15",
-    "rate": 0.2,
+    "name": "structural_10",
+    "rate": 0.1,
     "mode": "STRUCTURAL",
     "value_cols": []
     },
@@ -23,11 +23,12 @@
     },
 
     {
-      "name": "mcar_15",
-      "rate": 0.15,
+      "name": "mcar_10",
+      "rate": 0.1,
       "mode": "MCAR",
       "value_cols": []
     },
+    
     {
       "name": "mcar_30",
       "rate": 0.3,
@@ -36,10 +37,9 @@
     },
 
     {
-      "name": "mar_15",
-      "rate": 0.15,
+      "name": "mar_10",
+      "rate": 0.1,
       "mode": "MAR",
-      "block_size": 12,
       "value_cols": []
     },
     
@@ -47,20 +47,6 @@
       "name": "mar_30",
       "rate": 0.3,
       "mode": "MAR",
-      "block_size": 12,
-      "value_cols": []
-    },
-
-    {
-      "name": "mnar_15",
-      "rate": 0.15,
-      "mode": "MNAR",
-      "value_cols": []
-    }, 
-    {
-      "name": "mnar_30",
-      "rate": 0.3,
-      "mode": "MNAR",
       "value_cols": []
     }
   ]

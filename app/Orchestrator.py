@@ -61,7 +61,7 @@ class Orchestrator:
                 **self.bridge_kwargs
             )
             self.cep_engine.start()
-        time.sleep(3)
+        time.sleep(5)
 
         # Setup logger
         self.logger = CSVLogger(self.run_dir)
@@ -83,13 +83,30 @@ class Orchestrator:
             self.stop()
 
     def stop(self):
-        logging.info("[ORCHESTRATOR] Stopping pipeline")
-        if self.coordinator:
-            self.coordinator.stop()
-        if self.logger:
-            self.logger.close()
-        if self.cep_engine:
-            self.cep_engine.stop()
-        if self.server:
-            self.server.stop()
-        logging.info("[ORCHESTRATOR] Shutdown complete")
+        logging.info("[ExperimentOrchestrator] Stopping pipeline...")
+        try:
+            if self.coordinator:
+                self.coordinator.running = False
+                self.coordinator.stop()
+                time.sleep(1)
+
+            if self.event_stream:
+                self.event_stream.stop()
+
+            if self.logger:
+                logging.info("[ExperimentOrchestrator] Closing logger...")
+                try:
+                    self.logger.close(timeout=5)
+                except Exception as e:
+                    logging.warning(f"[ExperimentOrchestrator] Logger already closed: {e}")
+
+            if self.cep_engine:
+                self.cep_engine.stop()
+
+            if self.server:
+                self.server.stop()
+
+            logging.info("[ExperimentOrchestrator] All stopped.")
+        except Exception as e:
+            logging.exception(f"[ExperimentOrchestrator] Error during stop: {e}")
+

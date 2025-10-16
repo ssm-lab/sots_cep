@@ -1,0 +1,85 @@
+beach,attribute,MAE,RMSE,avg_confidence,dataset
+63rd Street Beach,Water Temperature,0.0,0.0,1.0,oracle
+63rd Street Beach,Turbidity,0.0,0.0,1.0,oracle
+63rd Street Beach,Wave Height,0.0,0.0,1.0,oracle
+63rd Street Beach,Wave Period,0.0,0.0,1.0,oracle
+Montrose Beach,Water Temperature,0.0,0.0,1.0,oracle
+Montrose Beach,Turbidity,0.0,0.0,1.0,oracle
+Montrose Beach,Wave Height,0.0,0.0,1.0,oracle
+Montrose Beach,Wave Period,0.0,0.0,1.0,oracle
+Calumet Beach,Water Temperature,0.0,0.0,1.0,oracle
+Calumet Beach,Turbidity,0.0,0.0,1.0,oracle
+Calumet Beach,Wave Height,0.0,0.0,1.0,oracle
+Calumet Beach,Wave Period,0.0,0.0,1.0,oracle
+63rd Street Beach,Water Temperature,0.8838453655362517,3.057547164307132,0.7563866115454273,mar_30
+63rd Street Beach,Turbidity,0.9785607887396289,3.9660222905189833,0.7650848950412922,mar_30
+63rd Street Beach,Wave Height,0.06537156816870693,0.22712133414171728,0.7539077957101472,mar_30
+63rd Street Beach,Wave Period,3.3843284338691086,11.570935383221048,0.7637632263526272,mar_30
+Montrose Beach,Water Temperature,2.717796103050243,19.133652523071376,0.7744543485624895,mar_30
+Montrose Beach,Turbidity,1.2549486741317495,6.046126727340454,0.7662882503106765,mar_30
+Montrose Beach,Wave Height,0.06168381210438039,0.24522788615144123,0.7771344736620077,mar_30
+Montrose Beach,Wave Period,2.9833102836444345,17.501865186122615,0.7758903970565665,mar_30
+Calumet Beach,Water Temperature,0.8998071042098003,3.349942169053693,0.75601668286379,mar_30
+Calumet Beach,Turbidity,0.8479256753961615,3.2632559134760606,0.7588276498253576,mar_30
+Calumet Beach,Wave Height,0.05019625895842821,0.2026862101281852,0.7720008996976823,mar_30
+Calumet Beach,Wave Period,1.8677156420386922,6.14299563039826,0.7583028911299197,mar_30
+63rd Street Beach,Water Temperature,0.20626531739008563,1.0214091112913344,0.9116268863049648,mar_10
+63rd Street Beach,Turbidity,0.197374653752068,1.2340587091509203,0.9130389956261772,mar_10
+63rd Street Beach,Wave Height,0.02080880180247121,0.12437225305899988,0.9138080463495831,mar_10
+63rd Street Beach,Wave Period,0.9598520441900443,4.771932711351346,0.9114072367445806,mar_10
+Montrose Beach,Water Temperature,0.35901806343174647,2.048957957294088,0.910466069509937,mar_10
+Montrose Beach,Turbidity,0.09821740156878919,0.6781343682493919,0.9156279766487574,mar_10
+Montrose Beach,Wave Height,0.018371216049135487,0.09176409882752197,0.9160533984659048,mar_10
+Montrose Beach,Wave Period,0.8451626425348578,4.533196762630679,0.9184680799758007,mar_10
+Calumet Beach,Water Temperature,0.2216488021471162,1.470998655363838,0.911130028179388,mar_10
+Calumet Beach,Turbidity,0.5736593351428694,4.246401265705381,0.9169082390837774,mar_10
+Calumet Beach,Wave Height,0.014370212706137435,0.09973823866978918,0.9138280493052391,mar_10
+Calumet Beach,Wave Period,0.4661874468251844,2.476453982732253,0.9138675773610989,mar_10
+63rd Street Beach,Water Temperature,0.030534203903975182,0.1431089194730972,0.955891172405824,mcar_10
+63rd Street Beach,Turbidity,0.05233791361006459,0.42453848183659537,0.9566996485115383,mcar_10
+63rd Street Beach,Wave Height,0.0019612023573717338,0.00944329306936095,0.9558750498360449,mcar_10
+63rd Street Beach,Wave Period,0.14994741055909008,0.6849026079489945,0.956589698029773,mcar_10
+Montrose Beach,Turbidity,0.03659493038929118,0.42433039731073385,0.9569737148187779,mcar_10
+Montrose Beach,Water Temperature,0.0320562486259997,0.15552739208402838,0.9559973784675785,mcar_10
+Montrose Beach,Wave Height,0.002692696701880815,0.01341136896564815,0.9566065941301944,mcar_10
+Montrose Beach,Wave Period,0.1700868842788148,0.8182406435953944,0.9551846821441607,mcar_10
+Calumet Beach,Water Temperature,0.022984464894868994,0.10617724272957513,0.9563285908308138,mcar_10
+Calumet Beach,Turbidity,0.03889268081837209,0.4023992632813093,0.9560015142368199,mcar_10
+Calumet Beach,Wave Height,0.001599776685725966,0.00723137516575546,0.9561709383916192,mcar_10
+Calumet Beach,Wave Period,0.11538195500972445,0.6054310933229762,0.9563591145813248,mcar_10
+63rd Street Beach,Wave Height,0.007509262671723786,0.022381510371285575,0.8472288472429657,mcar_30
+63rd Street Beach,Water Temperature,0.11670664170574595,0.3375278506358959,0.8430160567320056,mcar_30
+63rd Street Beach,Turbidity,0.19449834363983973,0.9672485656071756,0.8440294950551478,mcar_30
+63rd Street Beach,Wave Period,0.4862332949029985,1.3236546327344674,0.8481241114234592,mcar_30
+Montrose Beach,Turbidity,0.17285901903053655,1.406435770957782,0.845563202960139,mcar_30
+Montrose Beach,Water Temperature,0.12637524009308218,0.4059715506435542,0.8455580008915231,mcar_30
+Montrose Beach,Wave Height,0.00917853160795624,0.026531565878098937,0.8472874396997231,mcar_30
+Montrose Beach,Wave Period,0.531122094365691,1.5481838081549117,0.8461422146165559,mcar_30
+Calumet Beach,Water Temperature,0.09414678585239093,0.3162924385401169,0.8483286408305781,mcar_30
+Calumet Beach,Turbidity,0.1342190983524252,0.7548398325653921,0.8455987738620238,mcar_30
+Calumet Beach,Wave Height,0.005836872472509063,0.015689387346097174,0.8479187753765226,mcar_30
+Calumet Beach,Wave Period,0.39979653828540224,1.2833895637250314,0.8476970040598627,mcar_30
+63rd Street Beach,Water Temperature,0.0,0.0,1.0,structural_10
+63rd Street Beach,Turbidity,0.0,0.0,1.0,structural_10
+63rd Street Beach,Wave Height,0.0,0.0,1.0,structural_10
+63rd Street Beach,Wave Period,0.0,0.0,1.0,structural_10
+Calumet Beach,Water Temperature,0.0,0.0,1.0,structural_10
+Calumet Beach,Turbidity,0.0,0.0,1.0,structural_10
+Calumet Beach,Wave Height,0.0,0.0,1.0,structural_10
+Calumet Beach,Wave Period,0.0,0.0,1.0,structural_10
+Montrose Beach,Water Temperature,0.0,0.0,1.0,structural_10
+Montrose Beach,Turbidity,0.0,0.0,1.0,structural_10
+Montrose Beach,Wave Height,0.0,0.0,1.0,structural_10
+Montrose Beach,Wave Period,0.0,0.0,1.0,structural_10
+Calumet Beach,Water Temperature,0.0,0.0,1.0,structural_30
+Calumet Beach,Turbidity,0.0,0.0,1.0,structural_30
+Calumet Beach,Wave Height,0.0,0.0,1.0,structural_30
+Calumet Beach,Wave Period,0.0,0.0,1.0,structural_30
+63rd Street Beach,Water Temperature,0.0,0.0,1.0,structural_30
+63rd Street Beach,Turbidity,0.0,0.0,1.0,structural_30
+63rd Street Beach,Wave Height,0.0,0.0,1.0,structural_30
+63rd Street Beach,Wave Period,0.0,0.0,1.0,structural_30
+Montrose Beach,Water Temperature,0.0,0.0,1.0,structural_30
+Montrose Beach,Turbidity,0.0,0.0,1.0,structural_30
+Montrose Beach,Wave Height,0.0,0.0,1.0,structural_30
+Montrose Beach,Wave Period,0.0,0.0,1.0,structural_30

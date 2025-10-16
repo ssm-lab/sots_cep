@@ -28,6 +28,13 @@ To run the default Esper CEP engine, you need:
 Java 21 (set via maven-compiler-plugin in the build configuration).
 Maven 3.6+ (to build and package the JAR with dependencies).
 
+Build the Java layer:
+cd app/java
+mvn clean package
+
+
+This produces a self-contained JAR under:
+app/java/target/sots-uncertainty-aware-cep-0.0.1-SNAPSHOT.jar
 
 ---
 
@@ -69,8 +76,24 @@ This will:
 - Log all observed/reconstructed events to `data/logs/`.  
 
 ---
+## 3. CEP Engine and Bridge Overview
 
-## 3. Add a New Stream  
+The CEP Engine (Complex Event Processing) layer runs in Java (Esper) and is responsible for detecting atomic and complex patterns from reconstructed event streams. It subscribes only to the reconstructed partition, ensuring the engine operates on complete, confidence-annotated data.
+
+The connection between Python and Java is handled by the Bridge (app/core/bridge/JavaCEPBridge): Starts and monitors the Java CEP process using JavaRunner.
+
+The CEP layer is fully modular: The Esper engine can be replaced with another CEP backend (e.g., Siddhi, Drools Fusion) by subclassing CEPEngine and implementing start, stop, and load_patterns. The bridge remains the same regardless of the engine used, maintaining the same communication protocol.
+
+#### Pattern Definitions
+
+Patterns are defined declaratively under: `app/java/src/main/resources/patterns/`
+
+Each file defines rules in EPL (Event Pattern Language) that describe event relationships and detection logic.
+These can be edited, added, or replaced without modifying the Python layer
+
+---
+
+## 4. Add a New Stream  
 
 Streams are defined in JSON configs under `app_examples/<example>/configs/streams.json`.  
 
@@ -110,7 +133,7 @@ python -m app_examples.main_example.Main
 
 ---
 
-## 4. Plug in Your Own Stream  
+## 5. Plug in Your Own Stream  
 
 Sometimes you’ll want different types of streams: simulated, dataset-driven, or real sensors.  
 
@@ -150,7 +173,7 @@ Then reference it in `streams.json`:
 
 ---
 
-## 5. Define Predictors  
+## 6. Define Predictors  
 
 Predictors are configured in `app_examples/<example>/configs/predictors.json`.  
 
@@ -184,7 +207,7 @@ Each template specifies the predictor type and its params.
 
 ---
 
-## 6. Add Your Own Predictor  
+## 7. Add Your Own Predictor  
 
 Predictors define how missing values are estimated when streams drop events.
 
@@ -242,7 +265,7 @@ Finally, point a stream to it in streams.json:
 ```  
 ---
 
-## 7. Plug in a New Communication Layer  
+## 8. Plug in a New Communication Layer  
 
 1. Implement `Client` (publish/subscribe/dispatch).  
 2. Implement `Server` (run/stop/cleanup).  
@@ -258,7 +281,7 @@ orch = Orchestrator(
 
 ---
 
-## 8. Plug in a New CEP Engine  
+## 9. Plug in a New CEP Engine  
 
 1. Subclass `CEPEngine` and implement `start`, `stop` 
 2. Provide it to orchestrator:  

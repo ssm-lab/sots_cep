@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 import cep.esper.EsperCEPEngine;
 import schema.event.Event;
 import schema.pattern.*;
-import logger.PatternLogger;
+import utils.PatternLogger;
 import patterns.PatternManager;
 import com.google.gson.*;
 

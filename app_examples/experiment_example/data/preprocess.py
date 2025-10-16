@@ -1,12 +1,19 @@
 import json
 import logging
 import os
+from typing import Union, List, Optional
 
 import numpy as np
 import pandas as pd
-from typing import Union, List, Optional
+
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 class MissingnessInjector:
+    """
+    Injects artificial missingness (MCAR, MAR, MNAR, STRUCTURAL) into
+    already expanded datasets. Skips rows with structural_gap == 1.
+    """
+
     def __init__(self, rate: float, mode: str = "MCAR", seed: int = 42, block_size: int = 12):
         self.rate = rate
         self.mode = mode.upper() if mode else None
@@ -15,13 +22,18 @@ class MissingnessInjector:
         np.random.seed(self.seed)
 
     def inject(
-        self, 
-        df: pd.DataFrame, 
+        self,
+        df: pd.DataFrame,
         value_cols: Union[str, List[str]],
         group_col: Optional[str] = None
     ) -> pd.DataFrame:
         if isinstance(value_cols, str):
             value_cols = [value_cols]
+
+        # Protect structural gaps
+        df = df.copy()
+        if "structural_gap" in df.columns:
+            df = df[df["structural_gap"] == 0]
 
         if group_col:
             processed = []
@@ -36,21 +48,18 @@ class MissingnessInjector:
         uncertain_df = df.copy()
         n = len(uncertain_df)
 
-        # Initialize structural_gap column (0 = no gap, 1 = structural missing)
-        uncertain_df["structural_gap"] = 0
-
         for col in value_cols:
             uncertain_df[f"{col}_groundtruth"] = uncertain_df[col].copy()
             k = int(self.rate * n)
             if k == 0:
                 continue
 
-            # MCAR
+            # === MCAR ===
             if self.mode == "MCAR":
                 drop_idx = np.random.choice(n, size=k, replace=False)
                 uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc(col)] = np.nan
 
-            # MAR 
+            # === MAR (block missingness) ===
             elif self.mode == "MAR":
                 drop_idx = []
                 while len(drop_idx) < k:
@@ -60,36 +69,27 @@ class MissingnessInjector:
                 drop_idx = drop_idx[:k]
                 uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc(col)] = np.nan
 
-            # MNAR
+            # === MNAR (value-dependent) ===
             elif self.mode == "MNAR":
                 ref_values = pd.to_numeric(uncertain_df[col], errors="coerce")
-
-                # Skip if all missing
                 if ref_values.isnull().all():
                     continue
 
-                # Compute preliminary probabilities ignoring NaN
                 valid_mask = ~ref_values.isna()
                 valid_values = ref_values[valid_mask]
-
                 probs = (valid_values - valid_values.min()) / (valid_values.max() - valid_values.min() + 1e-9)
-                probs = probs / probs.sum()  # normalize to 1
-
-                # Choose only among valid indices
+                probs = probs / probs.sum()
                 valid_indices = np.where(valid_mask)[0]
-                drop_valid_idx = np.random.choice(valid_indices, size=k, replace=False, p=probs)
+                drop_valid_idx = np.random.choice(valid_indices, size=min(k, len(valid_indices)), replace=False, p=probs)
                 uncertain_df.iloc[drop_valid_idx, uncertain_df.columns.get_loc(col)] = np.nan
 
-
-            # STRUCTURAL: mark all dropped points as permanent structural gaps
+            # === STRUCTURAL: used intentionally, marks new permanent gaps ===
             elif self.mode == "STRUCTURAL":
                 drop_idx = np.random.choice(n, size=k, replace=False)
                 uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc(col)] = np.nan
-                # Mark them as structural gaps
                 uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc("structural_gap")] = 1
 
-
-            # ORACLE
+            # === ORACLE (no injection) ===
             elif self.mode is None or self.mode == "ORACLE":
                 return uncertain_df
 
@@ -99,19 +99,19 @@ class MissingnessInjector:
         return uncertain_df
 
 
-
-# Complete full 24hr readings timelines and flag structural gaps
 def expand_to_hourly(
-    df,
-    value_cols,
+    df: pd.DataFrame,
+    value_cols: List[str],
     timestamp_col="Readable Timestamp",
     group_col="Beach Name"
-):
+) -> pd.DataFrame:
+    """
+    Pads the dataset to a full hourly grid per beach and marks true structural gaps.
+    Structural gaps are timestamps that had no original measurement at all.
+    """
     all_groups = []
     for group_name, group in df.groupby(group_col):
         group = group.copy()
-
-        # Ensure timestamp is datetime
         group[timestamp_col] = pd.to_datetime(group[timestamp_col], errors="coerce")
         group = group.set_index(timestamp_col)
 
@@ -120,23 +120,20 @@ def expand_to_hourly(
             end=group.index.max().ceil("h"),
             freq="h"
         )
-
         expanded = group.reindex(full_index)
-
         expanded[group_col] = group_name
 
-        # Structural gap = when all value cols are missing (true missing row)
+        # Structural gap = when all values are NaN (no record existed)
         expanded["structural_gap"] = expanded[value_cols].isna().all(axis=1).astype(int)
-
-        all_groups.append(
-            expanded.reset_index().rename(columns={"index": timestamp_col})
-        )
+        all_groups.append(expanded.reset_index().rename(columns={"index": timestamp_col}))
 
     return pd.concat(all_groups).reset_index(drop=True)
 
 
+
 CONFIG_PATH = "app_examples/experiment_example/data/miss_config.json"
 OUTPUT_DIR = "app_examples/experiment_example/data/processed/experiment_dfs"
+
 
 def main():
     # Load config
@@ -145,13 +142,26 @@ def main():
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    # Load dataset
+    # Load base dataset (raw)
     df = pd.read_csv(config["dataset_path"])
+    DEFAULT_VALUE_COLS = ["Water Temperature", "Turbidity", "Wave Height", "Wave Period"]
 
+    # Expand first — define structural gaps once
+    df_expanded = expand_to_hourly(
+        df,
+        timestamp_col="Readable Timestamp",
+        group_col="Beach Name",
+        value_cols=DEFAULT_VALUE_COLS
+    )
+
+    # For each experiment, inject missingness only into non-structural rows
     for exp in config["experiments"]:
+        name = exp["name"]
         rate = exp.get("rate", 0.1)
         mode = exp.get("mode", "MCAR")
         block_size = exp.get("block_size", 12)
+
+        logging.info(f"[{name}] Injecting {mode} missingness at rate={rate}")
 
         injector = MissingnessInjector(
             rate=rate,
@@ -160,22 +170,19 @@ def main():
             block_size=block_size
         )
 
-        DEFAULT_VALUE_COLS = [
-            "Water Temperature",
-            "Turbidity",
-            "Wave Height",
-            "Wave Period",
-        ]
+        # Inject only on structural_gap == 0
+        df_injected = injector.inject(df_expanded[df_expanded["structural_gap"] == 0], DEFAULT_VALUE_COLS, group_col="Beach Name")
 
-        processed_df = injector.inject(df, DEFAULT_VALUE_COLS, group_col="Beach Name")
-        df_final = expand_to_hourly(processed_df, timestamp_col="Readable Timestamp", group_col="Beach Name", value_cols=DEFAULT_VALUE_COLS)
+        # Merge back with structural rows untouched
+        df_final = pd.concat([
+            df_injected,
+            df_expanded[df_expanded["structural_gap"] == 1]
+        ]).sort_values("Readable Timestamp").reset_index(drop=True)
 
-        # filename = f"{exp['name']}_rate{rate}_{mode}.csv"
-        filename = f"{exp['name']}.csv"
-        out_path = os.path.join(OUTPUT_DIR, filename)
+        # Save
+        out_path = os.path.join(OUTPUT_DIR, f"{name}.csv")
         df_final.to_csv(out_path, index=False)
-
-        logging.debug(f"[INFO] Saved processed dataset: {out_path}")
+        logging.info(f"[INFO] Saved processed dataset: {out_path}")
 
 
 if __name__ == "__main__":

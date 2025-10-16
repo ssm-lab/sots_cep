@@ -20,9 +20,8 @@ This section gives a high level overview tool
 
 - **Observed**: Holds raw sensor events directly from streams.  
 - **Reconstructed**: Holds all events (observed passthrough + imputed), with appended reliability metadata.  
-- **Groundtruth** *(optional, for experiments)*: Holds oracle dataset values for evaluation only.  
 
-Partitions are the backbone of modularity:  
+Partitions help with modularity
 - Consumers (CEP, loggers, UIs, reconstructors) only subscribe to partitions relevant to their role.  
 - New partitions (e.g., `late`, `anomaly`) can be added without disrupting the pipeline.  
 
@@ -31,7 +30,5 @@ Partitions are the backbone of modularity:
 ## Design Principles  
 - **Partitioned by lifecycle**: Events are grouped by their processing stage, not by source, so each consumer gets exactly the data it needs.  
 - **Separation of concerns**: Stream generation, reconstruction, and pattern detection are decoupled, enabling independent testing and modular upgrades.  
-- **Reliability-aware processing**: Every event in `reconstructed` carries metadata on confidence and reconstruction method, ensuring the CEP engine reasons over *uncertainty-aware streams*.  
 - **Extensibility**: Additional partitions or new messaging backends (e.g., Kafka, MQTT) can be introduced with minimal changes.  
-- **Experiment reproducibility**: Logging is isolated from runtime, so experiments can be replayed offline.  
 ---

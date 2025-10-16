@@ -4,6 +4,8 @@ import shutil
 import signal
 import subprocess
 
+import psutil
+
 __author__ = "Feyi Adesanya"
 
 """
@@ -70,9 +72,25 @@ def start_java(
 
 
 def stop_java(proc):
-    """ Terminates the Java process. """
-    if proc:
-        logging.info("[MAIN] Terminating subprocess...")
-        proc.send_signal(signal.SIGTERM)
-        proc.wait()
-        logging.info("[MAIN] Subprocess stopped")
+    """Terminate the Java subprocess safely on Windows and Unix."""
+    if not proc:
+        return
+    try:
+        logging.info("[MAIN] Attempting to stop Java process...")
+        proc.terminate()  # sends CTRL_BREAK on Windows
+        try:
+            proc.wait(timeout=8)
+            logging.info("[MAIN] Java stopped gracefully.")
+        except subprocess.TimeoutExpired:
+            logging.warning("[MAIN] Java unresponsive — forcing kill.")
+            proc.kill()
+            proc.wait()
+    except Exception as e:
+        logging.error(f"[MAIN] Failed to stop Java process: {e}")
+
+    # Safety net — kill all leftover Java processes (shouldn’t normally happen)
+    for p in psutil.process_iter(attrs=["pid", "name"]):
+        if "java" in p.info["name"].lower():
+            logging.warning(f"[MAIN] Found stray Java process (PID {p.pid}), terminating...")
+            p.kill()
+

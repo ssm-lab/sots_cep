@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import geopandas as gpd
 import contextily as ctx
 
-# Load CSV
+plt.rcParams["font.family"] = "Times New Roman"
 df = pd.read_csv("app_examples/experiment_example/data/original/Beach_Water_and_Weather_Sensor_Locations_20250918.csv")
 
 # Filter to selected beaches
@@ -15,23 +15,34 @@ gdf = gpd.GeoDataFrame(
     df_beaches,
     geometry=gpd.points_from_xy(df_beaches["Longitude"], df_beaches["Latitude"]),
     crs="EPSG:4326"
-).to_crs(epsg=3857)  # Convert to Web Mercator for contextily tiles
+).to_crs(epsg=3857)
 
 # Plot
-fig, ax = plt.subplots(figsize=(8, 8))
-gdf.plot(ax=ax, color="dodgerblue", markersize=100, edgecolor="black")
+fig, ax = plt.subplots(figsize=(7, 7))
+gdf.plot(ax=ax, color="dodgerblue", markersize=120, edgecolor="black", zorder=3)
 
-# Add basemap tiles
-ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron)
+# Add basemap
+ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, zoom=12)
 
-# Add labels
-for idx, row in gdf.iterrows():
-    ax.text(row.geometry.x + 200, row.geometry.y + 200, row["Sensor Name"], fontsize=9)
+# Dynamic label placement
+for _, row in gdf.iterrows():
+    name = row["Sensor Name"]
+    x, y = row.geometry.x, row.geometry.y
 
-# Remove axes and set bounds
+    if "Montrose" in name:
+        ax.text(x + -3000, y + 900, name, fontsize=9, ha="left", color="black", zorder=4)
+    elif "63rd" in name:
+        ax.text(x, y + 900, name, fontsize=9, ha="center", color="black", zorder=4)
+    elif "Calumet" in name:
+        ax.text(x + 3000, y + 900, name, fontsize=9, ha="right", color="black", zorder=4)
+
 ax.set_axis_off()
-ax.set_title("Selected Chicago Beach Sensors", fontsize=12, pad=10)
+ax.set_title("")
 
-# Save as PNG
-plt.savefig( "app_examples/experiment_example/data/beaches_map.png", dpi=300, bbox_inches="tight")
+buffer = 4000
+xmin, ymin, xmax, ymax = gdf.total_bounds
+ax.set_xlim(xmin - buffer, xmax + buffer)
+ax.set_ylim(ymin - buffer, ymax + buffer)
+
+plt.savefig("app_examples/experiment_example/data/beaches_map.png", dpi=300, bbox_inches="tight")
 plt.show()

@@ -2,16 +2,15 @@
 This section explains the core classes and their responsibilities.
 
 ---
-## CEP Layer
-### `app/core/cep/`
-#### CEPEngine (Abstract)
-- **Purpose**: Abstracts the Complex Event Processing backend.  
-- **Role**: Wraps the lifecycle of an external CEP engine (e.g., Esper) or a custom implementation.  
+## Bridge Layer
+### `app/core/bridge/`
+#### JavaCEPBridge
+- **Purpose**: Manages inter-process communication and lifecycle control between the Python orchestration layer and the Java CEP engine (Esper).  
+- **Role**: Acts as a bridge that sends reconstructed events to Java 
 - **Features**:
-  - Neutral interface (`start`, `stop`) for plugging in different CEP engines.
-  - Loads patterns and configurations dynamically.  
-- **Design Choice**: Keeps the framework agnostic to a specific CEP backend.  
-
+  - Launches and monitors the Java CEP process using `JavaRunner`.  
+  - Exchanges data asynchronously via ZeroMQ PUB/SUB sockets.  
+- **Design Choice**: Bridges components of the two programming languages
 ---
 ## Communication Layer
 ### `app/core/communication/`
@@ -98,6 +97,21 @@ This section explains the core classes and their responsibilities.
 - **Examples**: Kalman Filter, Particle Filter.  
 - **Design Choice**: Native uncertainty support for CEP integration.  
 
+
+---
+## CEP Layer
+### `app/java/src/main/java/cep/`
+#### CEPEngine (Abstract)
+- **Purpose**: Abstracts the Complex Event Processing (CEP) backend.  
+- **Role**: Manages the lifecycle of a CEP engine such as Esper or a custom implementation, enabling detection of atomic and complex events.  
+- **Features**:
+  - Unified interface (`start`, `stop`, `load_patterns`) for integrating different CEP engines.  
+  - Dynamically loads and registers **event patterns** from configuration (EPL, JSON, or other declarative formats).  
+  - Manages subscriptions for **atomic events** (e.g., sensor-level triggers) and **complex events** (compositions of multiple atomic or complex patterns).  
+  - Supports hierarchical rule evaluation, allowing high-level system alerts to emerge from lower-level detections.  
+- **Design Choice**: Keeps the pipeline agnostic to a specific CEP backend
+
+
 ---
 ## Schema
 ### `app/core/schema/`
@@ -118,17 +132,27 @@ This section explains the core classes and their responsibilities.
   - `origin` / `status`: Provenance markers (`observed`, `reconstructed`, `missing`).  
   - `extras`: Optional metadata for ground truth or annotations.  
 
+### `app/java/src/main/java/schema/pattern`
+#### Pattern
+- **Purpose**: Canonical representation of an event pattern (atomic or complex) detected by the CEP engine.  
+- **Responsibilities**:  
+  - Provide a consistent schema for all events in the pipeline. 
+  - Maintain hierarchical structure, allowing multi-level compositions (complex patterns made of atomic or other complex subpatterns).  
+
+- **Fields**:  
+  - `pattern_name`: Identifier of the pattern.  
+  - `pattern_type`: Type of pattern — `"atomic"` or `"complex"`.  
+  - `confidence`: Numeric confidence score  
+  - `stream_id`: Representative stream identifier (used for joins).  
+  - `stream_ids`: Set of all contributing stream identifiers for this pattern (traceability).  
+  - `events_nested`: List of event groups that contributed to the pattern; each sublist corresponds to one subpattern’s matched events.  
+
+- **Design Choice**:  
+  - Provides a consistent abstraction for both atomic and complex detections
+
 ---
 ## Utils
 ### `app/core/utils/`
-#### JavaRunner
-- **Purpose**: Utility for running Java-based CEP engines.  
-- **Role**: Starts/stops Esper or other Java processes.  
-- **Features**:
-  - `start_java()` → launch process with args.  
-  - `stop_java()` → clean shutdown.  
-- **Design Choice**: Bridges Python orchestration with Java CEP runtime.
-
 #### Logger (Abstract)
 - **Purpose**: Event consumer that logs events to disk.  
 - **Role**: Subscribes to partitions in the `EventStream` and writes events into structured files (e.g. CSV, text).  

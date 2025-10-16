@@ -19,24 +19,17 @@ ATTRIBUTES = [
 ]
 
 DATASETS = [
-    "mar_15",
-    "mar_30",
-    "mcar_15",
+    "oracle",
+    "mcar_10",
     "mcar_30",
-    "mnar_15",
-    "mnar_30",
-    "structural_15",
-    "structural_30",
-    "oracle"
+    "mar_10",
+    "mar_30",
+    "structural_10",
+    "structural_30"
 ]
 
 
 class ExperimentBatchOrchestrator:
-    """
-    Runs multiple experiment configurations sequentially.
-    Each configuration has its own generated stream config and Orchestrator instance.
-    """
-
     def __init__(self, base_data_dir, log_dir, predictors_cfg, pattern_cfg,
                  bridge_class=JavaCEPBridge, bridge_kwargs=None):
         self.base_data_dir = Path(base_data_dir)
@@ -52,8 +45,7 @@ class ExperimentBatchOrchestrator:
         }
 
     def run_all(self):
-        # for dataset_name in DATASETS:
-        for dataset_name in ["mnar_30"]:
+        for dataset_name in DATASETS:
             LOG.info(f"===== Starting Experiment: {dataset_name} =====")
 
             dataset_file = self.base_data_dir / f"{dataset_name}.csv"
@@ -94,7 +86,7 @@ class ExperimentBatchOrchestrator:
                     "type": "experiment_stream",
                     "unit": unit,
                     "datatype": "float",
-                    "interval": 0.1,
+                    "interval": 0.05,
                     "params": {
                         "file": str(dataset_file),
                         "beach": beach,
@@ -112,9 +104,10 @@ class ExperimentBatchOrchestrator:
     
 
 def main():
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
     batch = ExperimentBatchOrchestrator(
         base_data_dir="app_examples/experiment_example/data/processed/experiment_dfs",
-        log_dir="data/logs/experiment_example",
+        log_dir=f"data/logs/experiment_example/{timestamp}",
         predictors_cfg="app_examples/experiment_example/configs/predictors_experiment.json",
         pattern_cfg="patterns/experiments_patterns.json",
     )
