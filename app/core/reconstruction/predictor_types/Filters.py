@@ -25,7 +25,7 @@ class KalmanFilter(BasePredictor):
         super().__init__("KalmanFilter")
         self.dt = dt
         self.mode = mode.lower()
-
+        
         # Determine state dimensionality
         if self.mode == "position":
             dim_x = 1
@@ -38,6 +38,11 @@ class KalmanFilter(BasePredictor):
 
         # Initialize filter
         self.kf = FP_KalmanFilter(dim_x=dim_x, dim_z=1)
+
+        # Store intial P
+        self.P0_full = self.kf.P.copy()
+        self.trace_P0 = float(np.trace(self.P0_full))
+        self.P0_scalar = float(self.kf.P[0, 0])
 
         # Build defaults if not provided
         if F is None:
@@ -108,9 +113,19 @@ class KalmanFilter(BasePredictor):
         return float(self.kf.x[0, 0])
 
     def confidence(self) -> float:
-        variance = float(self.kf.P[0, 0])
-        confidence = 1.0 / (1.0 + np.log1p(variance))
-        return max(0.0, min(1.0, confidence))
+        # Identify observed state indices (nonzero columns in H)
+        observed_indices = np.where(np.any(self.kf.H != 0, axis=0))[0]
+        P_obs = self.kf.P[np.ix_(observed_indices, observed_indices)]
+        P0_obs = self.P0_full[np.ix_(observed_indices, observed_indices)]
+
+        # Trace
+        trace_current = float(np.trace(P_obs))
+        trace_initial = float(np.trace(P0_obs))
+
+        ratio = trace_current / max(trace_initial, 1e-8)
+        confidence = 1.0 - ratio
+
+        return float(np.clip(confidence, 0.0, 1.0))
 
 
 

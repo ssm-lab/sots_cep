@@ -15,6 +15,7 @@ class Event(TypedDict, total=False):
     origin: str
 
     reconstructed_value: Optional[float]
+    reconstructed_confidence: Optional[float]
     reconstruction_method: Optional[str]
     confidence: Optional[float]
     reconstruction_flag: Optional[bool]
@@ -38,6 +39,7 @@ def make_event(
     status: str = "observed",
     source: str = "unknown",
     reconstructed_value: Optional[float] = None,
+    reconstructed_confidence: Optional[float] = None,
     reconstruction_method: Optional[str] = None,
     confidence: Optional[float] = None,
     reconstruction_flag: Optional[bool] = None,
@@ -58,6 +60,7 @@ def make_event(
         "value": value,
         "origin": origin,
         "reconstructed_value": reconstructed_value,
+        "reconstructed_confidence": reconstructed_confidence,
         "reconstruction_method": reconstruction_method,
         "confidence": confidence,
         "reconstruction_flag": reconstruction_flag,

@@ -39,7 +39,7 @@ DATASETS = [
 
 class ExperimentBatchOrchestrator:
     def __init__(self, base_data_dir, log_dir, predictors_cfg, pattern_cfg,
-                 bridge_class=JavaCEPBridge, bridge_kwargs=None):
+                 bridge_class=JavaCEPBridge, bridge_kwargs=None, attributes=ATTRIBUTES_KF):
         self.base_data_dir = Path(base_data_dir)
         self.log_dir = Path(log_dir)
         self.predictors_cfg = predictors_cfg
@@ -51,13 +51,14 @@ class ExperimentBatchOrchestrator:
             "rebuild": False,
             "log_matches": "False"
         }
+        self.attributes = attributes
 
     def run_all(self):
         for dataset_name in DATASETS:
             LOG.info(f"===== Starting Experiment: {dataset_name} =====")
 
             dataset_file = self.base_data_dir / f"{dataset_name}.csv"
-            streams_config_path = self._generate_streams_config(dataset_file, attributes=ATTRIBUTES_KF)
+            streams_config_path = self._generate_streams_config(dataset_file, attributes=self.attributes)
 
             orch = ExperimentOrchestrator(
                 pattern_cfg=self.pattern_cfg,
@@ -118,6 +119,7 @@ def main():
         log_dir=f"data/logs/experiment_example/{timestamp}",
         predictors_cfg="app_examples/experiment_example/configs/predictors_experiment.json",
         pattern_cfg="patterns/experiments_patterns.json",
+        attributes = ATTRIBUTES_PF # change to particle filter when wanting to run that one instead
     )
     batch.run_all()
     

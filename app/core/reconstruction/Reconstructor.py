@@ -26,21 +26,19 @@ class Reconstructor(EventConsumer):
         observed_value = event.get("value")
 
         prediction = self.predictor.predict()
-        if observed_value is not None:
-            prediction = self.predictor.update(observed_value)
+        prediction = self.predictor.update(observed_value)
 
         processed: Event = copy.deepcopy(event)
         processed.update({
             "value": observed_value,
-            "reconstructed_value": prediction,
-            "reconstruction_flag": False,
+            "confidence": 1.0,
             "status": "reconstructed",
-            "reconstruction_method": (
-                self.predictor.name
-            ),
-            "confidence": (1.0),
+            "reconstructed_value": prediction,
+            "reconstructed_confidence": self.predictor.confidence(),
+            "reconstruction_flag": False,
+            "reconstruction_method": self.predictor.name,
             "reconstruction_time": time.time(),
-        })
+            })
 
         self.event_stream.add_event(processed, "reconstructed", self.stream_id)
         return processed
@@ -53,13 +51,12 @@ class Reconstructor(EventConsumer):
         processed: Event = copy.deepcopy(event)
         processed.update({
             "value": prediction,
-            "reconstructed_value": prediction,
-            "reconstruction_flag": True,
+            "confidence": self.predictor.confidence(),
             "status": "reconstructed",
-            "reconstruction_method": (
-                self.predictor.name
-            ),
-            "confidence": (self.predictor.confidence()),
+            "reconstructed_value": prediction,
+            "reconstructed_confidence": self.predictor.confidence(),
+            "reconstruction_flag": True,
+            "reconstruction_method": self.predictor.name,
             "reconstruction_time": time.time(),
         })
 

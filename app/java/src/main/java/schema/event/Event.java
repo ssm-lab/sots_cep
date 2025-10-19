@@ -40,6 +40,9 @@ public class Event {
     // Reconstruction fields
     @JsonProperty("reconstructed_value")
     private Double reconstructedValue;
+    
+    @JsonProperty("reconstructed_confidence")
+    private Double reconstructedConfidence;
 
     @JsonProperty("reconstruction_method")
     private String reconstructionMethod;
@@ -108,6 +111,9 @@ public class Event {
 
     public Double getReconstructedValue() { return reconstructedValue; }
     public void setReconstructedValue(Double reconstructedValue) { this.reconstructedValue = reconstructedValue; }
+    
+    public Double reconstructedConfidence() { return reconstructedConfidence; }
+    public void reconstructedConfidence(Double reconstructedConfidence) { this.reconstructedConfidence = reconstructedConfidence; }
 
     public String getReconstructionMethod() { return reconstructionMethod; }
     public void setReconstructionMethod(String reconstructionMethod) { this.reconstructionMethod = reconstructionMethod; }
@@ -141,6 +147,7 @@ public class Event {
                 ", origin='" + origin + '\'' +
                 ", value=" + value +
                 ", reconstructedValue=" + reconstructedValue +
+                ", reconstructedConfidence=" + reconstructedConfidence +
                 ", reconstructionMethod='" + reconstructionMethod + '\'' +
                 ", confidence=" + confidence +
                 ", reconstructionFlag=" + reconstructionFlag +
