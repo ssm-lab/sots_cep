@@ -10,13 +10,21 @@ logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 class MissingnessInjector:
     """
-    Injects artificial missingness (MCAR, MAR, MNAR, STRUCTURAL) into datasets
+    Injects artificial missingness (MCAR, MAR, MNAR, STRUCTURAL, HYBRID) into datasets.
+    HYBRID mixes MCAR and block missingness with 50/50 probability.
     """
-    def __init__(self, rate: float, mode: str = "MCAR", seed: int = 42, block_size: int = 3):
+
+    def __init__(
+        self,
+        rate: float,
+        mode: str = "MCAR",
+        seed: int = 42,
+        block_ranges: tuple = (2, 6)
+    ):
         self.rate = rate
         self.mode = mode.upper() if mode else None
         self.seed = seed
-        self.block_size = block_size
+        self.block_ranges = block_ranges
         np.random.seed(self.seed)
 
     def inject(
@@ -28,7 +36,6 @@ class MissingnessInjector:
         if isinstance(value_cols, str):
             value_cols = [value_cols]
 
-        # Protect structural gaps
         df = df.copy()
         if "structural_gap" in df.columns:
             df = df[df["structural_gap"] == 0]
@@ -52,42 +59,36 @@ class MissingnessInjector:
             if k == 0:
                 continue
 
+            drop_idx = set()
+
+            # === HYBRID (MCAR + Block Missingness) ===
+            if self.mode == "HYBRID":
+                while len(drop_idx) < k:
+                    i = np.random.randint(0, n)
+                    if np.random.rand() < 0.5:
+                        # MCAR: single missing point
+                        drop_idx.add(i)
+                    else:
+                        # Block missingness
+                        block_len = np.random.randint(*self.block_ranges)
+                        start = max(0, min(i, n - block_len))
+                        block = range(start, start + block_len)
+                        drop_idx.update(block)
+                drop_idx = list(drop_idx)[:k]
+                uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc(col)] = np.nan
+
             # === MCAR ===
-            if self.mode == "MCAR":
+            elif self.mode == "MCAR":
                 drop_idx = np.random.choice(n, size=k, replace=False)
                 uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc(col)] = np.nan
 
-            # === MAR (block missingness) ===
-            elif self.mode == "MAR":
-                drop_idx = []
-                while len(drop_idx) < k:
-                    start = np.random.randint(0, max(1, n - self.block_size))
-                    end = min(start + self.block_size, n)
-                    drop_idx.extend(range(start, end))
-                drop_idx = drop_idx[:k]
-                uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc(col)] = np.nan
-
-            # === MNAR (value-dependent) ===
-            elif self.mode == "MNAR":
-                ref_values = pd.to_numeric(uncertain_df[col], errors="coerce")
-                if ref_values.isnull().all():
-                    continue
-
-                valid_mask = ~ref_values.isna()
-                valid_values = ref_values[valid_mask]
-                probs = (valid_values - valid_values.min()) / (valid_values.max() - valid_values.min() + 1e-9)
-                probs = probs / probs.sum()
-                valid_indices = np.where(valid_mask)[0]
-                drop_valid_idx = np.random.choice(valid_indices, size=min(k, len(valid_indices)), replace=False, p=probs)
-                uncertain_df.iloc[drop_valid_idx, uncertain_df.columns.get_loc(col)] = np.nan
-
-            # === STRUCTURAL: used intentionally, marks new permanent gaps ===
+            # === STRUCTURAL ===
             elif self.mode == "STRUCTURAL":
                 drop_idx = np.random.choice(n, size=k, replace=False)
                 uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc(col)] = np.nan
                 uncertain_df.iloc[drop_idx, uncertain_df.columns.get_loc("structural_gap")] = 1
 
-            # === ORACLE (no injection) ===
+            # === ORACLE ===
             elif self.mode is None or self.mode == "ORACLE":
                 return uncertain_df
 
@@ -134,17 +135,13 @@ OUTPUT_DIR = "app_examples/experiment_example/data/processed/experiment_dfs"
 
 
 def main():
-    # Load config
     with open(CONFIG_PATH, "r") as f:
         config = json.load(f)
-
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    # Load base dataset (raw)
     df = pd.read_csv(config["dataset_path"])
     DEFAULT_VALUE_COLS = ["Water Temperature", "Turbidity", "Wave Height", "Wave Period"]
 
-    # Expand first — define structural gaps once
     df_expanded = expand_to_hourly(
         df,
         timestamp_col="Readable Timestamp",
@@ -152,12 +149,11 @@ def main():
         value_cols=DEFAULT_VALUE_COLS
     )
 
-    # For each experiment, inject missingness only into non-structural rows
     for exp in config["experiments"]:
         name = exp["name"]
         rate = exp.get("rate", 0.1)
-        mode = exp.get("mode", "MCAR")
-        block_size = exp.get("block_size", 12)
+        mode = exp.get("mode", "HYBRID")   # default to hybrid
+        block_ranges = tuple(exp.get("block_ranges", [2, 6]))
 
         logging.info(f"[{name}] Injecting {mode} missingness at rate={rate}")
 
@@ -165,23 +161,23 @@ def main():
             rate=rate,
             mode=mode,
             seed=exp.get("seed", 42),
-            block_size=block_size
+            block_ranges=block_ranges
         )
 
-        # Inject only on structural_gap == 0
-        df_injected = injector.inject(df_expanded[df_expanded["structural_gap"] == 0], DEFAULT_VALUE_COLS, group_col="Beach Name")
+        df_injected = injector.inject(
+            df_expanded[df_expanded["structural_gap"] == 0],
+            DEFAULT_VALUE_COLS,
+            group_col="Beach Name"
+        )
 
-        # Merge back with structural rows untouched
         df_final = pd.concat([
             df_injected,
             df_expanded[df_expanded["structural_gap"] == 1]
         ]).sort_values("Readable Timestamp").reset_index(drop=True)
 
-        # Save
         out_path = os.path.join(OUTPUT_DIR, f"{name}.csv")
         df_final.to_csv(out_path, index=False)
         logging.info(f"[INFO] Saved processed dataset: {out_path}")
-
 
 if __name__ == "__main__":
     main()

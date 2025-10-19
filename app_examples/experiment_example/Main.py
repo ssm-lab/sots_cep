@@ -28,12 +28,12 @@ ATTRIBUTES_PF = [
 
 DATASETS = [
     "oracle",
-    "mcar_10",
-    "mcar_30",
-    "mar_10",
-    "mar_30",
+    "hybrid_10",
+    "hybrid_20",
+    "hybrid_30",
     "structural_10",
-    "structural_30"
+    "structural_20",
+    "structural_30",
 ]
 
 
@@ -119,7 +119,7 @@ def main():
         log_dir=f"data/logs/experiment_example/{timestamp}",
         predictors_cfg="app_examples/experiment_example/configs/predictors_experiment.json",
         pattern_cfg="patterns/experiments_patterns.json",
-        attributes = ATTRIBUTES_PF # change to particle filter when wanting to run that one instead
+        attributes = ATTRIBUTES_KF # change to particle filter when wanting to run that one instead
     )
     batch.run_all()
     

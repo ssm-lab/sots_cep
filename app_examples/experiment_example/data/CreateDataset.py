@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import logging
 import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # --- CONFIGURATION ---
 YEAR = 2015
@@ -205,6 +207,48 @@ def filter_year(
     return df
 
 
+def visualize_attribute_statistics(df: pd.DataFrame, output_path: str, year, start_month, end_month):
+    ATTRS = ["Water Temperature", "Turbidity", "Wave Height", "Wave Period"]
+    BEACHES = df["Beach Name"].unique()
+    os.makedirs(os.path.join(output_path, "figures"), exist_ok=True)
+
+    # Time series
+    fig, axes = plt.subplots(len(BEACHES), 1, figsize=(10, 6), sharex=True)
+    if len(BEACHES) == 1:
+        axes = [axes]
+    for i, beach in enumerate(BEACHES):
+        subset = df[df["Beach Name"] == beach]
+        axes[i].plot(subset["Readable Timestamp"], subset["Water Temperature"], label="Water Temperature", alpha=0.5)
+        axes[i].plot(subset["Readable Timestamp"], subset["Turbidity"], label="Turbidity", alpha=0.6)
+        axes[i].plot(subset["Readable Timestamp"], subset["Wave Height"], label="Wave Height", alpha=0.7)
+        axes[i].plot(subset["Readable Timestamp"], subset["Wave Period"], label="Wave Period", alpha=0.8)
+        axes[i].set_title(beach)
+        axes[i].set_ylabel("Value")
+        axes[i].legend(loc="upper right", fontsize=8)
+    plt.suptitle(f"Time-Series Overview ({year}, May–Sep)", y=1.02)
+    plt.tight_layout()
+    fig4_path = os.path.join(output_path, "figures", f"time_series_overview_{year}_{start_month}_{end_month}.jpg")
+    plt.savefig(fig4_path, dpi=300)
+    plt.close()
+    logging.info(f"[PLOT] Saved time-series overview: {fig4_path}")
+
+    # Per-beach histograms
+    fig, axes = plt.subplots(2, 2, figsize=(10, 6))
+    axes = axes.flatten()
+    for i, attr in enumerate(ATTRS):
+        sns.histplot(data=df, x=attr, hue="Beach Name", kde=True, ax=axes[i], bins=30, element="step", common_norm=False)
+        axes[i].set_title(f"{attr} by Beach")
+        axes[i].set_xlabel("Value")
+        axes[i].set_ylabel("Count")
+    plt.suptitle(f"Per-Beach Attribute Distributions ({year}, May–Sep)", y=1.02)
+    plt.tight_layout()
+    fig_path = os.path.join(output_path, "figures", f"attribute_histograms_per_beach_{year}_{start_month}_{end_month}.jpg")
+    plt.savefig(fig_path, dpi=300)
+    plt.close()
+    logging.info(f"[PLOT] Saved per-beach histograms: {fig_path}")
+
+
+
 if __name__ == "__main__":
     dataset_path = "app_examples/experiment_example/data/original/Beach_Water_Quality_-_Automated_Sensors_20250918.csv"
     output_path = "app_examples/experiment_example/data/processed"
@@ -213,3 +257,4 @@ if __name__ == "__main__":
 
     # Compute threshold stats after cleaning
     compute_attribute_stats(preprocessed_df, output_path, YEAR, START_MONTH, END_MONTH)
+    visualize_attribute_statistics(preprocessed_df, output_path, YEAR, START_MONTH, END_MONTH)

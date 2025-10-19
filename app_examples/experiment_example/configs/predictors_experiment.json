@@ -4,7 +4,7 @@
     "params": {
       "initial_value": 11.1,
       "dt": 1.0,
-      "Q": 0.75,
+      "Q": 0.5,
       "R": 0.001,
       "mode": "position"
     }
@@ -14,7 +14,7 @@
     "params": {
       "initial_value": 0.0,
       "dt": 1.0,
-      "Q": 0.75,
+      "Q": 0.1,
       "R": 0.001,
       "mode": "position"
     }
@@ -24,7 +24,7 @@
     "params": {
       "initial_value": 0.072,
       "dt": 1.0,
-      "Q": 0.75,
+      "Q": 0.2,
       "R": 0.001,
       "mode": "position"
     }
@@ -34,8 +34,8 @@
     "params": {
       "initial_value": 2.0,
       "dt": 1.0,
-      "Q": 0.75,
-      "R": 0.001,
+      "Q":1.0,
+      "R": 0.05,
       "mode": "position"
     }
   },

@@ -400,7 +400,7 @@ class EvaluationPipeline:
 # ================================================================
 if __name__ == "__main__":
     BASE_DIR = "data/logs/experiment_example/Kalman Filter"
-    DATASETS = ["oracle", "mar_30", "mar_10", "mcar_10", "mcar_30", "structural_10", "structural_30"]
+    DATASETS = ["oracle", "structural_10", "structural_20", "structural_30", "hybrid_10", "hybrid_20", "hybrid_30"]
 
     pipeline = EvaluationPipeline(
         BASE_DIR,
@@ -411,5 +411,5 @@ if __name__ == "__main__":
 
     pipeline.summarize_reconstruction_by_attribute()
     pipeline.summarize_reconstruction_by_attribute(metric="MAE")
-    pipeline.summarize_f1_confidence_matrix(tolerance=0.1)
+    pipeline.summarize_f1_confidence_matrix(tolerance=0.5)
 
