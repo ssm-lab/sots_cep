@@ -146,16 +146,12 @@ def expand_to_hourly(
 # ====================================================
 #  MAIN
 # ====================================================
-CONFIG_PATH = "app_examples/experiment_example/data/miss_config.json"
-OUTPUT_DIR = "app_examples/experiment_example/data/processed/experiment_dfs"
+OUTPUT_DIR = "app_examples/experiment_example/configs"
 
 
 def main():
-    with open(CONFIG_PATH, "r") as f:
-        config = json.load(f)
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    df = pd.read_csv(config["dataset_path"])
+    df = pd.read_csv("app_examples/experiment_example/configs/Montrose Beach 2016 Summer Peroid.csv")
     DEFAULT_VALUE_COLS = ["Water Temperature", "Turbidity", "Wave Height", "Wave Period"]
 
     # Expand to hourly + interpolate
@@ -170,31 +166,38 @@ def main():
     for col in DEFAULT_VALUE_COLS:
         df_expanded[f"{col}_groundtruth"] = df_expanded[col]
 
+    config = {
+      "name": "hybrid_grid_20",
+      "rate": 0.2,
+      "mode": "HYBRID",
+      "block_ranges": [2,6],
+      "value_cols": [],
+    }
+
     # Inject missingness experiments
-    for exp in config["experiments"]:
-        name = exp["name"]
-        rate = exp.get("rate", 0.1)
-        mode = exp.get("mode", "HYBRID")   # default to hybrid
-        block_ranges = tuple(exp.get("block_ranges", [2, 6]))
+    name = config["name"]
+    rate = config.get("rate", 0.1)
+    mode = config.get("mode", "HYBRID")   # default to hybrid
+    block_ranges = tuple(config.get("block_ranges", [2, 6]))
 
-        logging.info(f"[{name}] Injecting {mode} missingness at rate={rate}")
+    logging.info(f"[{name}] Injecting {mode} missingness at rate={rate}")
 
-        injector = MissingnessInjector(
-            rate=rate,
-            mode=mode,
-            seed=exp.get("seed", 42),
-            block_ranges=block_ranges
-        )
+    injector = MissingnessInjector(
+        rate=rate,
+        mode=mode,
+        seed=config.get("seed", 42),
+        block_ranges=block_ranges
+    )
 
-        df_injected = injector.inject(
-            df_expanded,
-            DEFAULT_VALUE_COLS,
-            group_col="Beach Name"
-        )
+    df_injected = injector.inject(
+        df_expanded,
+        DEFAULT_VALUE_COLS,
+        group_col="Beach Name"
+    )
 
-        out_path = os.path.join(OUTPUT_DIR, f"{name}.csv")
-        df_injected.to_csv(out_path, index=False)
-        logging.info(f"[INFO] Saved processed dataset: {out_path}")
+    out_path = os.path.join(OUTPUT_DIR, f"{name}.csv")
+    df_injected.to_csv(out_path, index=False)
+    logging.info(f"[INFO] Saved processed dataset: {out_path}")
 
 
 if __name__ == "__main__":

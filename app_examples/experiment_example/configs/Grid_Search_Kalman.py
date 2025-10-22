@@ -1,97 +1,66 @@
-from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 import logging
 from itertools import product
 from app.core.reconstruction.predictor_types.Filters import KalmanFilter
 
+
+# ================================================================
+# CONFIGURATION
+# ================================================================
 YEAR = 2016
 BEACH = "Montrose Beach"
-
-NUMERIC_COLS = [
-    "Water Temperature",
-    "Turbidity",
-    "Wave Height",
-    "Wave Period",
-]
-
+NUMERIC_COLS = ["Water Temperature", "Turbidity", "Wave Height", "Wave Period"]
 
 PARAM_GRID = {
     "MODES": ["position", "velocity", "acceleration"],
-    "Q": [0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0],
-    "R": [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
+    "Q": [0.01, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0],
+    "R": [0.01, 0.02, 0.05, 0.1, 0.2]
 }
 
 DT = 1.0
-DATA_PATH = "app_examples/experiment_example/data/processed/preprocessed_2016_5_9.csv"
-
-MISSING_RATE = 0.3     
-ALPHA = 0.75  
-
+DATA_PATH = "app_examples/experiment_example/configs/hybrid_grid_20.csv"
 SEED = 42
 np.random.seed(SEED)
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 
-def mae(y_true, y_pred):
-    mask = ~np.isnan(y_true)
-    return np.mean(np.abs(np.array(y_true)[mask] - np.array(y_pred)[mask]))
+# ================================================================
+# CORE TUNING FUNCTION
+# ================================================================
+def tune_for_series(measured, groundtruth, attribute_name):
+    """
+    Tunes Kalman Filter parameters (Q, R, mode) for a single attribute,
+    using measured values with real missingness and groundtruth for evaluation.
+    """
+    best = {"rmse": float("inf"), "norm_rmse": float("inf"), "q": None, "r": None, "mode": None}
+    measured = np.array(measured, dtype=np.float64)
+    groundtruth = np.array(groundtruth, dtype=np.float64)
 
+    # Skip if too few valid values
+    valid_mask = ~np.isnan(groundtruth)
+    if valid_mask.sum() < 10:
+        return best, []
 
-def simulate_missingness(series, rate=0.3):
-    n = len(series)
-    mask = np.ones(n, dtype=bool)
-    missing_idx = np.random.choice(n, int(rate * n), replace=False)
-    mask[missing_idx] = False
-    corrupted = series.copy()
-    corrupted[~mask] = np.nan
-    return corrupted, mask
-
-
-def tune_for_series(values, attribute_name):
-    best = {"score": float("inf"), "q": None, "r": None, "mode": None}
-    series = np.array(values, dtype=np.float64)
-    series = series[~np.isnan(series)]
-    if len(series) < 10:
-        return best
-    series = (series - np.nanmean(series)) / (np.nanstd(series) + 1e-8) # Normalize series so RMSE values are around 0-1
-
-
-    # simulate missingness to tune under uncertainty
-    corrupted, _ = simulate_missingness(series, rate=MISSING_RATE)
-
+    std_dev = np.std(groundtruth[valid_mask]) + 1e-8
     results_list = []
+
     for mode in PARAM_GRID["MODES"]:
         for q, r in product(PARAM_GRID["Q"], PARAM_GRID["R"]):
             kf = KalmanFilter(dt=DT, Q=q, R=r, mode=mode)
-            preds, confs = [], []
+            preds = []
 
-            for z in corrupted:
+            for z in measured:
                 if np.isnan(z):
                     kf.predict()
                 else:
                     kf.update(z)
                 preds.append(kf.kf.x[0, 0])
-                confs.append(kf.confidence())
 
-           # Compute normalized absolute error
-            preds_arr = np.array(preds)
-            errors = np.abs(preds_arr - series[:len(preds_arr)])
-            norm_errors = errors / (np.nanmax(errors) + 1e-8)
-            confs = np.array(confs)
-
-            # Compute correlation (confidence vs error)
-            valid_mask = ~np.isnan(norm_errors) & ~np.isnan(confs)
-            corr = np.corrcoef(confs[valid_mask], norm_errors[valid_mask])[0, 1] if np.sum(valid_mask) > 2 else 0.0
-            corr_score = (1 + corr) / 2  # 0=good, 1=bad
-
-            # Compute normalized RMSE
-            rmse = np.sqrt(np.mean(errors ** 2))
-
-            # Composite score (lower = better)
-            score = ALPHA * rmse + (1 - ALPHA) * corr_score
-
+            preds = np.array(preds)
+            rmse = np.sqrt(np.nanmean((preds - groundtruth) ** 2))
+            norm_rmse = rmse / std_dev
 
             results_list.append({
                 "attribute": attribute_name,
@@ -99,42 +68,56 @@ def tune_for_series(values, attribute_name):
                 "Q": q,
                 "R": r,
                 "rmse": rmse,
-                "corr_score": corr_score,
-                "score": score
+                "norm_rmse": norm_rmse
             })
 
-            logging.info(f"[{mode}] Q={q:.4f}, R={r:.4f} | RMSE={rmse:.4f}, CorrScore={corr_score:.4f}, Score={score:.4f}")
+            logging.info(f"[{mode}] Q={q:.4f}, R={r:.4f} | RMSE={rmse:.4f} | NormRMSE={norm_rmse:.4f}")
 
-            if score < best["score"]:
-                best.update({"score": score, "q": q, "r": r, "mode": mode, "rmse": rmse, "corr_score": corr_score})
+            if rmse < best["rmse"]:
+                best.update({
+                    "rmse": rmse,
+                    "norm_rmse": norm_rmse,
+                    "q": q,
+                    "r": r,
+                    "mode": mode
+                })
 
     return best, results_list
 
 
-
+# ================================================================
+# MAIN ROUTINE
+# ================================================================
 def main():
-    np.random.seed(42)
+    np.random.seed(SEED)
     df = pd.read_csv(DATA_PATH)
     df.columns = df.columns.str.strip().str.replace('"', '')
-    df = df[df["Beach Name"] == BEACH]
 
+    # Filter to one beach for tuning
+    df = df[df["Beach Name"] == BEACH]
     if df.empty:
-        logging.error(f"No data found for {BEACH} in {YEAR}. Check the file path or column names.")
+        logging.error(f"No data found for {BEACH} in {YEAR}.")
         return
 
     logging.info(f"[INFO] Dataset loaded: {len(df)} rows for {BEACH}")
+
     results = {}
-    overall_results = {}
+    all_results = []
 
     for col in NUMERIC_COLS:
         if col not in df.columns:
             logging.warning(f"Skipping {col} (not found in dataset).")
             continue
 
+        gt_col = f"{col}_groundtruth"
+        if gt_col not in df.columns:
+            logging.warning(f"Skipping {col} (no groundtruth column).")
+            continue
+
         logging.info(f"\n--- Tuning {col} ---")
-        series = df[col].values
-        best, col_results_list = tune_for_series(series, col)
-        overall_results[col] = col_results_list
+        best, entries = tune_for_series(df[col].values, df[gt_col].values, col)
+        all_results.extend(entries)
+
         if best["q"] is None:
             logging.info(f"{col:20s} | Insufficient data, skipped.")
             continue
@@ -144,29 +127,31 @@ def main():
             "measurement_noise": best["r"],
             "mode": best["mode"],
             "rmse": best["rmse"],
-            "corr_score": best["corr_score"],
-            "score": best["score"],
+            "norm_rmse": best["norm_rmse"]
         }
 
         logging.info(
-            f"{col:20s} | RMSE={best['rmse']:.4f} | CorrScore={best['corr_score']:.4f} | "
-            f"Score={best['score']:.4f} | Q={best['q']:.4f} | R={best['r']:.4f} | Mode={best['mode']}"
+            f"{col:20s} | Best RMSE={best['rmse']:.4f} | NormRMSE={best['norm_rmse']:.4f} | "
+            f"Q={best['q']:.4f} | R={best['r']:.4f} | Mode={best['mode']}"
         )
 
-    # save results
+    # ------------------------------------------------------------
+    # Save results
+    # ------------------------------------------------------------
+    summary_path = "app_examples/experiment_example/configs/kalman_gridsearch_results.csv"
+    full_path = "app_examples/experiment_example/configs/kalman_gridsearch_results_full.csv"
+
     results_df = pd.DataFrame(results).T
-    results_df.to_csv("app_examples/experiment_example/configs/kalman_gridsearch_results.csv", index=True)
-    logging.info("\n[INFO] Grid search complete. Results saved to kalman_gridsearch_results.csv")
+    results_df.to_csv(summary_path, index=True)
+    logging.info(f"[INFO] Summary results saved to {summary_path}")
 
-    all_results_flat = []
-    for attr, entries in overall_results.items():
-        all_results_flat.extend(entries)
-
-    all_results_df = pd.DataFrame(all_results_flat)
-    all_results_df.to_csv("app_examples/experiment_example/configs/kalman_gridsearch_results_full.csv", index=False)
-    logging.info(f"[INFO] Full grid search results saved to kalman_gridsearch_results_full.csv "
-                 f"({len(all_results_flat)} rows total)")
+    all_results_df = pd.DataFrame(all_results)
+    all_results_df.to_csv(full_path, index=False)
+    logging.info(f"[INFO] Full grid search results saved ({len(all_results_df)} runs total)")
 
 
+# ================================================================
+# ENTRY POINT
+# ================================================================
 if __name__ == "__main__":
     main()

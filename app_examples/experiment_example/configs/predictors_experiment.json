@@ -4,9 +4,10 @@
     "params": {
       "initial_value": 11.1,
       "dt": 1.0,
-      "Q": 0.5,
-      "R": 0.001,
-      "mode": "position"
+      "Q": 2.0,
+      "R": 0.01,
+      "mode": "position",
+      "alpha": 0.1
     }
   },
   "kf_turbidity": {
@@ -14,9 +15,10 @@
     "params": {
       "initial_value": 0.0,
       "dt": 1.0,
-      "Q": 0.1,
-      "R": 0.001,
-      "mode": "position"
+      "Q": 2.0,
+      "R": 0.01,
+      "mode": "position",
+      "alpha": 1.0
     }
   },
   "kf_wave_height": {
@@ -24,9 +26,10 @@
     "params": {
       "initial_value": 0.072,
       "dt": 1.0,
-      "Q": 0.2,
-      "R": 0.001,
-      "mode": "position"
+      "Q": 2.0,
+      "R": 0.01,
+      "mode": "position",
+      "alpha": 0.1
     }
   },
   "kf_wave_period": {
@@ -34,9 +37,10 @@
     "params": {
       "initial_value": 2.0,
       "dt": 1.0,
-      "Q":1.0,
-      "R": 0.05,
-      "mode": "position"
+      "Q":0.05,
+      "R": 0.02,
+      "mode": "position",
+      "alpha": 0.2
     }
   },
   "pf_water_temp": {

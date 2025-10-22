@@ -21,6 +21,7 @@ class KalmanFilter(BasePredictor):
         F=None,
         H=None,
         P=None,
+        alpha=0.1,
     ):
         super().__init__("KalmanFilter")
         self.dt = dt
@@ -39,10 +40,9 @@ class KalmanFilter(BasePredictor):
         # Initialize filter
         self.kf = FP_KalmanFilter(dim_x=dim_x, dim_z=1)
 
-        # Store intial P
-        self.P0_full = self.kf.P.copy()
-        self.trace_P0 = float(np.trace(self.P0_full))
-        self.P0_scalar = float(self.kf.P[0, 0])
+        self.alpha = alpha
+        self.last_confidence = 1.0
+        self.last_trace = float(np.trace(self.kf.P))
 
         # Build defaults if not provided
         if F is None:
@@ -112,20 +112,50 @@ class KalmanFilter(BasePredictor):
         self.kf.update(np.array([[observed_value]]))
         return float(self.kf.x[0, 0])
 
-    def confidence(self) -> float:
-        # Identify observed state indices (nonzero columns in H)
-        observed_indices = np.where(np.any(self.kf.H != 0, axis=0))[0]
-        P_obs = self.kf.P[np.ix_(observed_indices, observed_indices)]
-        P0_obs = self.P0_full[np.ix_(observed_indices, observed_indices)]
 
-        # Trace
-        trace_current = float(np.trace(P_obs))
-        trace_initial = float(np.trace(P0_obs))
+    def confidence(self, observed_value=None):
+        kf = self.kf
+        # Compute predicted measurement and innovation covariance
+        z_pred = float((kf.H @ kf.x)[0])
+        S = float((kf.H @ kf.P @ kf.H.T + kf.R)[0, 0])
 
-        ratio = trace_current / max(trace_initial, 1e-8)
-        confidence = 1.0 - ratio
+        # Case 1: measurement available → innovation-based confidence  
+        if observed_value is not None:
+            # Predicted measurement
+            z_pred = float((kf.H @ kf.x)[0])
 
-        return float(np.clip(confidence, 0.0, 1.0))
+            # Innovation residual and covariance
+            v = observed_value - z_pred
+            S = float((kf.H @ kf.P @ kf.H.T + kf.R)[0, 0])
+
+            # Normalized Innovation Squared (NIS)
+            nis = (v ** 2) / (S + 1e-12)
+
+            # Confidence centered at expected NIS = 1
+            c = np.exp(-0.5 * (nis - 1.0))
+
+            # Clamp to [0, 1]
+            self.last_confidence = float(np.clip(c, 1e-6, 1.0))
+            self.last_trace = float(np.trace(kf.P))
+            return self.last_confidence
+        # Case 2: missing measurement → covariance-based decay
+        else:        
+            current_trace = float(np.trace(kf.P))
+            prev_trace = getattr(self, "last_trace", current_trace)
+
+            # Ratio of current to previous uncertainty (bounded)
+            ratio = min(current_trace / (prev_trace + 1e-8), 1.5)
+
+            # Exponential decay proportional to uncertainty growth
+            decay = np.exp(-self.alpha * (ratio - 1.0))
+
+            prev_conf = getattr(self, "last_confidence", 1.0)
+            c = prev_conf * decay
+
+            self.last_confidence = float(np.clip(c, 1e-6, 1.0))
+            self.last_trace = current_trace
+            return self.last_confidence
+
 
 
 

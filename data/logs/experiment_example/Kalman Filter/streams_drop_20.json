@@ -5,9 +5,10 @@
         "datatype": "float",
         "interval": 0.05,
         "params": {
-            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\structural_20.csv",
+            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\drop_20.csv",
             "beach": "Calumet Beach",
-            "col": "Water Temperature"
+            "col": "Water Temperature",
+            "drop_missing": true
         },
         "predictor_template": "kf_water_temp"
     },
@@ -17,9 +18,10 @@
         "datatype": "float",
         "interval": 0.05,
         "params": {
-            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\structural_20.csv",
+            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\drop_20.csv",
             "beach": "Calumet Beach",
-            "col": "Turbidity"
+            "col": "Turbidity",
+            "drop_missing": true
         },
         "predictor_template": "kf_turbidity"
     },
@@ -29,9 +31,10 @@
         "datatype": "float",
         "interval": 0.05,
         "params": {
-            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\structural_20.csv",
+            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\drop_20.csv",
             "beach": "Calumet Beach",
-            "col": "Wave Height"
+            "col": "Wave Height",
+            "drop_missing": true
         },
         "predictor_template": "kf_wave_height"
     },
@@ -41,9 +44,10 @@
         "datatype": "float",
         "interval": 0.05,
         "params": {
-            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\structural_20.csv",
+            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\drop_20.csv",
             "beach": "Calumet Beach",
-            "col": "Wave Period"
+            "col": "Wave Period",
+            "drop_missing": true
         },
         "predictor_template": "kf_wave_period"
     },
@@ -53,9 +57,10 @@
         "datatype": "float",
         "interval": 0.05,
         "params": {
-            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\structural_20.csv",
+            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\drop_20.csv",
             "beach": "Montrose Beach",
-            "col": "Water Temperature"
+            "col": "Water Temperature",
+            "drop_missing": true
         },
         "predictor_template": "kf_water_temp"
     },
@@ -65,9 +70,10 @@
         "datatype": "float",
         "interval": 0.05,
         "params": {
-            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\structural_20.csv",
+            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\drop_20.csv",
             "beach": "Montrose Beach",
-            "col": "Turbidity"
+            "col": "Turbidity",
+            "drop_missing": true
         },
         "predictor_template": "kf_turbidity"
     },
@@ -77,9 +83,10 @@
         "datatype": "float",
         "interval": 0.05,
         "params": {
-            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\structural_20.csv",
+            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\drop_20.csv",
             "beach": "Montrose Beach",
-            "col": "Wave Height"
+            "col": "Wave Height",
+            "drop_missing": true
         },
         "predictor_template": "kf_wave_height"
     },
@@ -89,9 +96,10 @@
         "datatype": "float",
         "interval": 0.05,
         "params": {
-            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\structural_20.csv",
+            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\drop_20.csv",
             "beach": "Montrose Beach",
-            "col": "Wave Period"
+            "col": "Wave Period",
+            "drop_missing": true
         },
         "predictor_template": "kf_wave_period"
     },
@@ -101,9 +109,10 @@
         "datatype": "float",
         "interval": 0.05,
         "params": {
-            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\structural_20.csv",
+            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\drop_20.csv",
             "beach": "63rd Street Beach",
-            "col": "Water Temperature"
+            "col": "Water Temperature",
+            "drop_missing": true
         },
         "predictor_template": "kf_water_temp"
     },
@@ -113,9 +122,10 @@
         "datatype": "float",
         "interval": 0.05,
         "params": {
-            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\structural_20.csv",
+            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\drop_20.csv",
             "beach": "63rd Street Beach",
-            "col": "Turbidity"
+            "col": "Turbidity",
+            "drop_missing": true
         },
         "predictor_template": "kf_turbidity"
     },
@@ -125,9 +135,10 @@
         "datatype": "float",
         "interval": 0.05,
         "params": {
-            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\structural_20.csv",
+            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\drop_20.csv",
             "beach": "63rd Street Beach",
-            "col": "Wave Height"
+            "col": "Wave Height",
+            "drop_missing": true
         },
         "predictor_template": "kf_wave_height"
     },
@@ -137,9 +148,10 @@
         "datatype": "float",
         "interval": 0.05,
         "params": {
-            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\structural_20.csv",
+            "file": "app_examples\\experiment_example\\data\\processed\\experiment_dfs\\drop_20.csv",
             "beach": "63rd Street Beach",
-            "col": "Wave Period"
+            "col": "Wave Period",
+            "drop_missing": true
         },
         "predictor_template": "kf_wave_period"
     }

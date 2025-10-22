@@ -7,28 +7,6 @@
       "mode": "ORACLE",
       "value_cols": []
     },
-
-    {
-    "name": "structural_10",
-    "rate": 0.1,
-    "mode": "STRUCTURAL",
-    "value_cols": []
-    },
-
-    {
-    "name": "structural_20",
-    "rate": 0.2,
-    "mode": "STRUCTURAL",
-    "value_cols": []
-    },
-
-    {
-    "name": "structural_30",
-    "rate": 0.3,
-    "mode": "STRUCTURAL",
-    "value_cols": []
-    },
-
     {
       "name": "hybrid_10",
       "rate": 0.1,

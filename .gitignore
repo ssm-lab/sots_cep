@@ -41,3 +41,44 @@ build/
 *.bak
 *.tmp
 *.old
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.bcf
+*.fdb_latexmk
+*.fls
+*.log
+*.lof
+*.lot
+*.lol
+*.out
+*.toc
+*.synctex.gz
+*.run.xml
+*.pdfsync
+*.nav
+*.snm
+*.vrb
+
+# Latexmk & other build caches
+*.xdv
+*.synctex(busy)
+*.synctex.gz(busy)
+*.fmt
+*.fot
+*.cb
+*.cb2
+
+# VS Code / LaTeX Workshop
+.vscode/
+__latexindent_temp.tex
+*.bak
+*.tmp
+*.backup
+
+# Output directories (optional)
+build/
+out/
+output/

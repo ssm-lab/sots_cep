@@ -1,9 +1,10 @@
 import os
+import re
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-
+from scipy.optimize import linear_sum_assignment
 
 # ================================================================
 # CONFIGURATION
@@ -24,6 +25,17 @@ PATTERN_LEVEL_KEYWORDS = {
     ],
 }
 
+ # --- Global style setup ---
+plt.rcParams.update({
+    "font.family": "Times New Roman",
+    "axes.titlesize": 13,
+    "axes.labelsize": 12,
+    "legend.fontsize": 10,
+    "xtick.labelsize": 11,
+    "ytick.labelsize": 11,
+})
+
+
 
 # ================================================================
 # PIPELINE
@@ -35,7 +47,7 @@ class EvaluationPipeline:
         datasets,
         event_file="events.csv",
         pattern_file="patterns.csv",
-        tolerances=[1.0],
+        tolerances=[0.5],
         confidence_thresholds=[0.65, 0.75, 0.85, 0.95],
     ):
         self.base_dir = base_dir
@@ -154,6 +166,7 @@ class EvaluationPipeline:
 
         return pd.DataFrame(results)
 
+
     # ----------------------------------------------------------------------
     # Build Unified Master Summary
     # ----------------------------------------------------------------------
@@ -182,6 +195,8 @@ class EvaluationPipeline:
             for tol in self.tolerances:
                 print(f"[EVAL] tol={tol:.2f}s, conf≥{conf_thr:.2f}")
                 for dataset in self.datasets:
+                    if dataset == "oracle":
+                        continue
                     df_patterns = self.safe_load_csv(os.path.join(self.base_dir, dataset, self.pattern_file))
                     cmp_df = self.compare_patterns(oracle_patterns, df_patterns, tol, conf_thr)
                     cmp_df["dataset"] = dataset
@@ -217,14 +232,6 @@ class EvaluationPipeline:
         return summary
     
 
-
-
-        # ----------------------------------------------------------------------
-    # Reconstruction Results Summary (per attribute)
-    # ----------------------------------------------------------------------
-    # ----------------------------------------------------------------------
-    # Reconstruction Results Summary (per dataset × attribute)
-    # ----------------------------------------------------------------------
     def summarize_reconstruction_by_attribute(self, metric="MAE"):
         """
         Summarize reconstruction performance (MAE or RMSE) per dataset × attribute.
@@ -305,94 +312,218 @@ class EvaluationPipeline:
         print(f"[INFO] LaTeX table saved → {latex_path}")
 
         return pivot
-    
-    # ----------------------------------------------------------------------
-    # Summary F1 Matrix (Confidence Threshold × Pattern Level)
-    # ----------------------------------------------------------------------
-    def summarize_f1_confidence_matrix(self, tolerance=1.0):
-        """
-        Generate a numeric F1-score matrix (no heatmap) showing the average
-        F1 across confidence thresholds for a fixed temporal tolerance.
-        Exports to LaTeX.
-        """
-        df = self.master_df.copy()
-        if df.empty:
-            print("[WARN] No master_df available for summary matrix.")
+
+
+    def plot_error_progression(self):       
+        all_recon = []
+        for dataset in self.datasets:
+            if dataset == "oracle" or dataset.startswith("structural"):
+                continue
+
+            df_events = self.safe_load_csv(os.path.join(self.base_dir, dataset, self.event_file))
+            if df_events.empty:
+                continue
+
+            recon_df = self.evaluate_reconstruction(df_events)
+            if recon_df.empty:
+                continue
+
+            # --- Parse attribute from stream_id ---
+            def parse_attribute_from_stream_id(stream_id):
+                if not isinstance(stream_id, str):
+                    return "Unknown"
+                parts = stream_id.split("_")
+                if "Beach" in parts:
+                    beach_end = parts.index("Beach") + 1
+                    attr = " ".join(parts[beach_end:]).replace("_", " ").strip()
+                else:
+                    attr = " ".join(parts[2:]).replace("_", " ").strip()
+                return attr if attr else "Unknown"
+
+            recon_df["attribute"] = recon_df["stream_id"].apply(parse_attribute_from_stream_id)
+            recon_df["dataset"] = dataset
+            all_recon.append(recon_df)
+
+        if not all_recon:
+            print("[WARN] No reconstruction data found for plotting.")
             return
 
-        # Filter for the representative tolerance
-        df = df[np.isclose(df["tolerance_s"], tolerance)]
-        if df.empty:
-            print(f"[WARN] No entries found for tolerance={tolerance}")
-            return
+        recon_all = pd.concat(all_recon, ignore_index=True)
 
-        # Aggregate across datasets for cleaner summary
-        pivot = (
-            df.groupby(["level", "confidence_thr"])["F1"]
+        # --- Aggregate: mean per dataset × attribute for both MAE & RMSE ---
+        summary = (
+            recon_all.groupby(["dataset", "attribute"])[["MAE", "RMSE"]]
             .mean()
-            .unstack()
             .round(3)
-            .sort_index()
+            .reset_index()
+            .sort_values(["attribute", "dataset"])
         )
 
-        print(f"\n=== F1 Summary Matrix (Tolerance = {tolerance:.1f}s) ===")
-        print(pivot.to_string())
+        print("\n=== Reconstruction Error Progression (MAE/RMSE) ===")
+        print(summary.to_string(index=False))
 
-        # --- Export LaTeX table ---
+        # --- Replace dataset names with readable missingness labels ---
+        label_map = {
+            "hybrid_10": "10%",
+            "hybrid_20": "20%",
+            "hybrid_30": "30%",
+        }
+        summary["dataset_label"] = summary["dataset"].map(label_map)
+        order = ["10%", "20%", "30%"]
+        summary["dataset_label"] = pd.Categorical(summary["dataset_label"], categories=order, ordered=True)
+
+        # --- Plot configuration ---
+        COLORS = sns.color_palette("Set2", n_colors=4)
+        metrics = ["MAE", "RMSE"]
+
+        fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharex=True)
+
+        for i, metric in enumerate(metrics):
+            ax = axes[i]
+            sns.lineplot(
+                data=summary,
+                x="dataset_label",
+                y=metric,
+                hue="attribute",
+                palette=COLORS,
+                marker="o",
+                linewidth=2.0,
+                markersize=7,
+                ax=ax
+            )
+
+            # Annotate numeric values above each point
+            for _, row in summary.iterrows():
+                ax.text(
+                    row["dataset_label"],
+                    row[metric] + 0.015 * summary[metric].max(),
+                    f"{row[metric]:.2f}",
+                    fontsize=9,
+                    ha="center",
+                    va="bottom"
+                )
+
+            ax.set_title(f"{metric} progression (Avg across Beaches)", pad=8)  # not bold
+            ax.set_xlabel("Missingness level")
+            ax.set_ylabel(f"Average {metric}")
+            ax.grid(True, linestyle="--", alpha=0.4)
+
+            if i == 1:
+                ax.legend(title="Attribute", bbox_to_anchor=(1.05, 1), loc="upper left")
+            else:
+                ax.get_legend().remove()
+
+        plt.tight_layout()
+        out_path = os.path.join(self.out_dir, "error_progression_mae_rmse.png")
+        plt.savefig(out_path, dpi=400, bbox_inches="tight")
+        plt.close()
+        print(f"[INFO] Combined MAE/RMSE progression plot saved → {out_path}")
+
+
+    def summarize_confidence_by_attribute(self):
+        """
+        Compute mean, std, min, max, and coefficient of variation (σ/μ)
+        for confidence values per dataset and attribute,
+        averaged across all beaches.
+        """
+        print("\n[INFO] Computing confidence statistics per attribute and dataset...")
+
+        all_conf = []
+        for dataset in self.datasets:
+            if dataset == "oracle" or dataset.startswith("structural"):
+                continue
+
+            df_events = self.safe_load_csv(os.path.join(self.base_dir, dataset, self.event_file))
+            if df_events.empty or "confidence" not in df_events.columns:
+                continue
+
+            # --- Parse attribute name robustly ---
+            def parse_attribute_from_stream_id(stream_id):
+                if not isinstance(stream_id, str):
+                    return "Unknown"
+                parts = stream_id.split("_")
+                # Try to find 'Beach' and take everything after it
+                if "Beach" in parts:
+                    idx = parts.index("Beach")
+                    attr = " ".join(parts[idx + 1 :]).replace("_", " ").strip()
+                else:
+                    # If no 'Beach', take last segment(s)
+                    attr = " ".join(parts[-2:]).replace("_", " ").strip()
+                return attr if attr else "Unknown"
+
+            # --- Parse beach name for debugging or extended aggregation ---
+            def parse_beach_from_stream_id(stream_id):
+                if not isinstance(stream_id, str):
+                    return "Unknown"
+                parts = stream_id.split("_")
+                if "Beach" in parts:
+                    idx = parts.index("Beach")
+                    beach = " ".join(parts[: idx + 1]).replace("_", " ").strip()
+                else:
+                    beach = parts[0]
+                return beach.strip()
+
+            df_events["attribute"] = df_events["stream_id"].apply(parse_attribute_from_stream_id)
+            df_events["beach"] = df_events["stream_id"].apply(parse_beach_from_stream_id)
+            df_events["dataset"] = dataset
+            df_events["confidence"] = pd.to_numeric(df_events["confidence"], errors="coerce")
+            df_events = df_events.dropna(subset=["confidence"])
+
+            # --- Compute stats per beach × attribute ---
+            stats = (
+                df_events.groupby(["dataset", "beach", "attribute"])["confidence"]
+                .agg(["mean", "std", "min", "max"])
+                .reset_index()
+            )
+            stats["CoeffVar"] = (stats["std"] / stats["mean"]).round(3)
+            all_conf.append(stats.round(4))
+
+        if not all_conf:
+            print("[WARN] No confidence data available.")
+            return
+
+        conf_all = pd.concat(all_conf, ignore_index=True)
+
+        # --- Aggregate across beaches: mean of stats per dataset × attribute ---
+        summary = (
+            conf_all.groupby(["dataset", "attribute"])
+            [["mean", "std", "min", "max", "CoeffVar"]]
+            .mean()
+            .round(4)
+            .reset_index()
+            .sort_values(["attribute", "dataset"])
+        )
+
+        print("\n=== Confidence Statistics per Dataset × Attribute (averaged across beaches) ===")
+        print(summary.to_string(index=False))
+
+        # --- LaTeX-friendly pivot table ---
+        summary["mean_std"] = summary.apply(lambda r: f"{r['mean']:.3f} ± {r['std']:.3f}", axis=1)
+        pivot = summary.pivot(index="attribute", columns="dataset", values="mean_std")
+
         caption = (
-            f"Average F1-scores across confidence thresholds and pattern levels "
-            f"(fixed tolerance = {tolerance:.1f}s)."
+            "Summary statistics of reconstruction confidence (mean ± std) per dataset and attribute "
+            "(averaged across beaches)."
         )
-        label = f"tab:f1_confidence_summary_t{int(tolerance*10)}"
-        latex_path = os.path.join(self.out_dir, f"f1_confidence_summary_t{tolerance:.1f}s.tex")
-
-        latex_str = pivot.to_latex(
-            float_format="%.3f",
-            caption=caption,
-            label=label,
-            multicolumn=True,
-            multicolumn_format="c",
-        )
-
-        wrapped = (
-            "\\begin{table}[H]\n"
-            "\\centering\n"
-            + latex_str
-            + "\\end{table}\n"
-        )
+        label = "tab:confidence_stats_per_dataset_attribute"
+        latex_path = os.path.join(self.out_dir, "confidence_stats_per_dataset_attribute.tex")
 
         with open(latex_path, "w") as f:
-            f.write(wrapped)
+            f.write(
+                pivot.to_latex(
+                    escape=False,
+                    caption=caption,
+                    label=label,
+                    multicolumn=True,
+                    multicolumn_format="c",
+                    column_format="lccc",
+                )
+            )
 
-        print(f"[INFO] LaTeX summary table saved → {latex_path}")
+        print(f"[INFO] LaTeX table saved → {latex_path}")
 
-        return pivot
-
-
-
-
-
-
-
+        return summary
     
-
-
-
-
-
-
-
-
-
-    # ----------------------------------------------------------------------
-    # Visualizations and Charts
-    # ----------------------------------------------------------------------
-
-
-
-
-
-
 
 
 # ================================================================
@@ -400,16 +531,16 @@ class EvaluationPipeline:
 # ================================================================
 if __name__ == "__main__":
     BASE_DIR = "data/logs/experiment_example/Kalman Filter"
-    DATASETS = ["oracle", "structural_10", "structural_20", "structural_30", "hybrid_10", "hybrid_20", "hybrid_30"]
+    DATASETS = ["oracle", "hybrid_10", "hybrid_20", "hybrid_30", "drop_10", "drop_20", "drop_30"]
 
     pipeline = EvaluationPipeline(
         BASE_DIR,
         DATASETS,
-        tolerances=[0.1, 0.25, 0.5, 1.0],
+        tolerances=[0.5],
         confidence_thresholds=[0.65, 0.75, 0.85, 0.95],
     )
 
-    pipeline.summarize_reconstruction_by_attribute()
     pipeline.summarize_reconstruction_by_attribute(metric="MAE")
-    pipeline.summarize_f1_confidence_matrix(tolerance=0.5)
+    pipeline.plot_error_progression()
+    pipeline.summarize_confidence_by_attribute()
 

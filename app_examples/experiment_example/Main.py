@@ -31,9 +31,9 @@ DATASETS = [
     "hybrid_10",
     "hybrid_20",
     "hybrid_30",
-    "structural_10",
-    "structural_20",
-    "structural_30",
+    "drop_10",
+    "drop_20",
+    "drop_30",
 ]
 
 
@@ -58,7 +58,8 @@ class ExperimentBatchOrchestrator:
             LOG.info(f"===== Starting Experiment: {dataset_name} =====")
 
             dataset_file = self.base_data_dir / f"{dataset_name}.csv"
-            streams_config_path = self._generate_streams_config(dataset_file, attributes=self.attributes)
+            drop_mode = dataset_name.startswith("drop_")
+            streams_config_path = self._generate_streams_config(dataset_file, attributes=self.attributes, drop_mode=drop_mode)
 
             orch = ExperimentOrchestrator(
                 pattern_cfg=self.pattern_cfg,
@@ -84,9 +85,12 @@ class ExperimentBatchOrchestrator:
             LOG.info(f"===== Completed Experiment: {dataset_name} =====")
             time.sleep(15)  # cooldown before next run
 
-    def _generate_streams_config(self, dataset_file: Path, attributes: dict = ATTRIBUTES_KF):
-        """Dynamically generate and write the streams config for one dataset."""
+    def _generate_streams_config(self, dataset_file: Path, attributes: dict = ATTRIBUTES_KF, drop_mode=False):
+        logging.info(f"Drop mode set to: {drop_mode}")
         cfg = {}
+
+        # detect if this dataset is a drop variant
+        drop_mode = dataset_file.stem.startswith("drop_")
 
         for beach in BEACHES:
             for col_name, unit, predictor in attributes:
@@ -100,6 +104,7 @@ class ExperimentBatchOrchestrator:
                         "file": str(dataset_file),
                         "beach": beach,
                         "col": col_name,
+                        "drop_missing": drop_mode,
                     },
                     "predictor_template": predictor
                 }
@@ -110,7 +115,7 @@ class ExperimentBatchOrchestrator:
             json.dump(cfg, f, indent=4)
 
         return str(cfg_path)
-    
+
 
 def main():
     timestamp = time.strftime("%Y%m%d-%H%M%S")

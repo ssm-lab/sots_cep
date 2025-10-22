@@ -34,7 +34,7 @@ class Reconstructor(EventConsumer):
             "confidence": 1.0,
             "status": "reconstructed",
             "reconstructed_value": prediction,
-            "reconstructed_confidence": self.predictor.confidence(),
+            "reconstructed_confidence": self.predictor.confidence(observed_value=observed_value),
             "reconstruction_flag": False,
             "reconstruction_method": self.predictor.name,
             "reconstruction_time": time.time(),
