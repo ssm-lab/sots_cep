@@ -1,6 +1,5 @@
 import pytest
-import numpy as np
-from app.core.reconstruction.predictor_types.Filters import KalmanFilter, ParticleFilter
+from app.core.reconstruction.predictor_types.Filters import KalmanFilter
 
 # Run this file directly with:
 #   pytest -s tests/test_predictors.py
@@ -40,36 +39,3 @@ def test_kalman_filter_confidence_progression():
     print(f"Initial confidence: {base_conf:.3f}")
     print("Decay trend:   ", [round(c, 3) for c in decay_confidences])
     print("Rebound trend: ", [round(c, 3) for c in rebound_confidences])
-
-
-def test_particle_filter_confidence_progression():
-    predictor = ParticleFilter(num_particles=500, process_std=0.2, meas_std=0.05, initial_value=10.0)
-
-    # Initial update
-    predictor.update(10.0)
-    base_conf = predictor.confidence()
-    assert 0.0 <= base_conf <= 1.0
-
-    decay_confidences = []
-    for _ in range(10):
-        predictor.predict()
-        decay_confidences.append(predictor.confidence())
-
-    # Should decay (though may fluctuate slightly)
-    assert np.mean(decay_confidences[-3:]) < base_conf
-
-    rebound_confidences = []
-    for _ in range(5):
-        predictor.update(10.0)
-        rebound_confidences.append(predictor.confidence())
-
-    # Should recover
-    assert rebound_confidences[-1] > np.mean(decay_confidences[-3:])
-
-    final_estimate = np.mean(predictor.particles)
-    assert abs(final_estimate - 10.0) < 1.0
-
-    print("\n--- ParticleFilter Confidence Progression ---")
-    print(f"Initial confidence: {base_conf:.3f}")
-    print("Decay trend:   ", [round(float(c), 3) for c in decay_confidences])
-    print("Rebound trend: ", [round(float(c), 3) for c in rebound_confidences])

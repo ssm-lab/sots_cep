@@ -9,150 +9,97 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Event {
-    // Core fields
-    @JsonProperty("stream_id")
-    private String streamId;
 
-    @JsonProperty("event_id")
-    private String eventId;
+    @JsonProperty("id")
+    private String id;
 
-    @JsonProperty("sampled_ts")
-    private Double sampledTs;
+    @JsonProperty("type")
+    private String type;
 
-    @JsonProperty("arrival_ts")
-    private Double arrivalTs;
+    @JsonProperty("src")
+    private String src;
 
     @JsonProperty("event_ts")
     private Double eventTs;
 
-    @JsonProperty("datatype")
-    private String datatype;
-
-    @JsonProperty("unit")
-    private String unit;
-
-    @JsonProperty("origin")
-    private String origin;
-
     @JsonProperty("value")
     private Double value;
-
-    // Reconstruction fields
-    @JsonProperty("reconstructed_value")
-    private Double reconstructedValue;
-    
-    @JsonProperty("reconstructed_confidence")
-    private Double reconstructedConfidence;
-
-    @JsonProperty("reconstruction_method")
-    private String reconstructionMethod;
 
     @JsonProperty("confidence")
     private Double confidence;
 
-    @JsonProperty("reconstruction_flag")
-    private Boolean reconstructionFlag;
+    @JsonProperty("event_status")
+    private String eventStatus;
 
-    // Metadata
-    @JsonProperty("status")
-    private String status;
+    @JsonProperty("value_datatype")
+    private String valueDatatype;
 
-    @JsonProperty("source")
-    private String source;
+    @JsonProperty("value_unit")
+    private String valueUnit;
 
     @JsonProperty("extras")
     private Map<String, Object> extras;
 
-    // --- Constructors ---
+
+
     public Event() {}
 
-    public Event(String streamId, String eventId, Double sampledTs, Double value,
-                 String datatype, String unit, String origin, String status,
-                 String source, Map<String, Object> extras) {
-        this.streamId = streamId;
-        this.eventId = eventId;
-        this.sampledTs = sampledTs;
-        this.value = value;
-        this.datatype = datatype;
-        this.unit = unit;
-        this.origin = origin;
-        this.status = status;
-        this.source = source;
-        this.extras = extras;
+    public Event(
+            String id,
+            String type,
+            String src,
+            String eventStatus
+    ) {
+        this.id = id;
+        this.type = type;
+        this.src = src;
+        this.eventStatus = eventStatus;
     }
 
-    // --- Getters and Setters ---
-    public String getStreamId() { return streamId; }
-    public void setStreamId(String streamId) { this.streamId = streamId; }
 
-    public String getEventId() { return eventId; }
-    public void setEventId(String eventId) { this.eventId = eventId; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public Double getSampledTs() { return sampledTs; }
-    public void setSampledTs(Double sampledTs) { this.sampledTs = sampledTs; }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-    public Double getArrivalTs() { return arrivalTs; }
-    public void setArrivalTs(Double arrivalTs) { this.arrivalTs = arrivalTs; }
+    public String getSrc() { return src; }
+    public void setSrc(String src) { this.src = src; }
 
     public Double getEventTs() { return eventTs; }
     public void setEventTs(Double eventTs) { this.eventTs = eventTs; }
 
-    public String getDatatype() { return datatype; }
-    public void setDatatype(String datatype) { this.datatype = datatype; }
-
-    public String getUnit() { return unit; }
-    public void setUnit(String unit) { this.unit = unit; }
-
-    public String getOrigin() { return origin; }
-    public void setOrigin(String origin) { this.origin = origin; }
-
     public Double getValue() { return value; }
     public void setValue(Double value) { this.value = value; }
-
-    public Double getReconstructedValue() { return reconstructedValue; }
-    public void setReconstructedValue(Double reconstructedValue) { this.reconstructedValue = reconstructedValue; }
-    
-    public Double reconstructedConfidence() { return reconstructedConfidence; }
-    public void reconstructedConfidence(Double reconstructedConfidence) { this.reconstructedConfidence = reconstructedConfidence; }
-
-    public String getReconstructionMethod() { return reconstructionMethod; }
-    public void setReconstructionMethod(String reconstructionMethod) { this.reconstructionMethod = reconstructionMethod; }
 
     public Double getConfidence() { return confidence; }
     public void setConfidence(Double confidence) { this.confidence = confidence; }
 
-    public Boolean getReconstructionFlag() { return reconstructionFlag; }
-    public void setReconstructionFlag(Boolean reconstructionFlag) { this.reconstructionFlag = reconstructionFlag; }
+    public String getEventStatus() { return eventStatus; }
+    public void setEventStatus(String eventStatus) { this.eventStatus = eventStatus; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public String getValueDatatype() { return valueDatatype; }
+    public void setValueDatatype(String valueDatatype) { this.valueDatatype = valueDatatype; }
 
-    public String getSource() { return source; }
-    public void setSource(String source) { this.source = source; }
+    public String getValueUnit() { return valueUnit; }
+    public void setValueUnit(String valueUnit) { this.valueUnit = valueUnit; }
 
     public Map<String, Object> getExtras() { return extras; }
     public void setExtras(Map<String, Object> extras) { this.extras = extras; }
 
-    // --- toString for debugging/logging ---
+
     @Override
     public String toString() {
         return "Event{" +
-                "streamId='" + streamId + '\'' +
-                ", eventId='" + eventId + '\'' +
-                ", sampledTs=" + sampledTs +
-                ", arrivalTs=" + arrivalTs +
+                "id='" + id + '\'' +
+                ", type='" + type + '\'' +
+                ", src='" + src + '\'' +
                 ", eventTs=" + eventTs +
-                ", datatype='" + datatype + '\'' +
-                ", unit='" + unit + '\'' +
-                ", origin='" + origin + '\'' +
                 ", value=" + value +
-                ", reconstructedValue=" + reconstructedValue +
-                ", reconstructedConfidence=" + reconstructedConfidence +
-                ", reconstructionMethod='" + reconstructionMethod + '\'' +
                 ", confidence=" + confidence +
-                ", reconstructionFlag=" + reconstructionFlag +
-                ", status='" + status + '\'' +
-                ", source='" + source + '\'' +
+                ", eventStatus='" + eventStatus + '\'' +
+                ", valueDatatype='" + valueDatatype + '\'' +
+                ", valueUnit='" + valueUnit + '\'' +
                 ", extras=" + extras +
                 '}';
     }

@@ -155,39 +155,3 @@ class KalmanFilter(BasePredictor):
             self.last_confidence = float(np.clip(c, 1e-6, 1.0))
             self.last_trace = current_trace
             return self.last_confidence
-
-
-
-
-@register_predictor("ParticleFilter")
-class ParticleFilter(BasePredictor):
-    def __init__(self, num_particles=500, process_std=0.2, meas_std=0.05, initial_value=0.0):
-        super().__init__("ParticleFilter")
-        self.num_particles = num_particles
-        self.particles = np.ones(num_particles) * initial_value
-        self.weights = np.ones(num_particles) / num_particles
-        self.process_std = process_std
-        self.meas_std = meas_std
-
-    def predict(self):
-        # Propagate particles with noise
-        self.particles += np.random.normal(0, self.process_std, self.num_particles)
-        return float(np.mean(self.particles))
-
-    def update(self, observed_value: float):
-        # Compute likelihoods
-        likelihoods = np.exp(-0.5 * ((self.particles - observed_value) / self.meas_std) ** 2)
-        likelihoods += 1e-12  # avoid zeros
-        self.weights *= likelihoods
-        self.weights /= np.sum(self.weights)
-
-        # Resample
-        indices = np.random.choice(self.num_particles, self.num_particles, p=self.weights)
-        self.particles = self.particles[indices]
-        self.weights.fill(1.0 / self.num_particles)
-        return float(np.mean(self.particles))
-
-    def confidence(self):
-        variance = np.var(self.particles)
-        confidence = 1.0 / (1.0 + np.log1p(variance))
-        return max(0.0, min(1.0, confidence))

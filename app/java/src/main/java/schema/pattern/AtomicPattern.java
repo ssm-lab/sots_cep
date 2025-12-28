@@ -17,9 +17,9 @@ public class AtomicPattern extends Pattern {
 
         // Derive representative stream ID
         if (!events.isEmpty()) {
-            this.streamId = events.get(0).getStreamId();
+            this.streamId = events.get(0).getSrc();
             for (Event e : events) {
-                this.addStreamId(e.getStreamId());
+                this.addStreamId(e.getSrc());
             }
         }
     }

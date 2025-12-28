@@ -12,14 +12,14 @@ import java.util.stream.Collectors;
 
 public class PatternLogger implements AutoCloseable {
     private final PrintWriter writer;
-    private final long experimentStart;  // 🔹 reference timestamp
+    private final long experimentStart;
 
     public PatternLogger(String runDir) throws IOException {
         Files.createDirectories(Paths.get(runDir));
         Path file = Paths.get(runDir, "patterns.csv");
         this.writer = new PrintWriter(new FileWriter(file.toFile(), false));
 
-        this.experimentStart = System.currentTimeMillis();  // 🔹 baseline for relative time
+        this.experimentStart = System.currentTimeMillis();
 
         writer.println("# Logger: PatternLogger | Started: " + new Date());
         writer.println("fired_at,fired_offset_sec,pattern_name,pattern_type,"
@@ -28,7 +28,7 @@ public class PatternLogger implements AutoCloseable {
 
     public synchronized void log(Pattern record) {
         long now = System.currentTimeMillis();
-        double offsetSec = (now - experimentStart) / 1000.0;  // 🔹 relative time since experiment start
+        double offsetSec = (now - experimentStart) / 1000.0;
 
         String firedAt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date(now));
 
@@ -45,7 +45,7 @@ public class PatternLogger implements AutoCloseable {
 
         List<String> nestedEventGroups = record.getEventsNested().stream()
                 .map(inner -> inner.stream()
-                        .map(Event::getEventId)
+                        .map(Event::getId)
                         .filter(Objects::nonNull)
                         .collect(Collectors.joining(";", "[", "]")))
                 .collect(Collectors.toList());
@@ -61,7 +61,7 @@ public class PatternLogger implements AutoCloseable {
 
         writer.printf("%s,%.3f,%s,%s,%s,%s,%d,%d,%.4f,%s%n",
                 firedAt,
-                offsetSec, // 🔹 new field: relative offset (seconds)
+                offsetSec,
                 record.getPatternName(),
                 record.getPatternType(),
                 subpatternField,

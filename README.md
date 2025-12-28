@@ -6,12 +6,12 @@
 
 - `/app` – Core project code  
   - `/core` – Main Python modules  
-    - `/bridge` – Python–Java bridge 
+    - `/processor` – Python–Java CEP Engine bridge 
     - `/communication` – ZMQ-based server/client abstractions for message routing  
     - `/reconstruction` – Predictors and reconstructors handling missing or uncertain data  
     - `/runtime` – Coordinator and execution logic  
     - `/schema` – Shared event schemas and serialization logic  
-    - `/stream` – Data stream definitions (simulated, reconstructed, or dataset-based)  
+    - `/source` – Data source definitions (simulated, reconstructed, or dataset-based)  
     - `/utils` – Logging, configuration, and helper utilities  
   - `/java` – Java integration layer (Esper CEP engine and orchestration)
     - `/src/main/java/app` – Java source code organized into packages:

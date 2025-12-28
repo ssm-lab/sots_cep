@@ -77,7 +77,9 @@ import logging
 from app.core.utils.UtilsFuncs import _deserialize_event, _serialize_event
 from ..Client import Client
 import threading
+from ..ClientRegistry import register_client_type
 
+@register_client_type("zmq")
 class ZMQClient(Client):
     def __init__(self, partition: str, pub_endpoint="tcp://localhost:5558", sub_endpoint="tcp://localhost:5557"):
         self.partition = partition

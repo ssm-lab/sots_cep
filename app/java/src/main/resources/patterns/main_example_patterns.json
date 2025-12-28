@@ -3,19 +3,19 @@
     "name": "Overspeeding",
     "type": "atomic",
 	"description": "",
-    "epl": "@Name('Overspeeding') select e from Event as e where e.streamId='speed-1' and e.value > 25 and confidence > 0.75"
+    "epl": "@Name('Overspeeding') select e from Event as e where e.src='speed-1' and e.value > 25 and confidence > 0.75"
   },
   {
     "name": "EngineOverheat",
     "type": "atomic",
 	"description": "",
-    "epl": "@Name('EngineOverheat') select e from Event as e where e.streamId='engine-temp-1' and e.value > 25 and confidence > 0.75"
+    "epl": "@Name('EngineOverheat') select e from Event as e where e.src='engine-temp-1' and e.value > 25 and confidence > 0.75"
   },
   {
     "name": "LowFuel",
     "type": "atomic",
 	"description": "",
-    "epl": "@Name('LowFuel') select e from Event as e where e.streamId='fuel-1' and e.value < 40 and confidence > 0.75"
+    "epl": "@Name('LowFuel') select e from Event as e where e.src='fuel-1' and e.value < 40 and confidence > 0.75"
   },
   {
     "name": "HighSpeedOverheat",

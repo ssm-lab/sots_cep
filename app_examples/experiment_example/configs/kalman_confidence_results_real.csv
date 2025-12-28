@@ -1,5 +1,0 @@
-Attribute,Best α,"Corr(Conf,Err)",Mean Conf,Mean Abs Err,CoeffVar (σ/μ)
-Water Temperature,0.10,-0.260,0.936,0.271,0.160
-Turbidity,1.00,-0.011,0.938,0.136,4.103
-Wave Height,0.10,-0.184,0.935,0.017,0.523
-Wave Period,0.20,-0.751,0.711,1.082,0.396

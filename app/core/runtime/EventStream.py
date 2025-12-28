@@ -1,4 +1,5 @@
 import logging
+import threading
 from typing import Type
 from app.core.runtime.EventConsumer import EventConsumer
 from app.core.schema.Event import Event
@@ -10,12 +11,10 @@ class EventStream:
     """
     Core event bus for the system.
     Handles publish/subscribe of events across partitions and streams.
-    Uses a pluggable MessagingClient backend (e.g., ZMQClient, KafkaClient).
     """
 
     def __init__(self, client_type: Type[Client]):
         self.client_type = client_type
-        # dict[partition -> dict[stream_id -> Client]]
         self.partitions: dict[str, dict[str, Client]] = {
             "observed": self.client_type(partition="observed"),
             "reconstructed": self.client_type(partition="reconstructed"),
@@ -23,19 +22,19 @@ class EventStream:
 
         self._running = False
 
-    def _get_client(self, partition: str, stream_id: str) -> Client:
+    def _get_client(self, partition: str, source_id: str) -> Client:
         if partition not in self.partitions:
             raise ValueError(f"Unknown partition: {partition}")
         return self.partitions[partition]
 
-    def add_event(self, event: Event, partition: str, stream_id: str):
-        client = self._get_client(partition, stream_id)
-        logging.debug(f"[EVENTSTREAM] Adding event to {partition}.{stream_id}: {event}")
-        client.publish(event, stream_id)
+    def add_event(self, event: Event, partition: str, source_id: str):
+        client = self._get_client(partition, source_id)
+        logging.debug(f"[EVENTSTREAM] Adding event to {partition}.{source_id}: {event}")
+        client.publish(event, source_id)
 
-    def subscribe(self, consumer: EventConsumer, partition: str, stream_id: str):
-        client = self._get_client(partition, stream_id)
-        client.subscribe_to(stream_id, consumer)
+    def subscribe(self, consumer: EventConsumer, partition: str, source_id: str):
+        client = self._get_client(partition, source_id)
+        client.subscribe_to(source_id, consumer)
         
     def dispatch(self, timeout: int = 1):
         self._running = True
@@ -43,7 +42,21 @@ class EventStream:
             for client in self.partitions.values():
                 client.poll_once(timeout=timeout)
 
+    def start(self, timeout: int = 1):
+            if self._running:
+                return
+
+            self._running = True
+            self._thread = threading.Thread(
+                target=self.dispatch,
+                kwargs={"timeout": timeout},
+                daemon=True,
+                name="eventstream-dispatch",
+            )
+            self._thread.start()
 
     def stop(self):
         logging.info("[EVENTSTREAM] Stopping dispatch loop.")
         self._running = False
+        if hasattr(self, "_thread"):
+            self._thread.join(timeout=1.0)

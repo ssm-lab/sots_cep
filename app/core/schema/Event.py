@@ -1,72 +1,77 @@
-from typing import Any, Dict, TypedDict, Optional
-import time
+from typing import TypedDict, Optional, Any, Literal
+import uuid
 
 __author__ = "Feyi Adesanya"
 
-class Event(TypedDict, total=False):
-    stream_id: str
-    event_id: str
-    sampled_ts: float
-    arrival_ts: Optional[float]
-    event_ts: Optional[float]
-    datatype: str
-    unit: Optional[str]
-    value: Optional[float]
-    origin: str
+EventStatus = Literal["observed", "reconstructed"]
 
-    reconstructed_value: Optional[float]
-    reconstructed_confidence: Optional[float]
-    reconstruction_method: Optional[str]
-    confidence: Optional[float]
-    reconstruction_flag: Optional[bool]
+
+class Event(TypedDict, total=False):
+    id: str
+    type: str
+    src: str
+
+    # observation
+    event_ts: Optional[float]
+    value: Optional[Any]
+
+    # uncertainty
+    confidence: Any
 
     # metadata
-    status: str
-    source: str
-    extras: Optional[dict[str, Any]]
+    event_status: EventStatus
+    value_datatype: str
+    value_unit: Optional[str]
+
+    # extensions
+    extras: dict[str, Any]
 
 
 def make_event(
-    stream_id: str,
-    event_id: str,
-    value: Optional[float],
-    datatype: str,
-    origin: str,
-    unit: Optional[str] = None,
-    sampled_ts: Optional[float] = None,
+    *,
+    type: str,
+    src: str,
+    event_status: EventStatus,
+    value: Optional[Any] = None,
     event_ts: Optional[float] = None,
-    arrival_ts: Optional[float] = None,
-    status: str = "observed",
-    source: str = "unknown",
-    reconstructed_value: Optional[float] = None,
-    reconstructed_confidence: Optional[float] = None,
-    reconstruction_method: Optional[str] = None,
-    confidence: Optional[float] = None,
-    reconstruction_flag: Optional[bool] = None,
-    extras: Optional[Dict[str, Any]] = None,
+    confidence: Optional[Any] = None,
+    value_datatype: str = "unknown",
+    value_unit: Optional[str] = None,
+    extras: Optional[dict[str, Any]] = None,
+    id: Optional[str] = None,
 ) -> Event:
-    now = time.time()
-    event_ts = event_ts or sampled_ts
-    arrival_ts = arrival_ts or now
+    
+    """
+    Create an event that conforms to the event model.
+    """
 
-    return {
-        "stream_id": stream_id,
-        "event_id": event_id,
-        "sampled_ts": sampled_ts,
-        "event_ts": event_ts,
-        "arrival_ts": arrival_ts,
-        "datatype": datatype,
-        "unit": unit,
-        "value": value,
-        "origin": origin,
-        "reconstructed_value": reconstructed_value,
-        "reconstructed_confidence": reconstructed_confidence,
-        "reconstruction_method": reconstruction_method,
-        "confidence": confidence,
-        "reconstruction_flag": reconstruction_flag,
-        # metadata
-        "status": status,
-        "source": source,
-        # always forward extras (at least an empty dict)
-        "extras": extras if extras is not None else {},
+    if event_status == "reconstructed" and confidence is None:
+        raise ValueError("Reconstructed events must include confidence")
+
+    if event_status == "observed" and value is None:
+        raise ValueError("Observed events must carry a value")
+
+    event: Event = {
+        "id": id or str(uuid.uuid4()),
+        "type": type,
+        "src": src,
+        "event_status": event_status,
+        "value_datatype": value_datatype,
     }
+
+    if event_ts is not None:
+        event["event_ts"] = event_ts
+
+    if value is not None:
+        event["value"] = value
+
+    if confidence is not None:
+        event["confidence"] = confidence
+
+    if value_unit is not None:
+        event["value_unit"] = value_unit
+
+    if extras is not None:
+        event["extras"] = extras
+
+    return event

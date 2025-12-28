@@ -1,46 +1,34 @@
 [
   {
-    "name": "Overspeeding",
-    "epl": "@Name('Overspeeding') select e as event from Event as e where e.status='reconstructed' and e.streamId='speed-1' and e.value > 25"
+    "name": "PeriodicSpeedUpdate",
+    "type": "atomic",
+    "description": "Emits periodic summary updates of average speed and confidence for each source over a fixed time window.",
+    "epl": "@Name('PeriodicSpeedUpdate') select e.src as sourceId, avg(e.value) as avgSpeed, avg(e.confidence) as avgConfidence from Event.win:time(5 sec) as e group by e.src"
   },
   {
-    "name": "EngineOverheat",
-    "epl": "@Name('EngineOverheat') select e as event from Event as e where e.status='reconstructed' and e.streamId='engine-temp-1' and e.value > 28"
+    "name": "HighSpeed",
+    "type": "atomic",
+    "description": "Detects individual speed observations that exceed a high-speed threshold.",
+    "epl": "@Name('HighSpeed') select e from Event as e where e.value > 120"
   },
   {
-    "name": "LowFuel",
-    "epl": "@Name('LowFuel') select e as event from Event as e where e.status='reconstructed' and e.streamId='fuel-1' and e.value < 15.5"
+    "name": "LowConfidenceSpeed",
+    "type": "atomic",
+    "description": "Detects speed events with reduced confidence, typically indicating reconstructed or degraded observations.",
+    "epl": "@Name('LowConfidenceSpeed') select e from Event as e where e.confidence < 0.7"
   },
   {
-    "name": "HighSpeedOverheat",
-    "epl": "@Name('HighSpeedOverheat') select a as speedEvent, b as tempEvent from pattern [every a=Event(status='reconstructed', streamId='speed-1', value > 20) -> b=Event(status='reconstructed', streamId='engine-temp-1', value > 27)]"
+    "name": "BothFast",
+    "type": "complex",
+    "description": "Detects correlated high-speed behavior across both simulated sources within a short time window.",
+    "epl": "@Name('BothFast') select a as firstEvt, b as secondEvt from pattern [ every a=Event(value > 110) -> b=Event(src != a.src and value > 110) where timer:within(3 sec) ]",
+    "confidence": { "aggregation": "min" }
   },
   {
-    "name": "CriticalCondition",
-    "epl": "@Name('CriticalCondition') select s as speedEvent, t as tempEvent, f as fuelEvent from pattern [every s=Event(status='reconstructed', streamId='speed-1', value > 20) -> t=Event(status='reconstructed', streamId='engine-temp-1', value > 27) -> f=Event(status='reconstructed', streamId='fuel-1', value < 15.5)]"
-  },
-  {
-    "name": "NormalCruise",
-    "epl": "@Name('NormalCruise') select e as event from Event as e where e.status='reconstructed' and e.streamId='speed-1' and e.value between 15 and 25"
-  },
-  {
-    "name": "GradualFuelDrop",
-    "epl": "@Name('GradualFuelDrop') select a as firstEvent, b as secondEvent from pattern [every a=Event(status='reconstructed', streamId='fuel-1') -> b=Event(status='reconstructed', streamId='fuel-1', value < a.value)]"
-  },
-  {
-    "name": "WarmEngine",
-    "epl": "@Name('WarmEngine') select e as event from Event as e where e.status='reconstructed' and e.streamId='engine-temp-1' and e.value between 24 and 28"
-  },
-  {
-    "name": "StopAndGo",
-    "epl": "@Name('StopAndGo') select a as stop, b as go from pattern [every a=Event(status='reconstructed', streamId='speed-1', value < 16) -> b=Event(status='reconstructed', streamId='speed-1', value > 20)]"
-  },
-  {
-    "name": "SpeedOscillation",
-    "epl": "@Name('SpeedOscillation') select a as accel, b as brake from pattern [every a=Event(status='reconstructed', streamId='speed-1', value > 22) -> b=Event(status='reconstructed', streamId='speed-1', value < 18)]"
-  },
-  {
-    "name": "OverheatCooldown",
-    "epl": "@Name('OverheatCooldown') select hot as overheat, cool as cooldown from pattern [every hot=Event(status='reconstructed', streamId='engine-temp-1', value > 28) -> cool=Event(status='reconstructed', streamId='engine-temp-1', value < 25)]"
+    "name": "SustainedHighSpeed",
+    "type": "complex",
+    "description": "Detects sustained high-speed behavior from the same source across consecutive observations.",
+    "epl": "@Name('SustainedHighSpeed') select a as firstEvt, b as nextEvt from pattern [ every a=Event(value > 100) -> b=Event(src = a.src and value > 100) where timer:within(4 sec) ]",
+    "confidence": { "aggregation": "avg" }
   }
 ]

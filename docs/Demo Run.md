@@ -1,20 +1,22 @@
 # Example Run (Main Example)  
-To demonstrate the pipeline, we provide a demo that ties all components together. Located in app_examples/main_example
+To demonstrate the complete pipeline, we provide a self-contained demo located in `app_examples/main_example`. The demo is executed through the **Orchestrator**, which assembles and manages all components automatically.
+
+---
 
 ## Demo Scenario  
-The `main_example` demo simulates a **vehicle digital twin** with three core data streams:  
+The `main_example` demo simulates a **vehicle digital twin** with three simulated event sources:  
 
 - **Speed (`speed-1`)**: Simulated vehicle speed in arbitrary units.  
 - **Engine Temperature (`engine-temp-1`)**: Simulated thermal state of the engine.  
 - **Fuel Level (`fuel-1`)**: Simulated remaining fuel percentage.  
 
-These streams are subject to dropouts and reconstructions, then fed into the CEP engine to detect meaningful patterns about the vehicle’s operational state.  
+Each source emits events at its own configured interval and may experience intermittent dropouts. When observations are missing, reconstructed events are generated and re-inserted into the event stream with associated confidence metadata. All events, observed and reconstructed, are then processed uniformly by the CEP engine.
 
 ---
 
 ## Patterns Tracked  
 
-The CEP engine listens to the **reconstructed partition** and continuously evaluates the following patterns:  
+The CEP engine listens to the event stream and continuously evaluates the following patterns:  
 
 ### Atomic Patterns  
 - **Overspeeding**: Speed exceeds 25.  
@@ -41,26 +43,30 @@ The CEP engine listens to the **reconstructed partition** and continuously evalu
 ## Configuration Used  
 
 - **Patterns**: `patterns/main_example_patterns.json`  
-- **Streams Settings**: `app_examples/main_example/configs/streams.json`  
-- **Filters Settings**: `app_examples/main_example/configs/filters.json`  
-- **Logs**: Written to `data/logs/main_example/` with a timestamped subfolder.  
+- **Event sources Settings**: `app_examples/main_example/configs/sources.json`  
+- **Predictor Settings**: `app_examples/main_example/configs/predictors.json`  
+- **Config Settings**: `app_examples/main_example/configs/config.json` 
+- **Logs**: Written to `data/logs/main_example/demo_run` with a timestamped subfolder.  
 
 ---
 
 ## Expected Flow  
 
 ### 1. Startup  
-- The **Orchestrator** launches the ZMQ server, CEP engine (Esper by default), logger, and coordinator.  
-- Each stream is registered and scheduled.  
+- The Orchestrator loads all configuration files.
+Messaging infrastructure (ZMQ server and clients) is started.
+The CEP engine (Esper) is launched.
+The event stream, coordinator, and logger are initialized.
+Event sources are dynamically constructed and scheduled.
 
 ### 2. Event Generation  
-- Example streams (e.g., `speed`, `engine-temp`) begin producing events at fixed intervals.  
-- Events are routed into the **observed** partition.  
+- Example event sources (e.g., `speed`, `engine-temp`) begin producing events at configured intervals.  
+- Events are published into the EventStream with status = observed..  
 
 ### 3. Reconstruction  
-- When a stream does not emit a scheduled event, the **Coordinator** invokes its reconstructor.  
+- When a event source does not emit a scheduled event, the **Coordinator** invokes its reconstructor.  
 - The **Reconstructor** uses a predictor (e.g., **Kalman filter**) to impute the value and generates a confidence score.  
-- Both observed and reconstructed events flow into the **reconstructed** partition.  
+- A reconstructed event is emitted back into the EventStream with status = reconstructed
 
 ### 4. CEP Pattern Detection  
 - **Esper** listens to the reconstructed partition.  
