@@ -105,10 +105,10 @@ class SimulatedEventSource(EventSource):
                 logging.debug(f"[EVENT SOURCE-{self.id}] SKIPPING EVENT for {now}")
                 return None
 
-        return self.emit({
+        return self.emit_event({
             "value": self.current_value,
             "event_ts": now,
-            "confidence": 1,
+            "confidence": 1.0,
             "value_unit": self.value_unit,
             "value_datatype": self.value_datatype,
             "extras": {

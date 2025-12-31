@@ -14,3 +14,10 @@ class EventGenerator(ABC):
         Produce the next event payload for this source.
         """
         pass
+
+    @abstractmethod
+    def emit_event(self):
+        """
+        Emit the event onto the Event Stream
+        """
+        pass

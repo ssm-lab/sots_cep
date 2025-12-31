@@ -22,8 +22,12 @@ public class PatternLogger implements AutoCloseable {
         this.experimentStart = System.currentTimeMillis();
 
         writer.println("# Logger: PatternLogger | Started: " + new Date());
-        writer.println("fired_at,fired_offset_sec,pattern_name,pattern_type,"
-                + "subpatterns,subpattern_confidences,num_subpatterns,num_events,confidence,nested_event_ids");
+        writer.println(
+            "fired_at,fired_offset_sec,pattern_name,pattern_type,"
+            + "subpatterns,subpattern_confidences,"
+            + "num_subpatterns,num_events,confidence,"
+            + "contributing_streams,nested_event_ids"
+            );
     }
 
     public synchronized void log(Pattern record) {
@@ -58,18 +62,26 @@ public class PatternLogger implements AutoCloseable {
 
         int numSub = record.countSubPatterns();
         int numEvents = record.countAllEvents();
+        String streamField = "[" + record.getSourceIds().stream()
+        .sorted()
+        .collect(Collectors.joining(";")) + "]";
 
-        writer.printf("%s,%.3f,%s,%s,%s,%s,%d,%d,%.4f,%s%n",
-                firedAt,
-                offsetSec,
-                record.getPatternName(),
-                record.getPatternType(),
-                subpatternField,
-                subConfField,
-                numSub,
-                numEvents,
-                record.getConfidence(),
-                nestedJsonLike);
+
+        writer.printf(
+            "%s,%.3f,%s,%s,%s,%s,%d,%d,%.4f,%s,%s%n",
+            firedAt,
+            offsetSec,
+            record.getPatternName(),
+            record.getPatternType(),
+            subpatternField,
+            subConfField,
+            numSub,
+            numEvents,
+            record.getConfidence(),
+            streamField,
+            nestedJsonLike
+        );
+
 
         writer.flush();
     }

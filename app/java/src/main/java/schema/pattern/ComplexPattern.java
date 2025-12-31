@@ -16,12 +16,7 @@ public class ComplexPattern extends Pattern {
         // Merge subpatterns’ nested events
         for (Pattern p : subPatterns) {
             this.eventsNested.addAll(p.getEventsNested());
-            this.streamIds.addAll(p.getStreamIds());
-        }
-
-        // Choose representative stream ID (first subpattern)
-        if (!subPatterns.isEmpty()) {
-            this.streamId = subPatterns.get(0).getStreamId();
+            this.sourceIds.addAll(p.getSourceIds());
         }
     }
 
@@ -29,7 +24,7 @@ public class ComplexPattern extends Pattern {
         return subPatterns;
     }
 
-    /** Returns names of all immediate subpatterns (for logging). */
+    /** Returns names of all immediate subpatterns. */
     public List<String> getSubpatternNames() {
         List<String> names = new ArrayList<>();
         for (Pattern p : subPatterns) {
@@ -38,7 +33,7 @@ public class ComplexPattern extends Pattern {
         return names;
     }
 
-    /** Returns confidences of all immediate subpatterns (for logging). */
+    /** Returns confidences of all immediate subpatterns. */
     public List<Double> getSubpatternConfidences() {
         List<Double> confs = new ArrayList<>();
         for (Pattern p : subPatterns) {
