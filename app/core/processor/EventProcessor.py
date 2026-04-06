@@ -2,10 +2,7 @@ import logging
 import logging
 import os
 import shutil
-import signal
 import subprocess
-
-import psutil
 
 __author__ = "Feyi Adesanya"
 
@@ -21,6 +18,7 @@ class EventProcessor:
         self.rebuild = rebuild
         self.log_matches = log_matches
         self.proc = None
+        self.pid = None
 
     def start(self):
         """Start the Java CEP engine as a subprocess."""
@@ -32,15 +30,15 @@ class EventProcessor:
             args=[self.pattern_cfg, self.run_dir, self.log_matches],
             rebuild=self.rebuild
         )
+        self.pid = self.proc.pid
+        logging.info(f"[JavaCEPBridge] Started Java PID={self.pid}")
 
     def stop(self):
         """Stop the Java CEP engine subprocess."""
         if self.proc:
             logging.info("[JavaCEPBridge] Stopping Java process")
-            stop_java(self.proc)
+            stop_java(self.proc, self.pid)
             self.proc = None
-
-
 
 
 # Utility functions for starting and stopping a Java process.
@@ -66,7 +64,7 @@ def build_java(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
-        shell=True, # change to false
+        shell=True,
     )
 
     if result.returncode != 0:
@@ -84,8 +82,6 @@ def start_java(
     args: list[str] = None,
     rebuild: bool = False
 ):
-    """ Launches the Java process. """
-
     jar_path = os.path.join(java_dir, "target", jar_name)
 
     if rebuild or not os.path.exists(jar_path):
@@ -103,26 +99,25 @@ def start_java(
     return subprocess.Popen(cmd)
 
 
-def stop_java(proc):
-    """Terminate the Java subprocess safely on Windows and Unix."""
+def stop_java(proc, pid=None):
     if not proc:
         return
     try:
         logging.info("[MAIN] Attempting to stop Java process...")
-        proc.terminate()  # sends CTRL_BREAK on Windows
+        proc.terminate()
         try:
             proc.wait(timeout=8)
-            logging.info("[MAIN] Java stopped gracefully.")
+            logging.info("[MAIN] Java stopped.")
         except subprocess.TimeoutExpired:
-            logging.warning("[MAIN] Java unresponsive — forcing kill.")
+            logging.warning("[MAIN] unresponsive — forcing kill.")
             proc.kill()
             proc.wait()
     except Exception as e:
         logging.error(f"[MAIN] Failed to stop Java process: {e}")
 
     # kill all leftover Java processes
-    for p in psutil.process_iter(attrs=["pid", "name"]):
-        if "java" in p.info["name"].lower():
-            logging.warning(f"[MAIN] Found stray Java process (PID {p.pid}), terminating...")
-            p.kill()
-
+    subprocess.run(
+    ["taskkill", "/IM", "java.exe", "/F"],
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL
+)

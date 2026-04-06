@@ -141,15 +141,15 @@ public class EsperPatternManager extends PatternManager<EsperCEPEngine> {
                 patternLogger.log(record);
                 rt.getEventService().sendEventBean(record, "PatternRecordStream");
 
-                if (logMatches) {
-                    LOG.info(String.format(
-                        "[CEP] Fired %s %s | conf=%.3f | sources=%s",
-                        def.type,
-                        def.name,
-                        record.getConfidence(),
-                        record.getSourceIdsAsString()
-                    ));
-                }
+                // if (logMatches) {
+                //     LOG.info(String.format(
+                //         "[CEP] Fired %s %s | conf=%.3f | sources=%s",
+                //         def.type,
+                //         def.name,
+                //         record.getConfidence(),
+                //         record.getSourceIdsAsString()
+                //     ));
+                // }
             });
         }
     }

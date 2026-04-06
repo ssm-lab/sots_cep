@@ -25,8 +25,9 @@ public class Main {
         manager.initialize(patternFile);
 
         EventStream stream = new EventStream("tcp://localhost:5557", "tcp://localhost:5558");
-        stream.subscribe((topic, event) -> engine.handleEvent(event),"observed","*");
-        stream.subscribe((topic, event) -> engine.handleEvent(event),"reconstructed","*");
+        stream.subscribe((topic, event) -> engine.handleEvent(event), "observed.validated", "*");
+        stream.subscribe((topic, event) -> engine.handleEvent(event), "reconstructed", "*");
+        stream.subscribe((topic, event) -> engine.handleEvent(event), "ground_truth", "*");
         
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("[JAVA] Shutdown hook triggered — cleaning up.");

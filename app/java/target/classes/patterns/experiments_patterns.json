@@ -1,362 +1,82 @@
 [
   {
-    "name": "Montrose_HighTurbidity_95",
+    "name": "CrossSignalAgreement_GT",
     "type": "atomic",
-    "description": "Turbidity > 8.5 NTU at Montrose Beach with confidence > 0.95.",
-    "epl": "@Name('Montrose_HighTurbidity_95') select e from Event as e where e.streamId like '%Montrose%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.95"
+    "description": "Signals remain aligned over time (ground truth).",
+    "epl": "@Name('CrossSignalAgreement_GT') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus='ground_truth') and b1=Event(src='dt-2', eventStatus='ground_truth') and c1=Event(src='dt-3', eventStatus='ground_truth')) -> (a2=Event(src='dt-1', eventStatus='ground_truth') and b2=Event(src='dt-2', eventStatus='ground_truth') and c2=Event(src='dt-3', eventStatus='ground_truth'))] where a1.eventTs < a2.eventTs and (a1.value - b1.value < 1.2 and a1.value - b1.value > -1.2) and (a1.value - c1.value < 1.2 and a1.value - c1.value > -1.2) and (b1.value - c1.value < 1.2 and b1.value - c1.value > -1.2) and (a2.value - b2.value < 1.2 and a2.value - b2.value > -1.2) and (a2.value - c2.value < 1.2 and a2.value - c2.value > -1.2) and (b2.value - c2.value < 1.2 and b2.value - c2.value > -1.2)"
   },
+
   {
-    "name": "Montrose_HighWave_95",
+    "name": "CrossSignalAgreement_OBS",
     "type": "atomic",
-    "description": "Wave height > 0.35 m at Montrose Beach with confidence > 0.95.",
-    "epl": "@Name('Montrose_HighWave_95') select e from Event as e where e.streamId like '%Montrose%' and e.streamId like '%Wave_Height%' and e.value > 0.35 and confidence > 0.95"
+    "description": "Observed signals remain aligned over time.",
+    "epl": "@Name('CrossSignalAgreement_OBS') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus='validated') and b1=Event(src='dt-2', eventStatus='validated') and c1=Event(src='dt-3', eventStatus='validated')) -> (a2=Event(src='dt-1', eventStatus='validated') and b2=Event(src='dt-2', eventStatus='validated') and c2=Event(src='dt-3', eventStatus='validated'))] where a1.eventTs < a2.eventTs and (a1.value - b1.value < 1.2 and a1.value - b1.value > -1.2) and (a1.value - c1.value < 1.2 and a1.value - c1.value > -1.2) and (b1.value - c1.value < 1.2 and b1.value - c1.value > -1.2) and (a2.value - b2.value < 1.2 and a2.value - b2.value > -1.2) and (a2.value - c2.value < 1.2 and a2.value - c2.value > -1.2) and (b2.value - c2.value < 1.2 and b2.value - c2.value > -1.2)"
   },
+
   {
-    "name": "Calumet_HighTurbidity_95",
+    "name": "CrossSignalAgreement_SYS",
     "type": "atomic",
-    "description": "Turbidity > 8.5 NTU at Calumet Beach with confidence > 0.95.",
-    "epl": "@Name('Calumet_HighTurbidity_95') select e from Event as e where e.streamId like '%Calumet%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.95"
+    "description": "System signals remain aligned over time.",
+    "epl": "@Name('CrossSignalAgreement_SYS') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus in ('validated','reconstructed')) and b1=Event(src='dt-2', eventStatus in ('validated','reconstructed')) and c1=Event(src='dt-3', eventStatus in ('validated','reconstructed'))) -> (a2=Event(src='dt-1', eventStatus in ('validated','reconstructed')) and b2=Event(src='dt-2', eventStatus in ('validated','reconstructed')) and c2=Event(src='dt-3', eventStatus in ('validated','reconstructed')))] where a1.eventTs < a2.eventTs and (a1.value - b1.value < 1.2 and a1.value - b1.value > -1.2) and (a1.value - c1.value < 1.2 and a1.value - c1.value > -1.2) and (b1.value - c1.value < 1.2 and b1.value - c1.value > -1.2) and (a2.value - b2.value < 1.2 and a2.value - b2.value > -1.2) and (a2.value - c2.value < 1.2 and a2.value - c2.value > -1.2) and (b2.value - c2.value < 1.2 and b2.value - c2.value > -1.2)"
   },
   {
-    "name": "Calumet_LowWaterTemp_95",
+    "name": "CrossSignalDivergence_GT",
     "type": "atomic",
-    "description": "Water temperature < 22 °C at Calumet Beach with confidence > 0.95.",
-    "epl": "@Name('Calumet_LowWaterTemp_95') select e from Event as e where e.streamId like '%Calumet%' and e.streamId like '%Water_Temperature%' and e.value < 22 and confidence > 0.95"
+    "description": "Signals diverge consistently over time (ground truth).",
+    "epl": "@Name('CrossSignalDivergence_GT') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus='ground_truth') and b1=Event(src='dt-2', eventStatus='ground_truth') and c1=Event(src='dt-3', eventStatus='ground_truth')) -> (a2=Event(src='dt-1', eventStatus='ground_truth') and b2=Event(src='dt-2', eventStatus='ground_truth') and c2=Event(src='dt-3', eventStatus='ground_truth'))] where a1.eventTs < a2.eventTs and ((a1.value > b1.value + 1.5 or a1.value < b1.value - 1.5) or (a1.value > c1.value + 1.5 or a1.value < c1.value - 1.5) or (b1.value > c1.value + 1.5 or b1.value < c1.value - 1.5)) and ((a2.value > b2.value + 1.5 or a2.value < b2.value - 1.5) or (a2.value > c2.value + 1.5 or a2.value < c2.value - 1.5) or (b2.value > c2.value + 1.5 or b2.value < c2.value - 1.5))"
   },
+
   {
-    "name": "63rd_HighTurbidity_95",
+    "name": "CrossSignalDivergence_OBS",
     "type": "atomic",
-    "description": "Turbidity > 8.5 NTU at 63rd Street Beach with confidence > 0.95.",
-    "epl": "@Name('63rd_HighTurbidity_95') select e from Event as e where e.streamId like '%63rd%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.95"
+    "description": "Observed signals diverge consistently over time.",
+    "epl": "@Name('CrossSignalDivergence_OBS') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus='validated') and b1=Event(src='dt-2', eventStatus='validated') and c1=Event(src='dt-3', eventStatus='validated')) -> (a2=Event(src='dt-1', eventStatus='validated') and b2=Event(src='dt-2', eventStatus='validated') and c2=Event(src='dt-3', eventStatus='validated'))] where a1.eventTs < a2.eventTs and ((a1.value > b1.value + 1.5 or a1.value < b1.value - 1.5) or (a1.value > c1.value + 1.5 or a1.value < c1.value - 1.5) or (b1.value > c1.value + 1.5 or b1.value < c1.value - 1.5)) and ((a2.value > b2.value + 1.5 or a2.value < b2.value - 1.5) or (a2.value > c2.value + 1.5 or a2.value < c2.value - 1.5) or (b2.value > c2.value + 1.5 or b2.value < c2.value - 1.5))"
   },
+
   {
-    "name": "63rd_HighWavePeriod_95",
+    "name": "CrossSignalDivergence_SYS",
     "type": "atomic",
-    "description": "Wave period > 4 s at 63rd Street Beach with confidence > 0.95.",
-    "epl": "@Name('63rd_HighWavePeriod_95') select e from Event as e where e.streamId like '%63rd%' and e.streamId like '%Wave_Period%' and e.value > 4 and confidence > 0.95"
+    "description": "System signals diverge consistently over time.",
+    "epl": "@Name('CrossSignalDivergence_SYS') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus in ('validated','reconstructed')) and b1=Event(src='dt-2', eventStatus in ('validated','reconstructed')) and c1=Event(src='dt-3', eventStatus in ('validated','reconstructed'))) -> (a2=Event(src='dt-1', eventStatus in ('validated','reconstructed')) and b2=Event(src='dt-2', eventStatus in ('validated','reconstructed')) and c2=Event(src='dt-3', eventStatus in ('validated','reconstructed')))] where a1.eventTs < a2.eventTs and ((a1.value > b1.value + 1.5 or a1.value < b1.value - 1.5) or (a1.value > c1.value + 1.5 or a1.value < c1.value - 1.5) or (b1.value > c1.value + 1.5 or b1.value < c1.value - 1.5)) and ((a2.value > b2.value + 1.5 or a2.value < b2.value - 1.5) or (a2.value > c2.value + 1.5 or a2.value < c2.value - 1.5) or (b2.value > c2.value + 1.5 or b2.value < c2.value - 1.5))"
   },
   {
-    "name": "Montrose_LocalAlert_95",
-    "type": "complex",
-    "description": "High turbidity and high wave height at Montrose Beach within 3 s.",
-    "epl": "@Name('Montrose_LocalAlert_95') select a as turb, b as wave from pattern [every (a=PatternRecordStream(patternName='Montrose_HighTurbidity_95') and b=PatternRecordStream(patternName='Montrose_HighWave_95')) where timer:within(3 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "Calumet_LocalAlert_95",
-    "type": "complex",
-    "description": "High turbidity and low temperature at Calumet Beach within 3 s.",
-    "epl": "@Name('Calumet_LocalAlert_95') select a as turb, b as temp from pattern [every (a=PatternRecordStream(patternName='Calumet_HighTurbidity_95') and b=PatternRecordStream(patternName='Calumet_LowWaterTemp_95')) where timer:within(3 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "63rd_LocalAlert_95",
-    "type": "complex",
-    "description": "High turbidity and high wave period at 63rd Street Beach within 3 s.",
-    "epl": "@Name('63rd_LocalAlert_95') select a as turb, b as period from pattern [every (a=PatternRecordStream(patternName='63rd_HighTurbidity_95') and b=PatternRecordStream(patternName='63rd_HighWavePeriod_95')) where timer:within(3 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "MontroseToCalumet_AlertSpread_95",
-    "type": "complex",
-    "description": "Montrose local alert followed by Calumet local alert within 5 s.",
-    "epl": "@Name('MontroseToCalumet_AlertSpread_95') select a as north, b as south from pattern [every (a=PatternRecordStream(patternName='Montrose_LocalAlert_95') -> b=PatternRecordStream(patternName='Calumet_LocalAlert_95') where timer:within(5 sec))]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "CalumetTo63rd_AlertSpread_95",
-    "type": "complex",
-    "description": "Calumet local alert followed by 63rd Street local alert within 5 s.",
-    "epl": "@Name('CalumetTo63rd_AlertSpread_95') select a as mid, b as south from pattern [every (a=PatternRecordStream(patternName='Calumet_LocalAlert_95') -> b=PatternRecordStream(patternName='63rd_LocalAlert_95') where timer:within(5 sec))]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "Regional_TripleAlert_95",
-    "type": "complex",
-    "description": "All three beaches experience local alerts within 7 s — broad-scale event.",
-    "epl": "@Name('Regional_TripleAlert_95') select a as north, b as mid, c as south from pattern [every (a=PatternRecordStream(patternName='Montrose_LocalAlert_95') and b=PatternRecordStream(patternName='Calumet_LocalAlert_95') and c=PatternRecordStream(patternName='63rd_LocalAlert_95')) where timer:within(7 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "Montrose_HighTurbidity_85",
+    "name": "CrossSignalTrendConsistency_GT",
     "type": "atomic",
-    "description": "Turbidity > 8.5 NTU at Montrose Beach with confidence > 0.85.",
-    "epl": "@Name('Montrose_HighTurbidity_85') select e from Event as e where e.streamId like '%Montrose%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.85"
+    "description": "Signals move in the same direction over time (ground truth).",
+    "epl": "@Name('CrossSignalTrendConsistency_GT') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus='ground_truth') and b1=Event(src='dt-2', eventStatus='ground_truth') and c1=Event(src='dt-3', eventStatus='ground_truth')) -> (a2=Event(src='dt-1', eventStatus='ground_truth') and b2=Event(src='dt-2', eventStatus='ground_truth') and c2=Event(src='dt-3', eventStatus='ground_truth'))] where a1.eventTs < a2.eventTs and ((a2.value > a1.value and b2.value > b1.value and c2.value > c1.value) or (a2.value < a1.value and b2.value < b1.value and c2.value < c1.value))"
   },
+
   {
-    "name": "Montrose_HighWave_85",
+    "name": "CrossSignalTrendConsistency_OBS",
     "type": "atomic",
-    "description": "Wave height > 0.35 m at Montrose Beach with confidence > 0.85.",
-    "epl": "@Name('Montrose_HighWave_85') select e from Event as e where e.streamId like '%Montrose%' and e.streamId like '%Wave_Height%' and e.value > 0.35 and confidence > 0.85"
+    "description": "Observed signals move in the same direction over time.",
+    "epl": "@Name('CrossSignalTrendConsistency_OBS') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus='validated') and b1=Event(src='dt-2', eventStatus='validated') and c1=Event(src='dt-3', eventStatus='validated')) -> (a2=Event(src='dt-1', eventStatus='validated') and b2=Event(src='dt-2', eventStatus='validated') and c2=Event(src='dt-3', eventStatus='validated'))] where a1.eventTs < a2.eventTs and ((a2.value > a1.value and b2.value > b1.value and c2.value > c1.value) or (a2.value < a1.value and b2.value < b1.value and c2.value < c1.value))"
   },
+
   {
-    "name": "Calumet_HighTurbidity_85",
+    "name": "CrossSignalTrendConsistency_SYS",
     "type": "atomic",
-    "description": "Turbidity > 8.5 NTU at Calumet Beach with confidence > 0.85.",
-    "epl": "@Name('Calumet_HighTurbidity_85') select e from Event as e where e.streamId like '%Calumet%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.85"
+    "description": "System signals move in the same direction over time.",
+    "epl": "@Name('CrossSignalTrendConsistency_SYS') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus in ('validated','reconstructed')) and b1=Event(src='dt-2', eventStatus in ('validated','reconstructed')) and c1=Event(src='dt-3', eventStatus in ('validated','reconstructed'))) -> (a2=Event(src='dt-1', eventStatus in ('validated','reconstructed')) and b2=Event(src='dt-2', eventStatus in ('validated','reconstructed')) and c2=Event(src='dt-3', eventStatus in ('validated','reconstructed')))] where a1.eventTs < a2.eventTs and ((a2.value > a1.value and b2.value > b1.value and c2.value > c1.value) or (a2.value < a1.value and b2.value < b1.value and c2.value < c1.value))"
   },
   {
-    "name": "Calumet_LowWaterTemp_85",
+    "name": "CrossSignalRelativeStable_GT",
     "type": "atomic",
-    "description": "Water temperature < 22 °C at Calumet Beach with confidence > 0.85.",
-    "epl": "@Name('Calumet_LowWaterTemp_85') select e from Event as e where e.streamId like '%Calumet%' and e.streamId like '%Water_Temperature%' and e.value < 22 and confidence > 0.85"
+    "description": "Relative differences between signals remain stable over time (ground truth).",
+    "epl": "@Name('CrossSignalRelativeStable_GT') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus='ground_truth') and b1=Event(src='dt-2', eventStatus='ground_truth') and c1=Event(src='dt-3', eventStatus='ground_truth')) -> (a2=Event(src='dt-1', eventStatus='ground_truth') and b2=Event(src='dt-2', eventStatus='ground_truth') and c2=Event(src='dt-3', eventStatus='ground_truth'))] where a1.eventTs < a2.eventTs and ((a1.value - b1.value) - (a2.value - b2.value) < 0.3 and (a1.value - b1.value) - (a2.value - b2.value) > -0.3) and ((b1.value - c1.value) - (b2.value - c2.value) < 0.3 and (b1.value - c1.value) - (b2.value - c2.value) > -0.3)"
   },
+
   {
-    "name": "63rd_HighTurbidity_85",
+    "name": "CrossSignalRelativeStable_OBS",
     "type": "atomic",
-    "description": "Turbidity > 8.5 NTU at 63rd Street Beach with confidence > 0.85.",
-    "epl": "@Name('63rd_HighTurbidity_85') select e from Event as e where e.streamId like '%63rd%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.85"
+    "description": "Relative differences between observed signals remain stable over time.",
+    "epl": "@Name('CrossSignalRelativeStable_OBS') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus='validated') and b1=Event(src='dt-2', eventStatus='validated') and c1=Event(src='dt-3', eventStatus='validated')) -> (a2=Event(src='dt-1', eventStatus='validated') and b2=Event(src='dt-2', eventStatus='validated') and c2=Event(src='dt-3', eventStatus='validated'))] where a1.eventTs < a2.eventTs and ((a1.value - b1.value) - (a2.value - b2.value) < 0.3 and (a1.value - b1.value) - (a2.value - b2.value) > -0.3) and ((b1.value - c1.value) - (b2.value - c2.value) < 0.3 and (b1.value - c1.value) - (b2.value - c2.value) > -0.3)"
   },
+
   {
-    "name": "63rd_HighWavePeriod_85",
+    "name": "CrossSignalRelativeStable_SYS",
     "type": "atomic",
-    "description": "Wave period > 4 s at 63rd Street Beach with confidence > 0.85.",
-    "epl": "@Name('63rd_HighWavePeriod_85') select e from Event as e where e.streamId like '%63rd%' and e.streamId like '%Wave_Period%' and e.value > 4 and confidence > 0.85"
-  },
-  {
-    "name": "Montrose_LocalAlert_85",
-    "type": "complex",
-    "description": "High turbidity and high wave height at Montrose Beach within 3 s.",
-    "epl": "@Name('Montrose_LocalAlert_85') select a as turb, b as wave from pattern [every (a=PatternRecordStream(patternName='Montrose_HighTurbidity_85') and b=PatternRecordStream(patternName='Montrose_HighWave_85')) where timer:within(3 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "Calumet_LocalAlert_85",
-    "type": "complex",
-    "description": "High turbidity and low temperature at Calumet Beach within 3 s.",
-    "epl": "@Name('Calumet_LocalAlert_85') select a as turb, b as temp from pattern [every (a=PatternRecordStream(patternName='Calumet_HighTurbidity_85') and b=PatternRecordStream(patternName='Calumet_LowWaterTemp_85')) where timer:within(3 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "63rd_LocalAlert_85",
-    "type": "complex",
-    "description": "High turbidity and high wave period at 63rd Street Beach within 3 s.",
-    "epl": "@Name('63rd_LocalAlert_85') select a as turb, b as period from pattern [every (a=PatternRecordStream(patternName='63rd_HighTurbidity_85') and b=PatternRecordStream(patternName='63rd_HighWavePeriod_85')) where timer:within(3 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "MontroseToCalumet_AlertSpread_85",
-    "type": "complex",
-    "description": "Montrose local alert followed by Calumet local alert within 5 s.",
-    "epl": "@Name('MontroseToCalumet_AlertSpread_85') select a as north, b as south from pattern [every (a=PatternRecordStream(patternName='Montrose_LocalAlert_85') -> b=PatternRecordStream(patternName='Calumet_LocalAlert_85') where timer:within(5 sec))]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "CalumetTo63rd_AlertSpread_85",
-    "type": "complex",
-    "description": "Calumet local alert followed by 63rd Street local alert within 5 s.",
-    "epl": "@Name('CalumetTo63rd_AlertSpread_85') select a as mid, b as south from pattern [every (a=PatternRecordStream(patternName='Calumet_LocalAlert_85') -> b=PatternRecordStream(patternName='63rd_LocalAlert_85') where timer:within(5 sec))]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "Regional_TripleAlert_85",
-    "type": "complex",
-    "description": "All three beaches experience local alerts within 7 s — broad-scale event.",
-    "epl": "@Name('Regional_TripleAlert_85') select a as north, b as mid, c as south from pattern [every (a=PatternRecordStream(patternName='Montrose_LocalAlert_85') and b=PatternRecordStream(patternName='Calumet_LocalAlert_85') and c=PatternRecordStream(patternName='63rd_LocalAlert_85')) where timer:within(7 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "Montrose_HighTurbidity_75",
-    "type": "atomic",
-    "description": "Turbidity > 8.5 NTU at Montrose Beach with confidence > 0.75.",
-    "epl": "@Name('Montrose_HighTurbidity_75') select e from Event as e where e.streamId like '%Montrose%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.75"
-  },
-  {
-    "name": "Montrose_HighWave_75",
-    "type": "atomic",
-    "description": "Wave height > 0.35 m at Montrose Beach with confidence > 0.75.",
-    "epl": "@Name('Montrose_HighWave_75') select e from Event as e where e.streamId like '%Montrose%' and e.streamId like '%Wave_Height%' and e.value > 0.35 and confidence > 0.75"
-  },
-  {
-    "name": "Calumet_HighTurbidity_75",
-    "type": "atomic",
-    "description": "Turbidity > 8.5 NTU at Calumet Beach with confidence > 0.75.",
-    "epl": "@Name('Calumet_HighTurbidity_75') select e from Event as e where e.streamId like '%Calumet%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.75"
-  },
-  {
-    "name": "Calumet_LowWaterTemp_75",
-    "type": "atomic",
-    "description": "Water temperature < 22 °C at Calumet Beach with confidence > 0.75.",
-    "epl": "@Name('Calumet_LowWaterTemp_75') select e from Event as e where e.streamId like '%Calumet%' and e.streamId like '%Water_Temperature%' and e.value < 22 and confidence > 0.75"
-  },
-  {
-    "name": "63rd_HighTurbidity_75",
-    "type": "atomic",
-    "description": "Turbidity > 8.5 NTU at 63rd Street Beach with confidence > 0.75.",
-    "epl": "@Name('63rd_HighTurbidity_75') select e from Event as e where e.streamId like '%63rd%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.75"
-  },
-  {
-    "name": "63rd_HighWavePeriod_75",
-    "type": "atomic",
-    "description": "Wave period > 4 s at 63rd Street Beach with confidence > 0.75.",
-    "epl": "@Name('63rd_HighWavePeriod_75') select e from Event as e where e.streamId like '%63rd%' and e.streamId like '%Wave_Period%' and e.value > 4 and confidence > 0.75"
-  },
-  {
-    "name": "Montrose_LocalAlert_75",
-    "type": "complex",
-    "description": "High turbidity and high wave height at Montrose Beach within 3 s.",
-    "epl": "@Name('Montrose_LocalAlert_75') select a as turb, b as wave from pattern [every (a=PatternRecordStream(patternName='Montrose_HighTurbidity_75') and b=PatternRecordStream(patternName='Montrose_HighWave_75')) where timer:within(3 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "Calumet_LocalAlert_75",
-    "type": "complex",
-    "description": "High turbidity and low temperature at Calumet Beach within 3 s.",
-    "epl": "@Name('Calumet_LocalAlert_75') select a as turb, b as temp from pattern [every (a=PatternRecordStream(patternName='Calumet_HighTurbidity_75') and b=PatternRecordStream(patternName='Calumet_LowWaterTemp_75')) where timer:within(3 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "63rd_LocalAlert_75",
-    "type": "complex",
-    "description": "High turbidity and high wave period at 63rd Street Beach within 3 s.",
-    "epl": "@Name('63rd_LocalAlert_75') select a as turb, b as period from pattern [every (a=PatternRecordStream(patternName='63rd_HighTurbidity_75') and b=PatternRecordStream(patternName='63rd_HighWavePeriod_75')) where timer:within(3 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "MontroseToCalumet_AlertSpread_75",
-    "type": "complex",
-    "description": "Montrose local alert followed by Calumet local alert within 5 s.",
-    "epl": "@Name('MontroseToCalumet_AlertSpread_75') select a as north, b as south from pattern [every (a=PatternRecordStream(patternName='Montrose_LocalAlert_75') -> b=PatternRecordStream(patternName='Calumet_LocalAlert_75') where timer:within(5 sec))]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "CalumetTo63rd_AlertSpread_75",
-    "type": "complex",
-    "description": "Calumet local alert followed by 63rd Street local alert within 5 s.",
-    "epl": "@Name('CalumetTo63rd_AlertSpread_75') select a as mid, b as south from pattern [every (a=PatternRecordStream(patternName='Calumet_LocalAlert_75') -> b=PatternRecordStream(patternName='63rd_LocalAlert_75') where timer:within(5 sec))]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "Regional_TripleAlert_75",
-    "type": "complex",
-    "description": "All three beaches experience local alerts within 7 s — broad-scale event.",
-    "epl": "@Name('Regional_TripleAlert_75') select a as north, b as mid, c as south from pattern [every (a=PatternRecordStream(patternName='Montrose_LocalAlert_75') and b=PatternRecordStream(patternName='Calumet_LocalAlert_75') and c=PatternRecordStream(patternName='63rd_LocalAlert_75')) where timer:within(7 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "Montrose_HighTurbidity_65",
-    "type": "atomic",
-    "description": "Turbidity > 8.5 NTU at Montrose Beach with confidence > 0.65.",
-    "epl": "@Name('Montrose_HighTurbidity_65') select e from Event as e where e.streamId like '%Montrose%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.65"
-  },
-  {
-    "name": "Montrose_HighWave_65",
-    "type": "atomic",
-    "description": "Wave height > 0.35 m at Montrose Beach with confidence > 0.65.",
-    "epl": "@Name('Montrose_HighWave_65') select e from Event as e where e.streamId like '%Montrose%' and e.streamId like '%Wave_Height%' and e.value > 0.35 and confidence > 0.65"
-  },
-  {
-    "name": "Calumet_HighTurbidity_65",
-    "type": "atomic",
-    "description": "Turbidity > 8.5 NTU at Calumet Beach with confidence > 0.65.",
-    "epl": "@Name('Calumet_HighTurbidity_65') select e from Event as e where e.streamId like '%Calumet%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.65"
-  },
-  {
-    "name": "Calumet_LowWaterTemp_65",
-    "type": "atomic",
-    "description": "Water temperature < 22 °C at Calumet Beach with confidence > 0.65.",
-    "epl": "@Name('Calumet_LowWaterTemp_65') select e from Event as e where e.streamId like '%Calumet%' and e.streamId like '%Water_Temperature%' and e.value < 22 and confidence > 0.65"
-  },
-  {
-    "name": "63rd_HighTurbidity_65",
-    "type": "atomic",
-    "description": "Turbidity > 8.5 NTU at 63rd Street Beach with confidence > 0.65.",
-    "epl": "@Name('63rd_HighTurbidity_65') select e from Event as e where e.streamId like '%63rd%' and e.streamId like '%Turbidity%' and e.value > 8.5 and confidence > 0.65"
-  },
-  {
-    "name": "63rd_HighWavePeriod_65",
-    "type": "atomic",
-    "description": "Wave period > 4 s at 63rd Street Beach with confidence > 0.65.",
-    "epl": "@Name('63rd_HighWavePeriod_65') select e from Event as e where e.streamId like '%63rd%' and e.streamId like '%Wave_Period%' and e.value > 4 and confidence > 0.65"
-  },
-  {
-    "name": "Montrose_LocalAlert_65",
-    "type": "complex",
-    "description": "High turbidity and high wave height at Montrose Beach within 3 s.",
-    "epl": "@Name('Montrose_LocalAlert_65') select a as turb, b as wave from pattern [every (a=PatternRecordStream(patternName='Montrose_HighTurbidity_65') and b=PatternRecordStream(patternName='Montrose_HighWave_65')) where timer:within(3 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "Calumet_LocalAlert_65",
-    "type": "complex",
-    "description": "High turbidity and low temperature at Calumet Beach within 3 s.",
-    "epl": "@Name('Calumet_LocalAlert_65') select a as turb, b as temp from pattern [every (a=PatternRecordStream(patternName='Calumet_HighTurbidity_65') and b=PatternRecordStream(patternName='Calumet_LowWaterTemp_65')) where timer:within(3 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "63rd_LocalAlert_65",
-    "type": "complex",
-    "description": "High turbidity and high wave period at 63rd Street Beach within 3 s.",
-    "epl": "@Name('63rd_LocalAlert_65') select a as turb, b as period from pattern [every (a=PatternRecordStream(patternName='63rd_HighTurbidity_65') and b=PatternRecordStream(patternName='63rd_HighWavePeriod_65')) where timer:within(3 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "MontroseToCalumet_AlertSpread_65",
-    "type": "complex",
-    "description": "Montrose local alert followed by Calumet local alert within 5 s.",
-    "epl": "@Name('MontroseToCalumet_AlertSpread_65') select a as north, b as south from pattern [every (a=PatternRecordStream(patternName='Montrose_LocalAlert_65') -> b=PatternRecordStream(patternName='Calumet_LocalAlert_65') where timer:within(5 sec))]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "CalumetTo63rd_AlertSpread_65",
-    "type": "complex",
-    "description": "Calumet local alert followed by 63rd Street local alert within 5 s.",
-    "epl": "@Name('CalumetTo63rd_AlertSpread_65') select a as mid, b as south from pattern [every (a=PatternRecordStream(patternName='Calumet_LocalAlert_65') -> b=PatternRecordStream(patternName='63rd_LocalAlert_65') where timer:within(5 sec))]",
-    "confidence": {
-      "aggregation": "avg"
-    }
-  },
-  {
-    "name": "Regional_TripleAlert_65",
-    "type": "complex",
-    "description": "All three beaches experience local alerts within 7 s — broad-scale event.",
-    "epl": "@Name('Regional_TripleAlert_65') select a as north, b as mid, c as south from pattern [every (a=PatternRecordStream(patternName='Montrose_LocalAlert_65') and b=PatternRecordStream(patternName='Calumet_LocalAlert_65') and c=PatternRecordStream(patternName='63rd_LocalAlert_65')) where timer:within(7 sec)]",
-    "confidence": {
-      "aggregation": "avg"
-    }
+    "description": "Relative differences between system signals remain stable over time.",
+    "epl": "@Name('CrossSignalRelativeStable_SYS') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus in ('validated','reconstructed')) and b1=Event(src='dt-2', eventStatus in ('validated','reconstructed')) and c1=Event(src='dt-3', eventStatus in ('validated','reconstructed'))) -> (a2=Event(src='dt-1', eventStatus in ('validated','reconstructed')) and b2=Event(src='dt-2', eventStatus in ('validated','reconstructed')) and c2=Event(src='dt-3', eventStatus in ('validated','reconstructed')))] where a1.eventTs < a2.eventTs and ((a1.value - b1.value) - (a2.value - b2.value) < 0.3 and (a1.value - b1.value) - (a2.value - b2.value) > -0.3) and ((b1.value - c1.value) - (b2.value - c2.value) < 0.3 and (b1.value - c1.value) - (b2.value - c2.value) > -0.3)"
   }
 ]

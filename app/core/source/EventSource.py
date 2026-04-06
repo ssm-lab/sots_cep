@@ -1,49 +1,100 @@
-from abc import ABC
+import logging
 import time
-from typing import Any, Optional
+from typing import Any
 
-from ..runtime.EventGenerator import EventGenerator
-from ..runtime.EventStream import EventStream
 from ..schema.Event import Event, make_event
+from ..schema.EventGenerator import EventGenerator
+from ..utils.UtilsFuncs import _as_observer
 
-__author__ = "Feyi Adesanya"
 
 class EventSource(EventGenerator):
     """
-    Base class for event sources.
-    """
+    Base class for all event sources.
 
+    Routes events to partitions depending on the
+    lifecycle state of the constituent.
+    """
     def __init__(
         self,
         *,
         id: str,
         type: str,
-        stream: EventStream,
+        stream,
+        lifecycle
     ):
         self.id = id
         self.type = type
         self.stream = stream
 
+        self.lifecycle = lifecycle
 
-    def generate_event(self, event_params: dict[str, Any] | None = None) -> Event:
-        event_params = event_params or {}
-        if "value" not in event_params:
-            raise ValueError("requires 'value' in event_params")
+        self.allow_observed = False
+        self.allow_validated = False
 
-        event = make_event(
+
+
+    def connect(self):
+        runtime = self.lifecycle.get_runtime(self.id)
+
+        runtime.emit_observed.subscribe(
+            _as_observer(self._on_observed_changed)
+        )
+
+        runtime.emit_validated.subscribe(
+            _as_observer(self._on_validated_changed)
+        )
+
+    def _on_observed_changed(self, value: bool):
+        self.allow_observed = value
+
+    def _on_validated_changed(self, value: bool):
+        self.allow_validated = value
+
+    def generate_event(self, params: dict[str, Any]) -> Event:
+
+        return make_event(
             type=self.type,
             src=self.id,
             event_status="observed",
-            value=event_params["value"],
-            event_ts=event_params.get("event_ts", time.time()),
-            value_datatype=event_params.get("value_datatype", "unknown"),
-            value_unit=event_params.get("value_unit"),
-            confidence = event_params.get("confidence"),
-            extras=event_params.get("extras"),
+            value=params["value"],
+            event_ts=params.get("event_ts", time.time()),
+            value_datatype=params.get("value_datatype"),
+            value_unit=params.get("value_unit"),
+            confidence=params.get("confidence"),
+            extras=params.get("extras"),
         )
-        return event 
-    
-    def emit_event(self, event_params: dict[str, Any] | None = None):
-        event = self.generate_event(event_params)
-        self.stream.add_event(event, "observed", self.id)
+
+
+    def emit_event(self, params):
+        if not self.allow_observed:
+            logging.debug(f"[SOURCE {self.id}] blocked → no emission")
+            return None
+
+        event = self.generate_event(params)
+
+        state = self.lifecycle.get_state(self.id)
+
+        if state:
+            event["extras"] = {
+                "health": state["health_main"],
+                "belonging_main": state["belonging_main"],
+                "belonging_sub": state["belonging_sub"]
+            }
+
+        if self.allow_validated:
+            partition = "observed.validated"
+            event["event_status"] = "validated"
+        else:
+            partition = "observed"
+            event["event_status"] = "observed"
+
+        event["partition"] = partition
+
+        self.stream.add_event(event, partition, self.id)
+
+        logging.debug(
+            f"[SOURCE {self.id}] → {partition} "
+            f"(obs={self.allow_observed}, val={self.allow_validated})"
+        )
+
         return event

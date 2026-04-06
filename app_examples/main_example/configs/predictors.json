@@ -1,29 +1,20 @@
 {
-  "kf_slow": {
+    "kf_1": {
     "type": "KalmanFilter",
     "params": {
-      "initial_value": 50.0,
-      "dt": 0.01,
-      "Q": 0.01,
-      "R": 0.1
+      "initial_value": 80.0,
+      "dt": 1.0,
+      "Q": 0.2,
+      "R": 0.25
     }
   },
-  "kf_medium": {
-    "type": "KalmanFilter",
-    "params": {
-      "initial_value": 90.0,
-      "dt": 0.05,
-      "Q": 0.05,
-      "R": 0.15
-    }
-  },
-  "kf_fast": {
-    "type": "KalmanFilter",
-    "params": {
-      "initial_value": 100.0,
-      "dt": 0.1,
-      "Q": 0.1,
-      "R": 0.2
-    }
+  "kf_2": {
+  "type": "KalmanFilter",
+  "params": {
+    "initial_value": 95.0,
+    "dt": 1.0,
+    "Q": 0.3,
+    "R": 0.65
   }
+}
 }

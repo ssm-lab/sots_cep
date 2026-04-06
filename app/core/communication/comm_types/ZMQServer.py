@@ -97,9 +97,7 @@ class ZMQServer(Server):
             return
         logging.info("[ZMQServer] Stopping server...")
         self._running = False
-        # Wake up poll() immediately by terminating context or unblocking collector
         try:
-            # Send dummy message to break poller if still blocking
             temp_ctx = zmq.Context.instance()
             temp_socket = temp_ctx.socket(zmq.PUSH)
             temp_socket.connect("tcp://localhost:5558")
@@ -108,7 +106,6 @@ class ZMQServer(Server):
             temp_ctx.term()
         except Exception:
             pass
-
 
 
     def _cleanup(self):
@@ -120,7 +117,6 @@ class ZMQServer(Server):
             if not self._collector.closed:
                 self._collector.close(linger=0)
 
-            # Wait a short moment before terminating to ensure closures propagate
             try:
                 self.ctx.term()
             except zmq.ZMQError as e:

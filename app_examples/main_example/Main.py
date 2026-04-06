@@ -1,7 +1,7 @@
 from app.Orchestrator import Orchestrator
 from app.core.processor.EventProcessor import EventProcessor
 
-# Run with: python -m app_example.main_example.Main
+# Run with: python -m app_examples.main_example.Main
 
 def main():
     orch = Orchestrator(

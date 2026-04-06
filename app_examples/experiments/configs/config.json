@@ -1,0 +1,28 @@
+{
+  "messaging": {
+    "client_type": "zmq",
+    "server_type": "zmq",
+    "pub_endpoint": "tcp://*:5557",
+    "pull_endpoint": "tcp://*:5558"
+  },
+
+  "sources_config": "app_examples/experiments/configs/sources.json",
+
+  "coordination": {
+    "predictors_config": "app_examples/experiments/configs/predictors.json"
+  },
+
+  "cep": {
+    "enabled": true,
+    "pattern_cfg": "patterns/experiments_patterns.json",
+    "jar_name": "sots-uncertainty-aware-cep-0.0.1-SNAPSHOT.jar",
+    "java_dir": "app/java",
+    "rebuild": true,
+    "log_matches": true
+  },
+
+  "logging": {
+    "enabled": true,
+    "base_dir": "data/logs/experiments"
+  }
+}

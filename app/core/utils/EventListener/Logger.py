@@ -1,9 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import threading, queue, csv, os, time
 import logging
+import csv
+import json
 
 from ...schema.Event import Event
-from ...runtime.EventConsumer import EventConsumer
+from ...schema.EventConsumer import EventConsumer
 LOG = logging.getLogger(__name__)
 
 
@@ -36,7 +38,7 @@ class CSVLogger(BaseLogger):
         super().__init__(run_dir)
         os.makedirs(run_dir, exist_ok=True)
         self.filepath = os.path.join(run_dir, "events.csv")
-        self.csvfile = open(self.filepath, "w", buffering=1024 * 1024)
+        self.csvfile = open(self.filepath, "w", newline="", buffering=1024 * 1024)
         self._queue = queue.Queue(maxsize=100_000)
         self.flush_every = flush_every
         self.flush_interval = flush_interval
@@ -53,8 +55,15 @@ class CSVLogger(BaseLogger):
         base_fields = list(Event.__annotations__.keys())
         extra_fields = set(event.keys()) - set(base_fields)
         self.fields = base_fields + sorted(extra_fields)
-        header = ",".join(self.fields)
-        self.csvfile.write(f"# Started {time.ctime()}\n{header}\n")
+
+        self.writer = csv.DictWriter(
+            self.csvfile,
+            fieldnames=self.fields,
+            quoting=csv.QUOTE_MINIMAL
+        )
+        self.csvfile.write(f"# Started {time.ctime()}\n")
+        self.writer.writeheader()
+
         self._initialized = True
 
     def consume_event(self, event):
@@ -86,11 +95,13 @@ class CSVLogger(BaseLogger):
         self.csvfile.flush()
 
     def _flush_batch(self, batch):
-        lines = []
         for e in batch:
-            lines.append(",".join(str(e.get(f, "")) for f in self.fields))
-        self.csvfile.write("\n".join(lines) + "\n")
-        # Periodic flush for safety
+            row = e.copy()
+            if "extras" in row and isinstance(row["extras"], dict):
+                row["extras"] = json.dumps(row["extras"])
+
+            self.writer.writerow(row)
+
         if time.time() - self._last_flush > 5.0:
             self.csvfile.flush()
             self._last_flush = time.time()
@@ -104,4 +115,38 @@ class CSVLogger(BaseLogger):
         self.csvfile.flush()
         self.csvfile.close()
         logging.info("[LOGGER] Shutting down...")
+
+
+class LifecycleLogger(BaseLogger):
+    def __init__(self, run_dir: str):
+        super().__init__(run_dir)
+
+        self.filepath = os.path.join(run_dir, "lifecycle.csv")
+        self.file = open(self.filepath, "w", newline="")
+
+        self.writer = None
+        self.fields = None
+
+        LOG.info(f"[LIFECYCLE LOGGER] Writing to {self.filepath}")
+
+    def consume_event(self, event: dict):
+        """
+        Expects event as dict (not Event object)
+        """
+        # Initialize header on first event
+        if self.writer is None:
+            self.fields = list(event.keys())
+            self.writer = csv.DictWriter(self.file, fieldnames=self.fields)
+
+            self.file.write(f"# Started {time.ctime()}\n")
+            self.writer.writeheader()
+
+        self.writer.writerow(event)
+        self.file.flush()
+
+    def close(self):
+        if self.file:
+            self.file.flush()
+            self.file.close()
+            LOG.info("[LIFECYCLE LOGGER] Shutting down...")
 
