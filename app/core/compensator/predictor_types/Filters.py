@@ -109,45 +109,6 @@ class KalmanFilter(BasePredictor):
         self.kf.update(np.array([[observed_value]]))
         return float(self.kf.x[0, 0])
 
-    # def confidence(self, observed_value=None):
-    #     kf = self.kf
-    #     # Compute predicted measurement and innovation covariance
-    #     z_pred = float((kf.H @ kf.x)[0])
-    #     S = float((kf.H @ kf.P @ kf.H.T + kf.R)[0, 0])
-
-    #     # Case 1: measurement available → innovation-based confidence  
-    #     if observed_value is not None:
-    #         # Predicted measurement
-    #         z_pred = float((kf.H @ kf.x)[0])
-
-    #         # Innovation residual and covariance
-    #         v = observed_value - z_pred
-    #         S = float((kf.H @ kf.P @ kf.H.T + kf.R)[0, 0])
-
-    #         # Normalized Innovation Squared (NIS)
-    #         nis = (v ** 2) / (S + 1e-12)
-    #         c_meas = max(np.exp(-0.5 * nis), 1e-3)
-    #         c = c_meas
-
-    #         self.last_confidence = float(np.clip(c, 1e-6, 1.0))
-    #         self.last_trace = float(np.trace(kf.P))
-    #         return self.last_confidence
-    #     # Case 2: missing measurement → covariance-based decay
-    #     else:        
-    #         current_trace = float(np.trace(kf.P))
-    #         prev_trace = getattr(self, "last_trace", current_trace)
-
-    #         # Ratio of current to previous uncertainty (bounded)
-    #         ratio = min(current_trace / (prev_trace + 1e-8), 1.5)
-
-    #         decay = np.exp(-self.alpha * (ratio - 1.0))
-
-    #         prev_conf = getattr(self, "last_confidence", 1.0)
-    #         c = prev_conf * decay
-
-    #         self.last_confidence = float(np.clip(c, 1e-6, 1.0))
-    #         self.last_trace = current_trace
-    #         return self.last_confidence
     def confidence(self, observed_value=None):
         kf = self.kf
 

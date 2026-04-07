@@ -1,4 +1,4 @@
-# Started Fri Apr  3 19:17:15 2026
+# Started Tue Mar 31 16:06:33 2026
 type,ts,scenario,constituent_id,from_state,target_state,goal_domain,transition,result,final_state,health,goal_match,trigger_event
 lifecycle_decision,0,LifecycleEvaluation,dt-1,disengaged/disengaged,participating,belonging,raise_prepare_for_so_s,made,prepared/prepared,ideal,False,raise_prepare_for_so_s
 lifecycle_decision,0,LifecycleEvaluation,dt-1,prepared/prepared,participating,belonging,raise_join_so_s,made,passive/available,ideal,False,raise_join_so_s

@@ -15,7 +15,7 @@ def main():
         clock=clock
     )
     orchestrator.run(T=500)
-    time.sleep(5) # give CEP time to finish logging
+    time.sleep(5)
 
 if __name__ == "__main__":
     main()

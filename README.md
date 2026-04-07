@@ -1,35 +1,36 @@
-# Uncertainty-Aware Stream Processing for Systems of Twinned Systems
+# Reliable Complex Event Processing in Systems of Twinned Systems
 
-## Repository Structure
+This repository implements a reliability-aware complex event processing pipeline for systems of twinned systems
 
-### Root Layout
+## Approach
+Each constituent is governed by a **lifecycle statechart** with two orthogonal dimensions:
 
-- `/app` – Core project code  
-  - `/core` – Main Python modules  
-    - `/processor` – Python–Java CEP Engine bridge 
-    - `/communication` – ZMQ-based server/client abstractions for message routing  
-    - `/reconstruction` – Predictors and reconstructors handling missing or uncertain data  
-    - `/runtime` – Coordinator and execution logic  
-    - `/schema` – Shared event schemas and serialization logic  
-    - `/source` – Data source definitions (simulated, reconstructed, or dataset-based)  
-    - `/utils` – Logging, configuration, and helper utilities  
-  - `/java` – Java integration layer (Esper CEP engine and orchestration)
-    - `/src/main/java/app` – Java source code organized into packages:
-      - `app ` - Main entry point and application lifecycle logic
-      - `runtime` –   execution logic
-      - `schema.event` – Event definitions shared with the Python layer via JSON schema  
-      - `schema.pattern` – Pattern schema representations  
-      - `pattern` – Pattern management classes (pattern loading, registration, and metadata)  
-      - `cep` – Core CEP interfaces and engine abstractions  
-      - `cep.esper` – Implementation of CEP interfaces using the Esper runtime (event injection, listeners, pattern evaluation)  
-      - `communication` – Java-side ZeroMQ clients for event exchange with Python  
-      - `utils` – Common helpers for parsing and logging  
-    - `/src/main/resources/` – Resource directory containing:
-      - `patterns/` – Event Pattern Language (EPL) definitions for Esper
-  - `Orchestrator.py` – Main entry point for launching the integrated pipeline (spawns Esper process, configures streams, logging, and bridge communication)
+- **Belonging** – whether the system participates in the SoTS  
+- **Health** – the operational condition of the system  
 
-- `/app_examples` – Example pipelines, experiment scripts, and demonstration setups  
-- `/assets` – Static assets such as figures or architecture diagrams  
-- `/data` – Logs, datasets, and experiment results  
-- `/docs` – Documentation and supplementary thesis material  
-- `/tests` – Unit and integration tests for Python and Java modules  
+These statecharts control:
+- when a system can contribute data  
+- when it must be restricted
+
+Reliability is enforced by constraining which combinations of belonging and health are allowed.
+
+Reliability levels implemented:
+- **Level 4 (Adaptive)** – Restricted roles with compensation for missing data  
+
+---
+
+## Architecture
+The system is implemented as a **hybrid Python–Java architecture**:
+
+- **Python layer**
+  - Executes lifecycle statecharts (Itemis CREATE / Yakindu)
+  - Controls event production based on belonging state
+  - Performs compensation for missing or unreliable data  
+
+- **Event stream**
+  - ZeroMQ-based messaging layer connecting components  
+
+- **Java layer**
+  - Processes events using the Esper CEP engine  
+
+Only **validated or compensated events** are forwarded to the CEP engine, ensuring that downstream processing operates on reliable inputs.

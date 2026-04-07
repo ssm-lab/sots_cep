@@ -2,7 +2,6 @@ import logging
 import time
 from ...state_charts.yakindu.timer.timer_service import TimerService
 
-
 class ConstituentController:
 
     HEALTH_ORDER = [
