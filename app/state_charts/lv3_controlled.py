@@ -23,8 +23,8 @@ class Statechart:
 			constituent_lifecycle_orthogonal_states_belonging_passive_region0avaliable,
 			constituent_lifecycle_orthogonal_states_belonging_active,
 			constituent_lifecycle_orthogonal_states_belonging_active_region0pending_entry,
-			constituent_lifecycle_orthogonal_states_belonging_active_region0participating,
 			constituent_lifecycle_orthogonal_states_belonging_active_region0pending_exit,
+			constituent_lifecycle_orthogonal_states_belonging_active_region0participating,
 			constituent_lifecycle_orthogonal_states_health_ideal,
 			constituent_lifecycle_orthogonal_states_health_defective,
 			constituent_lifecycle_orthogonal_states_health_faulty,
@@ -40,53 +40,59 @@ class Statechart:
 		""" Declares all necessary variables including list of states, histories etc. 
 		"""
 		
-		self.belong_id = None
-		self.health_id = None
 		self.prepare_for_so_s = None
 		self.disengage_from_so_s = None
 		self.join_so_s = None
 		self.leave_so_s = None
 		self.join_constellation = None
 		self.leave_constellation = None
-		self.leave_request = None
 		self.exit_denied = None
 		self.join_request = None
 		self.join_invitation = None
 		self.admission_rejected = None
-		self.recovery = None
-		self.component_deviation = None
-		self.defect_activated = None
-		self.fault_exercised = None
-		self.error_propogation = None
-		self.service_impact_observed = None
-		self.service_threshold_violated = None
+		self.full_recovery = None
+		self.degrade = None
+		self.improve = None
+		self.uncertainty_threshold_exceeded = None
 		self.announce = None
 		self.announce_value = None
 		self.announce_observable = Observable()
+		self.emit_observed = None
+		self.emit_observed_value = None
+		self.emit_observed_observable = Observable()
+		self.emit_validated = None
+		self.emit_validated_value = None
+		self.emit_validated_observable = Observable()
+		self.compensation_enabled = None
+		self.compensation_enabled_value = None
+		self.compensation_enabled_observable = Observable()
+		self.belonging_changed = None
+		self.belonging_changed_value = None
+		self.belonging_changed_observable = Observable()
+		self.health_changed = None
+		self.health_changed_value = None
+		self.health_changed_observable = Observable()
 		
-		self.__internal_event_queue = queue.Queue()
 		self.in_event_queue = queue.Queue()
-		self.DELTA = 5
+		self.DELTA = 1
 		self.JS = "join_SoS"
 		self.LS = "leave_SoS"
 		self.JC = "join_constellation"
 		self.LC = "leave_constellation"
 		self.LI = "leave_initated"
-		self.DISENGAGED_ID = 1
-		self.PREPARED_ID = 2
-		self.PASSIVE_ID = 3
-		self.ACTIVE_ID = 4
-		self.ACTIVE_ENTRY_ID = 5
-		self.ACTIVE_PARTICIPATING_ID = 6
-		self.ACTIVE_EXIT_ID = 7
-		self.IDEAL_ID = 1
-		self.DEFECTIVE_ID = 2
-		self.FAULTY_ID = 3
-		self.ERRONEOUS_ID = 4
-		self.MALFUNC_ID = 5
-		self.DEGRADED_ID = 6
-		self.FAILED_ID = 7
-		self.health_changed = None
+		self.DISENGAGED = "disengaged"
+		self.PREPARED = "prepared"
+		self.AVAILABLE = "available"
+		self.NEGOTIATING = "negotiating"
+		self.PENDING_ENTRY = "pending_entry"
+		self.PENDING_EXIT = "pending_exit"
+		self.IDEAL = "ideal"
+		self.DEFECTIVE = "defective"
+		self.FAULTY = "faulty"
+		self.ERRONEOUS = "erroneous"
+		self.MALFUNCTIONING = "malfunctioning"
+		self.DEGRADED = "degraded"
+		self.FAILED = "failed"
 		
 		# enumeration of all states:
 		self.__State = Statechart.State
@@ -100,9 +106,6 @@ class Statechart:
 		self.__time_events = [None] * 2
 		
 		# initializations:
-		#Default init sequence for statechart Statechart
-		self.belong_id = 0
-		self.health_id = 0
 		self.__is_executing = False
 		self.__state_conf_vector_position = None
 	
@@ -137,13 +140,13 @@ class Statechart:
 			return self.__state_vector[0] == self.__State.constituent_lifecycle_orthogonal_states_belonging_passive_region0avaliable
 		if s == self.__State.constituent_lifecycle_orthogonal_states_belonging_active:
 			return (self.__state_vector[0] >= self.__State.constituent_lifecycle_orthogonal_states_belonging_active)\
-				and (self.__state_vector[0] <= self.__State.constituent_lifecycle_orthogonal_states_belonging_active_region0pending_exit)
+				and (self.__state_vector[0] <= self.__State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating)
 		if s == self.__State.constituent_lifecycle_orthogonal_states_belonging_active_region0pending_entry:
 			return self.__state_vector[0] == self.__State.constituent_lifecycle_orthogonal_states_belonging_active_region0pending_entry
-		if s == self.__State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating:
-			return self.__state_vector[0] == self.__State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating
 		if s == self.__State.constituent_lifecycle_orthogonal_states_belonging_active_region0pending_exit:
 			return self.__state_vector[0] == self.__State.constituent_lifecycle_orthogonal_states_belonging_active_region0pending_exit
+		if s == self.__State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating:
+			return self.__state_vector[0] == self.__State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating
 		if s == self.__State.constituent_lifecycle_orthogonal_states_health_ideal:
 			return self.__state_vector[1] == self.__State.constituent_lifecycle_orthogonal_states_health_ideal
 		if s == self.__State.constituent_lifecycle_orthogonal_states_health_defective:
@@ -176,22 +179,10 @@ class Statechart:
 		func()
 	
 	def __get_next_event(self):
-		if not self.__internal_event_queue.empty():
-			return self.__internal_event_queue.get()
 		if not self.in_event_queue.empty():
 			return self.in_event_queue.get()
 		return None
 	
-	
-	def raise_health_changed(self):
-		"""Raise method for event health_changed.
-		"""
-		self.__internal_event_queue.put(self.__raise_health_changed_call)
-	
-	def __raise_health_changed_call(self):
-		"""Raise callback for event health_changed.
-		"""
-		self.health_changed = True
 	
 	def raise_prepare_for_so_s(self):
 		"""Raise method for event prepare_for_so_s.
@@ -259,17 +250,6 @@ class Statechart:
 		"""
 		self.leave_constellation = True
 	
-	def raise_leave_request(self):
-		"""Raise method for event leave_request.
-		"""
-		self.in_event_queue.put(self.__raise_leave_request_call)
-		self.run_cycle()
-	
-	def __raise_leave_request_call(self):
-		"""Raise callback for event leave_request.
-		"""
-		self.leave_request = True
-	
 	def raise_exit_denied(self):
 		"""Raise method for event exit_denied.
 		"""
@@ -314,177 +294,161 @@ class Statechart:
 		"""
 		self.admission_rejected = True
 	
-	def raise_recovery(self):
-		"""Raise method for event recovery.
+	def raise_full_recovery(self):
+		"""Raise method for event full_recovery.
 		"""
-		self.in_event_queue.put(self.__raise_recovery_call)
+		self.in_event_queue.put(self.__raise_full_recovery_call)
 		self.run_cycle()
 	
-	def __raise_recovery_call(self):
-		"""Raise callback for event recovery.
+	def __raise_full_recovery_call(self):
+		"""Raise callback for event full_recovery.
 		"""
-		self.recovery = True
+		self.full_recovery = True
 	
-	def raise_component_deviation(self):
-		"""Raise method for event component_deviation.
+	def raise_degrade(self):
+		"""Raise method for event degrade.
 		"""
-		self.in_event_queue.put(self.__raise_component_deviation_call)
+		self.in_event_queue.put(self.__raise_degrade_call)
 		self.run_cycle()
 	
-	def __raise_component_deviation_call(self):
-		"""Raise callback for event component_deviation.
+	def __raise_degrade_call(self):
+		"""Raise callback for event degrade.
 		"""
-		self.component_deviation = True
+		self.degrade = True
 	
-	def raise_defect_activated(self):
-		"""Raise method for event defect_activated.
+	def raise_improve(self):
+		"""Raise method for event improve.
 		"""
-		self.in_event_queue.put(self.__raise_defect_activated_call)
+		self.in_event_queue.put(self.__raise_improve_call)
 		self.run_cycle()
 	
-	def __raise_defect_activated_call(self):
-		"""Raise callback for event defect_activated.
+	def __raise_improve_call(self):
+		"""Raise callback for event improve.
 		"""
-		self.defect_activated = True
+		self.improve = True
 	
-	def raise_fault_exercised(self):
-		"""Raise method for event fault_exercised.
+	def raise_uncertainty_threshold_exceeded(self):
+		"""Raise method for event uncertainty_threshold_exceeded.
 		"""
-		self.in_event_queue.put(self.__raise_fault_exercised_call)
+		self.in_event_queue.put(self.__raise_uncertainty_threshold_exceeded_call)
 		self.run_cycle()
 	
-	def __raise_fault_exercised_call(self):
-		"""Raise callback for event fault_exercised.
+	def __raise_uncertainty_threshold_exceeded_call(self):
+		"""Raise callback for event uncertainty_threshold_exceeded.
 		"""
-		self.fault_exercised = True
-	
-	def raise_error_propogation(self):
-		"""Raise method for event error_propogation.
-		"""
-		self.in_event_queue.put(self.__raise_error_propogation_call)
-		self.run_cycle()
-	
-	def __raise_error_propogation_call(self):
-		"""Raise callback for event error_propogation.
-		"""
-		self.error_propogation = True
-	
-	def raise_service_impact_observed(self):
-		"""Raise method for event service_impact_observed.
-		"""
-		self.in_event_queue.put(self.__raise_service_impact_observed_call)
-		self.run_cycle()
-	
-	def __raise_service_impact_observed_call(self):
-		"""Raise callback for event service_impact_observed.
-		"""
-		self.service_impact_observed = True
-	
-	def raise_service_threshold_violated(self):
-		"""Raise method for event service_threshold_violated.
-		"""
-		self.in_event_queue.put(self.__raise_service_threshold_violated_call)
-		self.run_cycle()
-	
-	def __raise_service_threshold_violated_call(self):
-		"""Raise callback for event service_threshold_violated.
-		"""
-		self.service_threshold_violated = True
+		self.uncertainty_threshold_exceeded = True
 	
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_disengaged(self):
 		"""Entry action for state 'Disengaged'..
 		"""
 		#Entry action for state 'Disengaged'.
-		self.belong_id = self.DISENGAGED_ID
+		self.belonging_changed_observable.next(self.DISENGAGED)
+		self.emit_observed_observable.next(False)
+		self.emit_validated_observable.next(False)
+		self.compensation_enabled_observable.next(False)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_prepared(self):
 		"""Entry action for state 'Prepared'..
 		"""
 		#Entry action for state 'Prepared'.
-		self.belong_id = self.PREPARED_ID
+		self.belonging_changed_observable.next(self.PREPARED)
+		self.emit_observed_observable.next(False)
+		self.emit_validated_observable.next(False)
+		self.compensation_enabled_observable.next(False)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_passive(self):
 		"""Entry action for state 'Passive'..
 		"""
 		#Entry action for state 'Passive'.
-		self.belong_id = self.PASSIVE_ID
 		self.announce_observable.next(self.JS)
+		self.emit_observed_observable.next(True)
+		self.emit_validated_observable.next(False)
+		self.compensation_enabled_observable.next(False)
+		
+	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_passive__region0_negotiating(self):
+		"""Entry action for state 'Negotiating'..
+		"""
+		#Entry action for state 'Negotiating'.
+		self.belonging_changed_observable.next(self.NEGOTIATING)
+		
+	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_passive__region0_avaliable(self):
+		"""Entry action for state 'Avaliable'..
+		"""
+		#Entry action for state 'Avaliable'.
+		self.belonging_changed_observable.next(self.AVAILABLE)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_active(self):
 		"""Entry action for state 'Active'..
 		"""
 		#Entry action for state 'Active'.
-		self.belong_id = self.ACTIVE_ID
 		self.announce_observable.next(self.JC)
+		self.emit_observed_observable.next(True)
+		self.emit_validated_observable.next(False)
+		self.compensation_enabled_observable.next(False)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_entry(self):
 		"""Entry action for state 'Pending Entry'..
 		"""
 		#Entry action for state 'Pending Entry'.
 		self.timer_service.set_timer(self, 0, (self.DELTA * 1000), False)
-		self.belong_id = self.ACTIVE_ENTRY_ID
-		
-	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating(self):
-		"""Entry action for state 'Participating'..
-		"""
-		#Entry action for state 'Participating'.
-		self.belong_id = self.ACTIVE_PARTICIPATING_ID
+		self.belonging_changed_observable.next(self.PENDING_ENTRY)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit(self):
 		"""Entry action for state 'Pending Exit'..
 		"""
 		#Entry action for state 'Pending Exit'.
 		self.timer_service.set_timer(self, 1, (self.DELTA * 1000), False)
-		self.belong_id = self.ACTIVE_EXIT_ID
+		self.belonging_changed_observable.next(self.PENDING_EXIT)
+		self.emit_validated_observable.next(False)
+		self.compensation_enabled_observable.next(False)
+		
+	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating(self):
+		"""Entry action for state 'Participating'..
+		"""
+		#Entry action for state 'Participating'.
+		self.emit_validated_observable.next(True)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_ideal(self):
 		"""Entry action for state 'Ideal'..
 		"""
 		#Entry action for state 'Ideal'.
-		self.health_id = self.IDEAL_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.IDEAL)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_defective(self):
 		"""Entry action for state 'Defective'..
 		"""
 		#Entry action for state 'Defective'.
-		self.health_id = self.DEFECTIVE_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.DEFECTIVE)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_faulty(self):
 		"""Entry action for state 'Faulty'..
 		"""
 		#Entry action for state 'Faulty'.
-		self.health_id = self.FAULTY_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.FAULTY)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_erroneous(self):
 		"""Entry action for state 'Erroneous'..
 		"""
 		#Entry action for state 'Erroneous'.
-		self.health_id = self.ERRONEOUS_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.ERRONEOUS)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_malfunctioning(self):
 		"""Entry action for state 'Malfunctioning'..
 		"""
 		#Entry action for state 'Malfunctioning'.
-		self.health_id = self.MALFUNC_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.MALFUNCTIONING)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_degraded(self):
 		"""Entry action for state 'Degraded'..
 		"""
 		#Entry action for state 'Degraded'.
-		self.health_id = self.DEGRADED_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.DEGRADED)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_failed(self):
 		"""Entry action for state 'Failed'..
 		"""
 		#Entry action for state 'Failed'.
-		self.health_id = self.FAILED_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.FAILED)
 		
 	def __exit_action_constituent_lifecycle_orthogonal_states_belonging_passive(self):
 		"""Exit action for state 'Passive'..
@@ -546,6 +510,7 @@ class Statechart:
 		"""'default' enter sequence for state Negotiating.
 		"""
 		#'default' enter sequence for state Negotiating
+		self.__entry_action_constituent_lifecycle_orthogonal_states_belonging_passive__region0_negotiating()
 		self.__state_vector[0] = self.State.constituent_lifecycle_orthogonal_states_belonging_passive_region0negotiating
 		self.__state_conf_vector_position = 0
 		self.__state_conf_vector_changed = True
@@ -554,6 +519,7 @@ class Statechart:
 		"""'default' enter sequence for state Avaliable.
 		"""
 		#'default' enter sequence for state Avaliable
+		self.__entry_action_constituent_lifecycle_orthogonal_states_belonging_passive__region0_avaliable()
 		self.__state_vector[0] = self.State.constituent_lifecycle_orthogonal_states_belonging_passive_region0avaliable
 		self.__state_conf_vector_position = 0
 		self.__state_conf_vector_changed = True
@@ -574,21 +540,21 @@ class Statechart:
 		self.__state_conf_vector_position = 0
 		self.__state_conf_vector_changed = True
 		
-	def __enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating_default(self):
-		"""'default' enter sequence for state Participating.
-		"""
-		#'default' enter sequence for state Participating
-		self.__entry_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating()
-		self.__state_vector[0] = self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating
-		self.__state_conf_vector_position = 0
-		self.__state_conf_vector_changed = True
-		
 	def __enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit_default(self):
 		"""'default' enter sequence for state Pending Exit.
 		"""
 		#'default' enter sequence for state Pending Exit
 		self.__entry_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit()
 		self.__state_vector[0] = self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0pending_exit
+		self.__state_conf_vector_position = 0
+		self.__state_conf_vector_changed = True
+		
+	def __enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating_default(self):
+		"""'default' enter sequence for state Participating.
+		"""
+		#'default' enter sequence for state Participating
+		self.__entry_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating()
+		self.__state_vector[0] = self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating
 		self.__state_conf_vector_position = 0
 		self.__state_conf_vector_changed = True
 		
@@ -739,13 +705,6 @@ class Statechart:
 		self.__state_conf_vector_position = 0
 		self.__exit_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_entry()
 		
-	def __exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating(self):
-		"""Default exit sequence for state Participating.
-		"""
-		#Default exit sequence for state Participating
-		self.__state_vector[0] = self.State.constituent_lifecycle_orthogonal_states_belonging_active
-		self.__state_conf_vector_position = 0
-		
 	def __exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit(self):
 		"""Default exit sequence for state Pending Exit.
 		"""
@@ -753,6 +712,13 @@ class Statechart:
 		self.__state_vector[0] = self.State.constituent_lifecycle_orthogonal_states_belonging_active
 		self.__state_conf_vector_position = 0
 		self.__exit_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit()
+		
+	def __exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating(self):
+		"""Default exit sequence for state Participating.
+		"""
+		#Default exit sequence for state Participating
+		self.__state_vector[0] = self.State.constituent_lifecycle_orthogonal_states_belonging_active
+		self.__state_conf_vector_position = 0
 		
 	def __exit_sequence_constituent_lifecycle_orthogonal_states_health_ideal(self):
 		"""Default exit sequence for state Ideal.
@@ -825,11 +791,11 @@ class Statechart:
 		elif state == self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0pending_entry:
 			self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_entry()
 			self.__exit_action_constituent_lifecycle_orthogonal_states_belonging_active()
-		elif state == self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating:
-			self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating()
-			self.__exit_action_constituent_lifecycle_orthogonal_states_belonging_active()
 		elif state == self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0pending_exit:
 			self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit()
+			self.__exit_action_constituent_lifecycle_orthogonal_states_belonging_active()
+		elif state == self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating:
+			self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating()
 			self.__exit_action_constituent_lifecycle_orthogonal_states_belonging_active()
 		state = self.__state_vector[1]
 		if state == self.State.constituent_lifecycle_orthogonal_states_health_ideal:
@@ -864,10 +830,10 @@ class Statechart:
 		state = self.__state_vector[0]
 		if state == self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0pending_entry:
 			self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_entry()
-		elif state == self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating:
-			self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating()
 		elif state == self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0pending_exit:
 			self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit()
+		elif state == self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating:
+			self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating()
 		
 	def __react_constituent_lifecycle__entry_default(self):
 		"""Default react sequence for initial entry .
@@ -935,11 +901,11 @@ class Statechart:
 		#The reactions of state Passive.
 		transitioned_after = transitioned_before
 		if transitioned_after < 0:
-			if self.join_constellation:
+			if (self.__state_vector[1] == self.State.constituent_lifecycle_orthogonal_states_health_failed):
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_passive()
-				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active_default()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_prepared_default()
 				transitioned_after = 0
-			elif (self.__state_vector[1] == self.State.constituent_lifecycle_orthogonal_states_health_failed):
+			elif self.leave_so_s:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_passive()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_prepared_default()
 				transitioned_after = 0
@@ -956,6 +922,10 @@ class Statechart:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_passive__region0_negotiating()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_passive__region0_avaliable_default()
 				self.__constituent_lifecycle_orthogonal_states_belonging_passive_react(0)
+				transitioned_after = 0
+			elif self.join_constellation:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_passive()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active_default()
 				transitioned_after = 0
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -975,14 +945,10 @@ class Statechart:
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_passive__region0_negotiating_default()
 				self.__constituent_lifecycle_orthogonal_states_belonging_passive_react(0)
 				transitioned_after = 0
-			elif (self.join_invitation) and ((self.__state_vector[1] == self.State.constituent_lifecycle_orthogonal_states_health_ideal) and (self.__state_vector[1] == self.State.constituent_lifecycle_orthogonal_states_health_defective) and (self.__state_vector[1] == self.State.constituent_lifecycle_orthogonal_states_health_faulty)):
+			elif (self.join_invitation) and ((self.__state_vector[1] == self.State.constituent_lifecycle_orthogonal_states_health_ideal) or (self.__state_vector[1] == self.State.constituent_lifecycle_orthogonal_states_health_defective) or (self.__state_vector[1] == self.State.constituent_lifecycle_orthogonal_states_health_faulty)):
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_passive__region0_avaliable()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_passive__region0_negotiating_default()
 				self.__constituent_lifecycle_orthogonal_states_belonging_passive_react(0)
-				transitioned_after = 0
-			elif self.leave_so_s:
-				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_passive()
-				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_prepared_default()
 				transitioned_after = 0
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -1010,35 +976,16 @@ class Statechart:
 		#The reactions of state Pending Entry.
 		transitioned_after = transitioned_before
 		if transitioned_after < 0:
-			if (self.__time_events[0]) and ((self.__state_vector[1] == self.State.constituent_lifecycle_orthogonal_states_health_ideal) and (self.__state_vector[1] == self.State.constituent_lifecycle_orthogonal_states_health_defective) and (self.__state_vector[1] == self.State.constituent_lifecycle_orthogonal_states_health_faulty)):
+			if self.leave_constellation:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_entry()
+				self.announce_observable.next(self.LI)
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit_default()
+				self.__constituent_lifecycle_orthogonal_states_belonging_active_react(0)
+				transitioned_after = 0
+			elif self.__time_events[0]:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_entry()
 				self.__time_events[0] = False
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating_default()
-				self.__constituent_lifecycle_orthogonal_states_belonging_active_react(0)
-				transitioned_after = 0
-			elif self.leave_request:
-				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_entry()
-				self.announce_observable.next(self.LI)
-				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit_default()
-				self.__constituent_lifecycle_orthogonal_states_belonging_active_react(0)
-				transitioned_after = 0
-		#If no transition was taken
-		if transitioned_after == transitioned_before:
-			#then execute local reactions.
-			transitioned_after = self.__constituent_lifecycle_orthogonal_states_belonging_active_react(transitioned_before)
-		return transitioned_after
-	
-	
-	def __constituent_lifecycle_orthogonal_states_belonging_active__region0_participating_react(self, transitioned_before):
-		"""Implementation of __constituent_lifecycle_orthogonal_states_belonging_active__region0_participating_react function.
-		"""
-		#The reactions of state Participating.
-		transitioned_after = transitioned_before
-		if transitioned_after < 0:
-			if self.leave_request:
-				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating()
-				self.announce_observable.next(self.LI)
-				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit_default()
 				self.__constituent_lifecycle_orthogonal_states_belonging_active_react(0)
 				transitioned_after = 0
 		#If no transition was taken
@@ -1056,7 +1003,6 @@ class Statechart:
 		if transitioned_after < 0:
 			if self.__time_events[1]:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active()
-				self.raise_leave_constellation()
 				self.__time_events[1] = False
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_passive_default()
 				transitioned_after = 0
@@ -1072,13 +1018,32 @@ class Statechart:
 		return transitioned_after
 	
 	
+	def __constituent_lifecycle_orthogonal_states_belonging_active__region0_participating_react(self, transitioned_before):
+		"""Implementation of __constituent_lifecycle_orthogonal_states_belonging_active__region0_participating_react function.
+		"""
+		#The reactions of state Participating.
+		transitioned_after = transitioned_before
+		if transitioned_after < 0:
+			if self.leave_constellation:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating()
+				self.announce_observable.next(self.LI)
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit_default()
+				self.__constituent_lifecycle_orthogonal_states_belonging_active_react(0)
+				transitioned_after = 0
+		#If no transition was taken
+		if transitioned_after == transitioned_before:
+			#then execute local reactions.
+			transitioned_after = self.__constituent_lifecycle_orthogonal_states_belonging_active_react(transitioned_before)
+		return transitioned_after
+	
+	
 	def __constituent_lifecycle_orthogonal_states_health_ideal_react(self, transitioned_before):
 		"""Implementation of __constituent_lifecycle_orthogonal_states_health_ideal_react function.
 		"""
 		#The reactions of state Ideal.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.component_deviation:
+			if self.degrade:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_ideal()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_defective_default()
 				transitioned_after = 1
@@ -1095,13 +1060,17 @@ class Statechart:
 		#The reactions of state Defective.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.recovery:
+			if self.full_recovery:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_defective()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
 				transitioned_after = 1
-			elif self.defect_activated:
+			elif self.degrade:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_defective()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_faulty_default()
+				transitioned_after = 1
+			elif self.improve:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_defective()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
 				transitioned_after = 1
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -1116,13 +1085,17 @@ class Statechart:
 		#The reactions of state Faulty.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.recovery:
+			if self.full_recovery:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_faulty()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
 				transitioned_after = 1
-			elif self.fault_exercised:
+			elif self.degrade:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_faulty()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_erroneous_default()
+				transitioned_after = 1
+			elif self.improve:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_faulty()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_defective_default()
 				transitioned_after = 1
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -1137,13 +1110,17 @@ class Statechart:
 		#The reactions of state Erroneous.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.recovery:
+			if self.full_recovery:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_erroneous()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
 				transitioned_after = 1
-			elif self.error_propogation:
+			elif self.degrade:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_erroneous()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_malfunctioning_default()
+				transitioned_after = 1
+			elif self.improve:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_erroneous()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_faulty_default()
 				transitioned_after = 1
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -1158,13 +1135,17 @@ class Statechart:
 		#The reactions of state Malfunctioning.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.recovery:
+			if self.full_recovery:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_malfunctioning()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
 				transitioned_after = 1
-			elif self.service_impact_observed:
+			elif self.degrade:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_malfunctioning()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_degraded_default()
+				transitioned_after = 1
+			elif self.improve:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_malfunctioning()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_erroneous_default()
 				transitioned_after = 1
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -1179,13 +1160,17 @@ class Statechart:
 		#The reactions of state Degraded.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.recovery:
+			if self.full_recovery:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_degraded()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
 				transitioned_after = 1
-			elif self.service_threshold_violated:
+			elif self.degrade:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_degraded()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_failed_default()
+				transitioned_after = 1
+			elif self.improve:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_degraded()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_malfunctioning_default()
 				transitioned_after = 1
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -1200,9 +1185,13 @@ class Statechart:
 		#The reactions of state Failed.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.recovery:
+			if self.full_recovery:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_failed()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
+				transitioned_after = 1
+			elif self.improve:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_failed()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_degraded_default()
 				transitioned_after = 1
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -1220,26 +1209,16 @@ class Statechart:
 		self.leave_so_s = False
 		self.join_constellation = False
 		self.leave_constellation = False
-		self.leave_request = False
 		self.exit_denied = False
 		self.join_request = False
 		self.join_invitation = False
 		self.admission_rejected = False
-		self.recovery = False
-		self.component_deviation = False
-		self.defect_activated = False
-		self.fault_exercised = False
-		self.error_propogation = False
-		self.service_impact_observed = False
-		self.service_threshold_violated = False
+		self.full_recovery = False
+		self.degrade = False
+		self.improve = False
+		self.uncertainty_threshold_exceeded = False
 		self.__time_events[0] = False
 		self.__time_events[1] = False
-	
-	
-	def __clear_internal_events(self):
-		"""Implementation of __clear_internal_events function.
-		"""
-		self.health_changed = False
 	
 	
 	def __micro_step(self):
@@ -1258,10 +1237,10 @@ class Statechart:
 			transitioned = self.__constituent_lifecycle_orthogonal_states_belonging_passive__region0_avaliable_react(transitioned)
 		elif state == self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0pending_entry:
 			transitioned = self.__constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_entry_react(transitioned)
-		elif state == self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating:
-			transitioned = self.__constituent_lifecycle_orthogonal_states_belonging_active__region0_participating_react(transitioned)
 		elif state == self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0pending_exit:
 			transitioned = self.__constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit_react(transitioned)
+		elif state == self.State.constituent_lifecycle_orthogonal_states_belonging_active_region0participating:
+			transitioned = self.__constituent_lifecycle_orthogonal_states_belonging_active__region0_participating_react(transitioned)
 		if self.__state_conf_vector_position < 1:
 			state = self.__state_vector[1]
 			if state == self.State.constituent_lifecycle_orthogonal_states_health_ideal:
@@ -1297,7 +1276,6 @@ class Statechart:
 		while condition_0:
 			self.__micro_step()
 			self.__clear_in_events()
-			self.__clear_internal_events()
 			condition_0 = False
 			next_event = self.__get_next_event()
 			if next_event is not None:

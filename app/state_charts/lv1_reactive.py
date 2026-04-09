@@ -35,43 +35,53 @@ class Statechart:
 		""" Declares all necessary variables including list of states, histories etc. 
 		"""
 		
-		self.belong_id = None
-		self.health_id = None
 		self.prepare_for_so_s = None
 		self.disengage_from_so_s = None
 		self.join_so_s = None
 		self.leave_so_s = None
 		self.join_constellation = None
 		self.leave_constellation = None
-		self.recovery = None
-		self.component_deviation = None
-		self.defect_activated = None
-		self.fault_exercised = None
-		self.error_propogation = None
-		self.service_impact_observed = None
-		self.service_threshold_violated = None
+		self.exit_denied = None
+		self.join_request = None
+		self.join_invitation = None
+		self.admission_rejected = None
+		self.full_recovery = None
+		self.degrade = None
+		self.improve = None
+		self.uncertainty_threshold_exceeded = None
 		self.announce = None
 		self.announce_value = None
 		self.announce_observable = Observable()
+		self.emit_observed = None
+		self.emit_observed_value = None
+		self.emit_observed_observable = Observable()
+		self.emit_validated = None
+		self.emit_validated_value = None
+		self.emit_validated_observable = Observable()
+		self.compensation_enabled = None
+		self.compensation_enabled_value = None
+		self.compensation_enabled_observable = Observable()
+		self.belonging_changed = None
+		self.belonging_changed_value = None
+		self.belonging_changed_observable = Observable()
+		self.health_changed = None
+		self.health_changed_value = None
+		self.health_changed_observable = Observable()
 		
-		self.__internal_event_queue = queue.Queue()
 		self.in_event_queue = queue.Queue()
 		self.JS = "join_SoS"
 		self.LS = "leave_SoS"
 		self.JC = "join_constellation"
 		self.LC = "leave_constellation"
-		self.DISENGAGED_ID = 1
-		self.PREPARED_ID = 2
-		self.PASSIVE_ID = 3
-		self.ACTIVE_ID = 4
-		self.IDEAL_ID = 1
-		self.DEFECTIVE_ID = 2
-		self.FAULTY_ID = 3
-		self.ERRONEOUS_ID = 4
-		self.MALFUNC_ID = 5
-		self.DEGRADED_ID = 6
-		self.FAILED_ID = 7
-		self.health_changed = None
+		self.DISENGAGED = "disengaged"
+		self.PREPARED = "prepared"
+		self.IDEAL = "ideal"
+		self.DEFECTIVE = "defective"
+		self.FAULTY = "faulty"
+		self.ERRONEOUS = "erroneous"
+		self.MALFUNCTIONING = "malfunctioning"
+		self.DEGRADED = "degraded"
+		self.FAILED = "failed"
 		
 		# enumeration of all states:
 		self.__State = Statechart.State
@@ -81,9 +91,6 @@ class Statechart:
 			self.__state_vector[__state_index] = self.State.null_state
 		
 		# initializations:
-		#Default init sequence for statechart Statechart
-		self.belong_id = 0
-		self.health_id = 0
 		self.__is_executing = False
 		self.__state_conf_vector_position = None
 	
@@ -133,22 +140,10 @@ class Statechart:
 		func()
 	
 	def __get_next_event(self):
-		if not self.__internal_event_queue.empty():
-			return self.__internal_event_queue.get()
 		if not self.in_event_queue.empty():
 			return self.in_event_queue.get()
 		return None
 	
-	
-	def raise_health_changed(self):
-		"""Raise method for event health_changed.
-		"""
-		self.__internal_event_queue.put(self.__raise_health_changed_call)
-	
-	def __raise_health_changed_call(self):
-		"""Raise callback for event health_changed.
-		"""
-		self.health_changed = True
 	
 	def raise_prepare_for_so_s(self):
 		"""Raise method for event prepare_for_so_s.
@@ -216,157 +211,171 @@ class Statechart:
 		"""
 		self.leave_constellation = True
 	
-	def raise_recovery(self):
-		"""Raise method for event recovery.
+	def raise_exit_denied(self):
+		"""Raise method for event exit_denied.
 		"""
-		self.in_event_queue.put(self.__raise_recovery_call)
+		self.in_event_queue.put(self.__raise_exit_denied_call)
 		self.run_cycle()
 	
-	def __raise_recovery_call(self):
-		"""Raise callback for event recovery.
+	def __raise_exit_denied_call(self):
+		"""Raise callback for event exit_denied.
 		"""
-		self.recovery = True
+		self.exit_denied = True
 	
-	def raise_component_deviation(self):
-		"""Raise method for event component_deviation.
+	def raise_join_request(self):
+		"""Raise method for event join_request.
 		"""
-		self.in_event_queue.put(self.__raise_component_deviation_call)
+		self.in_event_queue.put(self.__raise_join_request_call)
 		self.run_cycle()
 	
-	def __raise_component_deviation_call(self):
-		"""Raise callback for event component_deviation.
+	def __raise_join_request_call(self):
+		"""Raise callback for event join_request.
 		"""
-		self.component_deviation = True
+		self.join_request = True
 	
-	def raise_defect_activated(self):
-		"""Raise method for event defect_activated.
+	def raise_join_invitation(self):
+		"""Raise method for event join_invitation.
 		"""
-		self.in_event_queue.put(self.__raise_defect_activated_call)
+		self.in_event_queue.put(self.__raise_join_invitation_call)
 		self.run_cycle()
 	
-	def __raise_defect_activated_call(self):
-		"""Raise callback for event defect_activated.
+	def __raise_join_invitation_call(self):
+		"""Raise callback for event join_invitation.
 		"""
-		self.defect_activated = True
+		self.join_invitation = True
 	
-	def raise_fault_exercised(self):
-		"""Raise method for event fault_exercised.
+	def raise_admission_rejected(self):
+		"""Raise method for event admission_rejected.
 		"""
-		self.in_event_queue.put(self.__raise_fault_exercised_call)
+		self.in_event_queue.put(self.__raise_admission_rejected_call)
 		self.run_cycle()
 	
-	def __raise_fault_exercised_call(self):
-		"""Raise callback for event fault_exercised.
+	def __raise_admission_rejected_call(self):
+		"""Raise callback for event admission_rejected.
 		"""
-		self.fault_exercised = True
+		self.admission_rejected = True
 	
-	def raise_error_propogation(self):
-		"""Raise method for event error_propogation.
+	def raise_full_recovery(self):
+		"""Raise method for event full_recovery.
 		"""
-		self.in_event_queue.put(self.__raise_error_propogation_call)
+		self.in_event_queue.put(self.__raise_full_recovery_call)
 		self.run_cycle()
 	
-	def __raise_error_propogation_call(self):
-		"""Raise callback for event error_propogation.
+	def __raise_full_recovery_call(self):
+		"""Raise callback for event full_recovery.
 		"""
-		self.error_propogation = True
+		self.full_recovery = True
 	
-	def raise_service_impact_observed(self):
-		"""Raise method for event service_impact_observed.
+	def raise_degrade(self):
+		"""Raise method for event degrade.
 		"""
-		self.in_event_queue.put(self.__raise_service_impact_observed_call)
+		self.in_event_queue.put(self.__raise_degrade_call)
 		self.run_cycle()
 	
-	def __raise_service_impact_observed_call(self):
-		"""Raise callback for event service_impact_observed.
+	def __raise_degrade_call(self):
+		"""Raise callback for event degrade.
 		"""
-		self.service_impact_observed = True
+		self.degrade = True
 	
-	def raise_service_threshold_violated(self):
-		"""Raise method for event service_threshold_violated.
+	def raise_improve(self):
+		"""Raise method for event improve.
 		"""
-		self.in_event_queue.put(self.__raise_service_threshold_violated_call)
+		self.in_event_queue.put(self.__raise_improve_call)
 		self.run_cycle()
 	
-	def __raise_service_threshold_violated_call(self):
-		"""Raise callback for event service_threshold_violated.
+	def __raise_improve_call(self):
+		"""Raise callback for event improve.
 		"""
-		self.service_threshold_violated = True
+		self.improve = True
+	
+	def raise_uncertainty_threshold_exceeded(self):
+		"""Raise method for event uncertainty_threshold_exceeded.
+		"""
+		self.in_event_queue.put(self.__raise_uncertainty_threshold_exceeded_call)
+		self.run_cycle()
+	
+	def __raise_uncertainty_threshold_exceeded_call(self):
+		"""Raise callback for event uncertainty_threshold_exceeded.
+		"""
+		self.uncertainty_threshold_exceeded = True
 	
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_disengaged(self):
 		"""Entry action for state 'Disengaged'..
 		"""
 		#Entry action for state 'Disengaged'.
-		self.belong_id = self.DISENGAGED_ID
+		self.belonging_changed_observable.next(self.DISENGAGED)
+		self.emit_observed_observable.next(False)
+		self.emit_validated_observable.next(False)
+		self.compensation_enabled_observable.next(False)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_prepared(self):
 		"""Entry action for state 'Prepared'..
 		"""
 		#Entry action for state 'Prepared'.
-		self.belong_id = self.PREPARED_ID
+		self.belonging_changed_observable.next(self.PREPARED)
+		self.emit_observed_observable.next(False)
+		self.emit_validated_observable.next(False)
+		self.compensation_enabled_observable.next(False)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_passive(self):
 		"""Entry action for state 'Passive'..
 		"""
 		#Entry action for state 'Passive'.
-		self.belong_id = self.PASSIVE_ID
 		self.announce_observable.next(self.JS)
+		self.emit_observed_observable.next(True)
+		self.emit_validated_observable.next(False)
+		self.compensation_enabled_observable.next(False)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_active(self):
 		"""Entry action for state 'Active'..
 		"""
 		#Entry action for state 'Active'.
-		self.belong_id = self.ACTIVE_ID
 		self.announce_observable.next(self.JC)
+		self.emit_observed_observable.next(True)
+		self.emit_validated_observable.next(True)
+		self.compensation_enabled_observable.next(False)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_ideal(self):
 		"""Entry action for state 'Ideal'..
 		"""
 		#Entry action for state 'Ideal'.
-		self.health_id = self.IDEAL_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.IDEAL)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_defective(self):
 		"""Entry action for state 'Defective'..
 		"""
 		#Entry action for state 'Defective'.
-		self.health_id = self.DEFECTIVE_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.DEFECTIVE)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_faulty(self):
 		"""Entry action for state 'Faulty'..
 		"""
 		#Entry action for state 'Faulty'.
-		self.health_id = self.FAULTY_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.FAULTY)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_erroneous(self):
 		"""Entry action for state 'Erroneous'..
 		"""
 		#Entry action for state 'Erroneous'.
-		self.health_id = self.ERRONEOUS_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.ERRONEOUS)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_malfunctioning(self):
 		"""Entry action for state 'Malfunctioning'..
 		"""
 		#Entry action for state 'Malfunctioning'.
-		self.health_id = self.MALFUNC_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.MALFUNCTIONING)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_degraded(self):
 		"""Entry action for state 'Degraded'..
 		"""
 		#Entry action for state 'Degraded'.
-		self.health_id = self.DEGRADED_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.DEGRADED)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_health_failed(self):
 		"""Entry action for state 'Failed'..
 		"""
 		#Entry action for state 'Failed'.
-		self.health_id = self.FAILED_ID
-		self.raise_health_changed()
+		self.health_changed_observable.next(self.FAILED)
 		
 	def __exit_action_constituent_lifecycle_orthogonal_states_belonging_passive(self):
 		"""Exit action for state 'Passive'..
@@ -696,7 +705,7 @@ class Statechart:
 		#The reactions of state Ideal.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.component_deviation:
+			if self.degrade:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_ideal()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_defective_default()
 				transitioned_after = 1
@@ -713,13 +722,17 @@ class Statechart:
 		#The reactions of state Defective.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.recovery:
+			if self.full_recovery:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_defective()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
 				transitioned_after = 1
-			elif self.defect_activated:
+			elif self.degrade:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_defective()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_faulty_default()
+				transitioned_after = 1
+			elif self.improve:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_defective()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
 				transitioned_after = 1
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -734,13 +747,17 @@ class Statechart:
 		#The reactions of state Faulty.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.recovery:
+			if self.full_recovery:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_faulty()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
 				transitioned_after = 1
-			elif self.fault_exercised:
+			elif self.degrade:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_faulty()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_erroneous_default()
+				transitioned_after = 1
+			elif self.improve:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_faulty()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_defective_default()
 				transitioned_after = 1
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -755,13 +772,17 @@ class Statechart:
 		#The reactions of state Erroneous.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.recovery:
+			if self.full_recovery:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_erroneous()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
 				transitioned_after = 1
-			elif self.error_propogation:
+			elif self.degrade:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_erroneous()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_malfunctioning_default()
+				transitioned_after = 1
+			elif self.improve:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_erroneous()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_faulty_default()
 				transitioned_after = 1
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -776,13 +797,17 @@ class Statechart:
 		#The reactions of state Malfunctioning.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.recovery:
+			if self.full_recovery:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_malfunctioning()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
 				transitioned_after = 1
-			elif self.service_impact_observed:
+			elif self.degrade:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_malfunctioning()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_degraded_default()
+				transitioned_after = 1
+			elif self.improve:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_malfunctioning()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_erroneous_default()
 				transitioned_after = 1
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -797,13 +822,17 @@ class Statechart:
 		#The reactions of state Degraded.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.recovery:
+			if self.full_recovery:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_degraded()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
 				transitioned_after = 1
-			elif self.service_threshold_violated:
+			elif self.degrade:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_degraded()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_failed_default()
+				transitioned_after = 1
+			elif self.improve:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_degraded()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_malfunctioning_default()
 				transitioned_after = 1
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -818,9 +847,13 @@ class Statechart:
 		#The reactions of state Failed.
 		transitioned_after = transitioned_before
 		if transitioned_after < 1:
-			if self.recovery:
+			if self.full_recovery:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_failed()
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_ideal_default()
+				transitioned_after = 1
+			elif self.improve:
+				self.__exit_sequence_constituent_lifecycle_orthogonal_states_health_failed()
+				self.__enter_sequence_constituent_lifecycle_orthogonal_states_health_degraded_default()
 				transitioned_after = 1
 		#If no transition was taken
 		if transitioned_after == transitioned_before:
@@ -838,19 +871,14 @@ class Statechart:
 		self.leave_so_s = False
 		self.join_constellation = False
 		self.leave_constellation = False
-		self.recovery = False
-		self.component_deviation = False
-		self.defect_activated = False
-		self.fault_exercised = False
-		self.error_propogation = False
-		self.service_impact_observed = False
-		self.service_threshold_violated = False
-	
-	
-	def __clear_internal_events(self):
-		"""Implementation of __clear_internal_events function.
-		"""
-		self.health_changed = False
+		self.exit_denied = False
+		self.join_request = False
+		self.join_invitation = False
+		self.admission_rejected = False
+		self.full_recovery = False
+		self.degrade = False
+		self.improve = False
+		self.uncertainty_threshold_exceeded = False
 	
 	
 	def __micro_step(self):
@@ -899,7 +927,6 @@ class Statechart:
 		while condition_0:
 			self.__micro_step()
 			self.__clear_in_events()
-			self.__clear_internal_events()
 			condition_0 = False
 			next_event = self.__get_next_event()
 			if next_event is not None:

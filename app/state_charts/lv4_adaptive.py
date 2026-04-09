@@ -42,17 +42,12 @@ class Statechart:
 		""" Declares all necessary variables including list of states, histories etc. 
 		"""
 		
-		self.allow_observed = None
-		self.allow_validated = None
-		self.allow_compensation = None
 		self.prepare_for_so_s = None
 		self.disengage_from_so_s = None
 		self.join_so_s = None
 		self.leave_so_s = None
 		self.join_constellation = None
 		self.leave_constellation = None
-		self.constellation_stable = None
-		self.leave_request = None
 		self.exit_denied = None
 		self.join_request = None
 		self.join_invitation = None
@@ -81,6 +76,7 @@ class Statechart:
 		self.health_changed_observable = Observable()
 		
 		self.in_event_queue = queue.Queue()
+		self.DELTA = 1
 		self.JS = "join_SoS"
 		self.LS = "leave_SoS"
 		self.JC = "join_constellation"
@@ -109,11 +105,11 @@ class Statechart:
 		for __state_index in range(2):
 			self.__state_vector[__state_index] = self.State.null_state
 		
+		# for timed statechart:
+		self.timer_service = None
+		self.__time_events = [None] * 2
+		
 		# initializations:
-		#Default init sequence for statechart Statechart
-		self.allow_observed = False
-		self.allow_validated = False
-		self.allow_compensation = False
 		self.__is_executing = False
 		self.__state_conf_vector_position = None
 	
@@ -176,6 +172,18 @@ class Statechart:
 			return self.__state_vector[1] == self.__State.constituent_lifecycle_orthogonal_states_health_failed
 		return False
 		
+	def time_elapsed(self, event_id):
+		"""Add time events to in event queue
+		"""
+		if event_id in range(2):
+			self.in_event_queue.put(lambda: self.raise_time_event(event_id))
+			self.run_cycle()
+	
+	def raise_time_event(self, event_id):
+		"""Raise timed events using the event_id.
+		"""
+		self.__time_events[event_id] = True
+	
 	def __execute_queued_event(self, func):
 		func()
 	
@@ -250,28 +258,6 @@ class Statechart:
 		"""Raise callback for event leave_constellation.
 		"""
 		self.leave_constellation = True
-	
-	def raise_constellation_stable(self):
-		"""Raise method for event constellation_stable.
-		"""
-		self.in_event_queue.put(self.__raise_constellation_stable_call)
-		self.run_cycle()
-	
-	def __raise_constellation_stable_call(self):
-		"""Raise callback for event constellation_stable.
-		"""
-		self.constellation_stable = True
-	
-	def raise_leave_request(self):
-		"""Raise method for event leave_request.
-		"""
-		self.in_event_queue.put(self.__raise_leave_request_call)
-		self.run_cycle()
-	
-	def __raise_leave_request_call(self):
-		"""Raise callback for event leave_request.
-		"""
-		self.leave_request = True
 	
 	def raise_exit_denied(self):
 		"""Raise method for event exit_denied.
@@ -366,9 +352,6 @@ class Statechart:
 		"""
 		#Entry action for state 'Disengaged'.
 		self.belonging_changed_observable.next(self.DISENGAGED)
-		self.allow_observed = False
-		self.allow_validated = False
-		self.allow_compensation = False
 		self.emit_observed_observable.next(False)
 		self.emit_validated_observable.next(False)
 		self.compensation_enabled_observable.next(False)
@@ -378,9 +361,6 @@ class Statechart:
 		"""
 		#Entry action for state 'Prepared'.
 		self.belonging_changed_observable.next(self.PREPARED)
-		self.allow_observed = False
-		self.allow_validated = False
-		self.allow_compensation = False
 		self.emit_observed_observable.next(False)
 		self.emit_validated_observable.next(False)
 		self.compensation_enabled_observable.next(False)
@@ -390,9 +370,6 @@ class Statechart:
 		"""
 		#Entry action for state 'Passive'.
 		self.announce_observable.next(self.JS)
-		self.allow_observed = True
-		self.allow_validated = False
-		self.allow_compensation = False
 		self.emit_observed_observable.next(True)
 		self.emit_validated_observable.next(False)
 		self.compensation_enabled_observable.next(False)
@@ -414,9 +391,6 @@ class Statechart:
 		"""
 		#Entry action for state 'Active'.
 		self.announce_observable.next(self.JC)
-		self.allow_observed = True
-		self.allow_validated = False
-		self.allow_compensation = False
 		self.emit_observed_observable.next(True)
 		self.emit_validated_observable.next(False)
 		self.compensation_enabled_observable.next(False)
@@ -425,13 +399,13 @@ class Statechart:
 		"""Entry action for state 'Pending Entry'..
 		"""
 		#Entry action for state 'Pending Entry'.
+		self.timer_service.set_timer(self, 0, (self.DELTA * 1000), False)
 		self.belonging_changed_observable.next(self.PENDING_ENTRY)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating(self):
 		"""Entry action for state 'Participating'..
 		"""
 		#Entry action for state 'Participating'.
-		self.allow_validated = True
 		self.emit_validated_observable.next(True)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating__region0_full_role(self):
@@ -445,16 +419,14 @@ class Statechart:
 		"""
 		#Entry action for state 'Restricted Role'.
 		self.belonging_changed_observable.next(self.RESTRICTED_ROLE)
-		self.allow_compensation = True
 		self.compensation_enabled_observable.next(True)
 		
 	def __entry_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit(self):
 		"""Entry action for state 'Pending Exit'..
 		"""
 		#Entry action for state 'Pending Exit'.
+		self.timer_service.set_timer(self, 1, (self.DELTA * 1000), False)
 		self.belonging_changed_observable.next(self.PENDING_EXIT)
-		self.allow_validated = False
-		self.allow_compensation = False
 		self.emit_validated_observable.next(False)
 		self.compensation_enabled_observable.next(False)
 		
@@ -511,6 +483,18 @@ class Statechart:
 		"""
 		#Exit action for state 'Active'.
 		self.announce_observable.next(self.LC)
+		
+	def __exit_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_entry(self):
+		"""Exit action for state 'Pending Entry'..
+		"""
+		#Exit action for state 'Pending Entry'.
+		self.timer_service.unset_timer(self, 0)
+		
+	def __exit_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit(self):
+		"""Exit action for state 'Pending Exit'..
+		"""
+		#Exit action for state 'Pending Exit'.
+		self.timer_service.unset_timer(self, 1)
 		
 	def __enter_sequence_constituent_lifecycle_orthogonal_states_default(self):
 		"""'default' enter sequence for state Orthogonal States.
@@ -763,6 +747,7 @@ class Statechart:
 		#Default exit sequence for state Pending Entry
 		self.__state_vector[0] = self.State.constituent_lifecycle_orthogonal_states_belonging_active
 		self.__state_conf_vector_position = 0
+		self.__exit_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_entry()
 		
 	def __exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating(self):
 		"""Default exit sequence for state Participating.
@@ -792,6 +777,7 @@ class Statechart:
 		#Default exit sequence for state Pending Exit
 		self.__state_vector[0] = self.State.constituent_lifecycle_orthogonal_states_belonging_active
 		self.__state_conf_vector_position = 0
+		self.__exit_action_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit()
 		
 	def __exit_sequence_constituent_lifecycle_orthogonal_states_health_ideal(self):
 		"""Default exit sequence for state Ideal.
@@ -1084,12 +1070,13 @@ class Statechart:
 		#The reactions of state Pending Entry.
 		transitioned_after = transitioned_before
 		if transitioned_after < 0:
-			if self.constellation_stable:
+			if self.__time_events[0]:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_entry()
+				self.__time_events[0] = False
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating_default()
 				self.__constituent_lifecycle_orthogonal_states_belonging_active_react(0)
 				transitioned_after = 0
-			elif self.leave_request:
+			elif self.leave_constellation:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_entry()
 				self.announce_observable.next(self.LI)
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit_default()
@@ -1108,7 +1095,7 @@ class Statechart:
 		#The reactions of state Participating.
 		transitioned_after = transitioned_before
 		if transitioned_after < 0:
-			if self.leave_request:
+			if self.leave_constellation:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_participating()
 				self.announce_observable.next(self.LI)
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_active__region0_pending_exit_default()
@@ -1173,8 +1160,9 @@ class Statechart:
 		#The reactions of state Pending Exit.
 		transitioned_after = transitioned_before
 		if transitioned_after < 0:
-			if self.leave_constellation:
+			if self.__time_events[1]:
 				self.__exit_sequence_constituent_lifecycle_orthogonal_states_belonging_active()
+				self.__time_events[1] = False
 				self.__enter_sequence_constituent_lifecycle_orthogonal_states_belonging_passive_default()
 				transitioned_after = 0
 			elif (self.exit_denied) and (not (self.__state_vector[1] == self.State.constituent_lifecycle_orthogonal_states_health_degraded)):
@@ -1361,8 +1349,6 @@ class Statechart:
 		self.leave_so_s = False
 		self.join_constellation = False
 		self.leave_constellation = False
-		self.constellation_stable = False
-		self.leave_request = False
 		self.exit_denied = False
 		self.join_request = False
 		self.join_invitation = False
@@ -1371,6 +1357,8 @@ class Statechart:
 		self.degrade = False
 		self.improve = False
 		self.uncertainty_threshold_exceeded = False
+		self.__time_events[0] = False
+		self.__time_events[1] = False
 	
 	
 	def __micro_step(self):
@@ -1417,6 +1405,9 @@ class Statechart:
 		"""Implementation of run_cycle function.
 		"""
 		#Performs a 'run to completion' step.
+		if self.timer_service is None:
+			raise ValueError('Timer service must be set.')
+		
 		if self.__is_executing:
 			return
 		self.__is_executing = True
@@ -1439,6 +1430,9 @@ class Statechart:
 		"""Implementation of enter function.
 		"""
 		#Activates the state machine.
+		if self.timer_service is None:
+			raise ValueError('Timer service must be set.')
+		
 		if self.__is_executing:
 			return
 		self.__is_executing = True

@@ -8,29 +8,19 @@ PATTERN_LOG = os.path.join(LOG_DIR, "patterns.csv")
 PATTERNS = [
     "CrossSignalAgreement",
     "CrossSignalDivergence",
-    "CrossSignalTrendConsistency",
     "CrossSignalRelativeStable"
 ]
 
-# =========================
-# LOAD
-# =========================
+
 def load_data():
     df = pd.read_csv(PATTERN_LOG, comment="#")
     df.columns = df.columns.str.strip()
     return df
 
 
-# =========================
-# HELPERS
-# =========================
 def get_base_pattern(name):
     return name.rsplit("_", 1)[0]
 
-
-# =========================
-# BASIC METRICS
-# =========================
 def split_pattern_types(df):
     return {
         "OBS": df[df["pattern_name"].str.endswith("_OBS")],
@@ -42,11 +32,6 @@ def split_pattern_types(df):
 def compute_detection_counts(groups):
     return {k: len(v) for k, v in groups.items()}
 
-
-
-# =========================
-# TEMPORAL MATCHING
-# =========================
 def match_events(gt_times, test_times, tolerance=1.0):
     i, j = 0, 0
     matched = 0
@@ -113,10 +98,6 @@ def compute_temporal_metrics(df, pattern_base, tolerance=1.0):
         "SYS": compute_metrics(gt_times, sys_times),
     }
 
-
-# =========================
-# PER-PATTERN BREAKDOWN
-# =========================
 def compute_pattern_breakdown(df):
     results = defaultdict(dict)
 
@@ -132,9 +113,6 @@ def compute_pattern_breakdown(df):
     return results
 
 
-# =========================
-# MAIN
-# =========================
 def main():
     df = load_data()
 

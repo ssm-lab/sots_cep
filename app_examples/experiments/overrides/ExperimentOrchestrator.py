@@ -22,7 +22,7 @@ from .ExperimentReconstructor import ExperimentReconstructor, ExperimentalExpect
 from app.core.compensator.PredictorRegistry import get_predictor_class
 
 from app.core.utils.UtilsFuncs import load_plugins_from_package
-from app.state_charts.lv4_adaptive import Statechart
+from app_examples.experiments.overrides.state_charts.lv4_adaptive_experiment import Statechart
 
 load_plugins_from_package("app.core.source.source_type")
 load_plugins_from_package("app.core.compensator.predictor_types")

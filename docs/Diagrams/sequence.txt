@@ -1,0 +1,35 @@
+@startuml
+title Event Processing and Compensation Workflow
+
+participant "Statechart Controller" as SC
+participant "Event Source" as ES
+participant "Event Stream" as STREAM
+participant "Compensation Service" as COMP
+participant "State Estimator" as EST
+participant "Event Processing Service" as EPS
+
+ES -> SC : query lifecycle state
+SC --> ES : lifecycle state
+
+alt Publishing allowed
+    ES -> STREAM : publish observed event
+    STREAM -> EPS : forward event
+
+    STREAM -> COMP : observed event
+    COMP -> EST : update estimator
+end
+
+alt Gap detected
+    COMP -> SC : query lifecycle state
+    SC --> COMP : lifecycle state
+
+    alt Reconstruction allowed
+        COMP -> EST : predict state
+        EST --> COMP : predicted observation
+        COMP -> STREAM : publish reconstructed event
+        STREAM -> EPS : forward reconstructed event
+    end
+end
+
+EPS -> EPS : evaluate event patterns
+@enduml

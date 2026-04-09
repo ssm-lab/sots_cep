@@ -1,0 +1,34 @@
+@startuml
+title Process Flow
+
+actor Researcher
+
+participant Stream
+participant Coordinator
+participant EventStream
+participant Reconstructor
+participant Predictor
+participant CEPEngine
+
+== Event Generation ==
+Researcher -> Stream: startDataCollection()
+Stream -> Coordinator: generateEvent()
+Coordinator -> EventStream: publish(event, "observed")
+
+== Reconstruction ==
+EventStream -> Reconstructor: dispatch(event, "observed")
+
+alt Event observed
+    Reconstructor -> EventStream: publish(event + metadata, "reconstructed")
+else Event missing (gap detected)
+    Coordinator -> Reconstructor: triggerReconstruction()
+    Reconstructor -> Predictor: predict()
+    Predictor --> Reconstructor: predicted_value
+    Reconstructor -> EventStream: publish(reconstructed_event, "reconstructed")
+end
+
+== CEP Processing ==
+EventStream -> CEPEngine: dispatch(event, "reconstructed")
+CEPEngine -> CEPEngine: matchPatterns()
+CEPEngine --> Researcher: logDetectedEvents()
+@enduml

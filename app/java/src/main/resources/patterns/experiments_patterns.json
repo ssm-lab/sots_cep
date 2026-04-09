@@ -40,26 +40,6 @@
     "epl": "@Name('CrossSignalDivergence_SYS') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus in ('validated','reconstructed')) and b1=Event(src='dt-2', eventStatus in ('validated','reconstructed')) and c1=Event(src='dt-3', eventStatus in ('validated','reconstructed'))) -> (a2=Event(src='dt-1', eventStatus in ('validated','reconstructed')) and b2=Event(src='dt-2', eventStatus in ('validated','reconstructed')) and c2=Event(src='dt-3', eventStatus in ('validated','reconstructed')))] where a1.eventTs < a2.eventTs and ((a1.value > b1.value + 1.5 or a1.value < b1.value - 1.5) or (a1.value > c1.value + 1.5 or a1.value < c1.value - 1.5) or (b1.value > c1.value + 1.5 or b1.value < c1.value - 1.5)) and ((a2.value > b2.value + 1.5 or a2.value < b2.value - 1.5) or (a2.value > c2.value + 1.5 or a2.value < c2.value - 1.5) or (b2.value > c2.value + 1.5 or b2.value < c2.value - 1.5))"
   },
   {
-    "name": "CrossSignalTrendConsistency_GT",
-    "type": "atomic",
-    "description": "Signals move in the same direction over time (ground truth).",
-    "epl": "@Name('CrossSignalTrendConsistency_GT') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus='ground_truth') and b1=Event(src='dt-2', eventStatus='ground_truth') and c1=Event(src='dt-3', eventStatus='ground_truth')) -> (a2=Event(src='dt-1', eventStatus='ground_truth') and b2=Event(src='dt-2', eventStatus='ground_truth') and c2=Event(src='dt-3', eventStatus='ground_truth'))] where a1.eventTs < a2.eventTs and ((a2.value > a1.value and b2.value > b1.value and c2.value > c1.value) or (a2.value < a1.value and b2.value < b1.value and c2.value < c1.value))"
-  },
-
-  {
-    "name": "CrossSignalTrendConsistency_OBS",
-    "type": "atomic",
-    "description": "Observed signals move in the same direction over time.",
-    "epl": "@Name('CrossSignalTrendConsistency_OBS') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus='validated') and b1=Event(src='dt-2', eventStatus='validated') and c1=Event(src='dt-3', eventStatus='validated')) -> (a2=Event(src='dt-1', eventStatus='validated') and b2=Event(src='dt-2', eventStatus='validated') and c2=Event(src='dt-3', eventStatus='validated'))] where a1.eventTs < a2.eventTs and ((a2.value > a1.value and b2.value > b1.value and c2.value > c1.value) or (a2.value < a1.value and b2.value < b1.value and c2.value < c1.value))"
-  },
-
-  {
-    "name": "CrossSignalTrendConsistency_SYS",
-    "type": "atomic",
-    "description": "System signals move in the same direction over time.",
-    "epl": "@Name('CrossSignalTrendConsistency_SYS') select a1, b1, c1, a2, b2, c2 from pattern [every (a1=Event(src='dt-1', eventStatus in ('validated','reconstructed')) and b1=Event(src='dt-2', eventStatus in ('validated','reconstructed')) and c1=Event(src='dt-3', eventStatus in ('validated','reconstructed'))) -> (a2=Event(src='dt-1', eventStatus in ('validated','reconstructed')) and b2=Event(src='dt-2', eventStatus in ('validated','reconstructed')) and c2=Event(src='dt-3', eventStatus in ('validated','reconstructed')))] where a1.eventTs < a2.eventTs and ((a2.value > a1.value and b2.value > b1.value and c2.value > c1.value) or (a2.value < a1.value and b2.value < b1.value and c2.value < c1.value))"
-  },
-  {
     "name": "CrossSignalRelativeStable_GT",
     "type": "atomic",
     "description": "Relative differences between signals remain stable over time (ground truth).",
