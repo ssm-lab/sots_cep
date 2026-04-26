@@ -1,5 +1,5 @@
 from app.core.runtime.LifecycleManager import ConstituentContext, LifecycleManager
-from app_examples.experiments.overrides.ExperimentConstituentController import ExperimentConstituentController
+from app_examples.experiments.overrides.ExperimentModelAdaptor import ExperimentModelAdaptor
 
 class ExperimentLifecycleManager(LifecycleManager):
 
@@ -18,7 +18,7 @@ class ExperimentLifecycleManager(LifecycleManager):
         schedule
     ):
 
-        runtime = ExperimentConstituentController(
+        runtime = ExperimentModelAdaptor(
             statechart_cls=statechart_cls,
             constituent_id=source_id,
             lifecycle_logger=self.lifecycle_logger,

@@ -1,32 +1,5 @@
-# Started Tue Mar 31 16:06:33 2026
+# Started Sun Apr 26 11:37:49 2026
 type,ts,scenario,constituent_id,from_state,target_state,goal_domain,transition,result,final_state,health,goal_match,trigger_event
-lifecycle_decision,0,LifecycleEvaluation,dt-1,disengaged/disengaged,participating,belonging,raise_prepare_for_so_s,made,prepared/prepared,ideal,False,raise_prepare_for_so_s
-lifecycle_decision,0,LifecycleEvaluation,dt-1,prepared/prepared,participating,belonging,raise_join_so_s,made,passive/available,ideal,False,raise_join_so_s
-lifecycle_decision,0,LifecycleEvaluation,dt-1,passive/available,participating,belonging,raise_join_invitation,made,passive/negotiating,ideal,False,raise_join_invitation
-lifecycle_decision,0,LifecycleEvaluation,dt-1,passive/negotiating,participating,belonging,raise_join_constellation,made,active/pending_entry,ideal,False,raise_join_constellation
-lifecycle_decision,0,LifecycleEvaluation,dt-1,active/pending_entry,participating,belonging,raise_constellation_stable,made,active/full_role,ideal,False,raise_constellation_stable
-lifecycle_decision,0,LifecycleEvaluation,dt-2,disengaged/disengaged,participating,belonging,raise_prepare_for_so_s,made,prepared/prepared,ideal,False,raise_prepare_for_so_s
-lifecycle_decision,0,LifecycleEvaluation,dt-2,prepared/prepared,participating,belonging,raise_join_so_s,made,passive/available,ideal,False,raise_join_so_s
-lifecycle_decision,0,LifecycleEvaluation,dt-2,passive/available,participating,belonging,raise_join_invitation,made,passive/negotiating,ideal,False,raise_join_invitation
-lifecycle_decision,0,LifecycleEvaluation,dt-2,passive/negotiating,participating,belonging,raise_join_constellation,made,active/pending_entry,ideal,False,raise_join_constellation
-lifecycle_decision,0,LifecycleEvaluation,dt-2,active/pending_entry,participating,belonging,raise_constellation_stable,made,active/full_role,ideal,False,raise_constellation_stable
-lifecycle_decision,0,LifecycleEvaluation,dt-3,disengaged/disengaged,participating,belonging,raise_prepare_for_so_s,made,prepared/prepared,ideal,False,raise_prepare_for_so_s
-lifecycle_decision,0,LifecycleEvaluation,dt-3,prepared/prepared,participating,belonging,raise_join_so_s,made,passive/available,ideal,False,raise_join_so_s
-lifecycle_decision,0,LifecycleEvaluation,dt-3,passive/available,participating,belonging,raise_join_invitation,made,passive/negotiating,ideal,False,raise_join_invitation
-lifecycle_decision,0,LifecycleEvaluation,dt-3,passive/negotiating,participating,belonging,raise_join_constellation,made,active/pending_entry,ideal,False,raise_join_constellation
-lifecycle_decision,0,LifecycleEvaluation,dt-3,active/pending_entry,participating,belonging,raise_constellation_stable,made,active/full_role,ideal,False,raise_constellation_stable
-lifecycle_decision,1,LifecycleEvaluation,dt-1,active/full_role,disengaged,belonging,raise_leave_request,made,active/pending_exit,ideal,False,raise_leave_request
-lifecycle_decision,1,LifecycleEvaluation,dt-2,active/full_role,disengaged,belonging,raise_leave_request,made,active/pending_exit,ideal,False,raise_leave_request
-lifecycle_decision,1,LifecycleEvaluation,dt-3,active/full_role,disengaged,belonging,raise_leave_request,made,active/pending_exit,ideal,False,raise_leave_request
-lifecycle_decision,2,LifecycleEvaluation,dt-1,active/pending_exit,disengaged,belonging,raise_leave_constellation,made,passive/available,ideal,False,raise_leave_constellation
-lifecycle_decision,2,LifecycleEvaluation,dt-2,active/pending_exit,disengaged,belonging,raise_leave_constellation,made,passive/available,ideal,False,raise_leave_constellation
-lifecycle_decision,2,LifecycleEvaluation,dt-3,active/pending_exit,disengaged,belonging,raise_leave_constellation,made,passive/available,ideal,False,raise_leave_constellation
-lifecycle_decision,3,LifecycleEvaluation,dt-1,passive/available,disengaged,belonging,raise_leave_so_s,made,prepared/prepared,ideal,False,raise_leave_so_s
-lifecycle_decision,3,LifecycleEvaluation,dt-2,passive/available,disengaged,belonging,raise_leave_so_s,made,prepared/prepared,ideal,False,raise_leave_so_s
-lifecycle_decision,3,LifecycleEvaluation,dt-3,passive/available,disengaged,belonging,raise_leave_so_s,made,prepared/prepared,ideal,False,raise_leave_so_s
-lifecycle_decision,4,LifecycleEvaluation,dt-1,prepared/prepared,disengaged,belonging,raise_disengage_from_so_s,made,disengaged/disengaged,ideal,False,raise_disengage_from_so_s
-lifecycle_decision,4,LifecycleEvaluation,dt-2,prepared/prepared,disengaged,belonging,raise_disengage_from_so_s,made,disengaged/disengaged,ideal,False,raise_disengage_from_so_s
-lifecycle_decision,4,LifecycleEvaluation,dt-3,prepared/prepared,disengaged,belonging,raise_disengage_from_so_s,made,disengaged/disengaged,ideal,False,raise_disengage_from_so_s
 lifecycle_decision,5,LifecycleEvaluation,dt-1,disengaged/disengaged,prepared,belonging,raise_prepare_for_so_s,made,prepared/prepared,ideal,False,raise_prepare_for_so_s
 lifecycle_decision,5,LifecycleEvaluation,dt-2,disengaged/disengaged,prepared,belonging,raise_prepare_for_so_s,made,prepared/prepared,ideal,False,raise_prepare_for_so_s
 lifecycle_decision,5,LifecycleEvaluation,dt-3,disengaged/disengaged,prepared,belonging,raise_prepare_for_so_s,made,prepared/prepared,ideal,False,raise_prepare_for_so_s

@@ -144,7 +144,7 @@ Example (abridged):
 
 ## 5. Defining Event Sources
 
-Event sources are defined in a separate JSON file to encourage reuse across experiments.
+Event sources are defined in a separate JSON file. 
 
 Example `sources.json`:
 ```json
@@ -162,6 +162,10 @@ Example `sources.json`:
       "noise": 4.0,
       "drop_chance": 0.15
     },
+    "default_lifecycle_state": {
+      "initial_belonging": "disengaged",
+      "initial_health": "ideal"
+    },
     "predictor_template": "kf_fast"
   }
 }
@@ -172,6 +176,7 @@ Each entry defines:
 - **type**: which source class to instantiate
 - **interval**: expected emission period
 - **params**: constructor arguments for the source
+- **lifecycle**: Defines the initial runtime state of the constituent when the system starts:
 - **predictor_template**: which predictor to use for reconstruction
 
 Sources are instantiated dynamically via a registry, allowing new source types to be added without modifying the orchestrator.

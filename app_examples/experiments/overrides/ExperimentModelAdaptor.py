@@ -2,7 +2,7 @@ import logging
 import time
 from .state_charts.yakindu.timer.timer_service import TimerService
 
-class ExperimentConstituentController:
+class ExperimentModelAdaptor:
 
     HEALTH_ORDER = [
         "ideal",

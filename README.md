@@ -20,7 +20,7 @@ Reliability levels implemented:
 ---
 
 ## Architecture
-The system is implemented as a **hybrid Python–Java architecture**:
+The system is implemented as a **hybrid Python–Java architecture** (See [Architecture Overview](./docs/Architecture%20Overview.md) for a detailed breakdown):
 
 - **Python layer**
   - Executes lifecycle statecharts (Itemis CREATE / Yakindu)

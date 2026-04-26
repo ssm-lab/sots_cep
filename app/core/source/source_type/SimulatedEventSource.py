@@ -87,18 +87,16 @@ class SimulatedEventSource(EventSource):
             self._step(now)
 
     def _step(self, now: float) -> Optional[Any]:
-        value = random.gauss(self.baseline, self.noise)
-
-        value = max(self.min_value, min(value, self.max_value))
-
-        self.generated_count += 1
-
         if self.generated_count > self.mandatory_count:
             if random.random() < self.drop_chance:
                 logging.debug(
                     f"[EVENT SOURCE-{self.id}] skipping event at {now}"
                 )
                 return None
+            
+        value = random.gauss(self.baseline, self.noise)
+        value = max(self.min_value, min(value, self.max_value))
+        self.generated_count += 1
 
         return self.emit_event({
             "value": value,

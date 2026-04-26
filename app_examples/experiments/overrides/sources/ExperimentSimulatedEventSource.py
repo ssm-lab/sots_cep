@@ -50,19 +50,7 @@ class SimulatedEventSource(ExperimentEventSource):
     def override_observation(self, scenario, clock):
         self.scenario = scenario
         self.clock = clock
-
-
-    # def _generate_signal(self, length=500):
-    #     t = np.arange(length)
-    #     signal = (
-    #         self.current_value +
-    #         self.drift * t +
-    #         2 * np.sin(0.05 * t) +
-    #         self.rng.normal(0, self.noise, length)
-    #     )
-
-    #     return signal
-    
+        
     def _generate_signal(self, length=500):
         signal = np.zeros(length)
         signal[0] = self.current_value

@@ -140,7 +140,7 @@ class ExperimentOrchestrator:
         for source_id, cfg in sources_cfg.items():
 
             # ----------------------------
-            # Schedule (EXPERIMENTAL)
+            # Schedule
             schedule = ExperimentalExpectedSchedule(
                 interval=cfg.get("interval", 1.0),
                 clock=self.clock,
@@ -239,8 +239,8 @@ class ExperimentOrchestrator:
         self._start_lifecycle()
         self._start_constituents()
 
-        self.lifecycle.activate_all()
-
+        sources_cfg = self._load_sources()
+        self.lifecycle.apply_initial_lifecycle(sources_cfg)
 
         # Simulation loop
         for _ in range(T):

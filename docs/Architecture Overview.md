@@ -1,7 +1,5 @@
 # Architecture Overview
-
-This section describes the core architectural layers, the main classes within each layer, and their responsibilities. The architecture follows an event-driven model in which all information exchange occurs through a shared `EventStream`, enabling loose coupling between data sources, reconstruction logic, and downstream analytics.
-
+This section describes the core architectural layers, the main classes within each layer, and their responsibilities.
 ---
 
 ## Orchestration Layer
@@ -65,24 +63,29 @@ This section describes the core architectural layers, the main classes within ea
   - Prevents direct component-to-component coupling.
   - Enables logging and horizontal scaling without modifying current components.
 
-#### EventConsumer (Interface)
-- **Purpose**: Common interface for all components that react to events.
-- **Role**: Defines the contract for event-driven processing.
+#### ModelAdaptor
+- **Purpose**: Interface between generated statecharts and the runtime system.
+- **Role**: Encapsulates a constituent’s lifecycle statechart.
 - **Responsibilities**:
-  - Consume immutable `Event` objects via `consume_event(event)`.
+  - Execute and manage the underlying statechart.
+  - Maintain state snapshot:
+    - Belonging (e.g., passive, active, participating)
+    - Health (e.g., ideal → failed)
+  - Provide transition (e.g., `join_sos`, `degrade`, `improve`).
+  - Emit lifecycle signals and log transitions.
 - **Design Choice**:
-  - Ensures uniform handling across reconstructors, loggers, coordinators, and CEP adapters.
+  - Hides statechart complexity
 
-#### Coordinator
-- **Purpose**: Detects absence of expected events and triggers reconstruction when required.
-- **Role**: Reasons about deadlines and schedules of event sources.
+#### LifecycleManager
+- **Purpose**: Coordinate lifecycle state across all constituents.
+- **Role**: Central controller for system-level lifecycle behaviour.
 - **Responsibilities**:
-  - Maintain per-source expected schedules derived from configuration.
-  - Observe incoming events to detec missed deadlines.
-  - Notify the corresponding `Reconstructor` when an event is missing.
+  - Register and manage `ConstituentContext` objects.
+  - Control transitions (activation, health, belonging).
+  - Provide system-wide state summaries.
+  - Enable coordinated adaptation across constituents.
 - **Design Choice**:
-  - Separation of concerns: timing logic is isolated from prediction logic.
-  - Avoids embedding scheduling logic inside sources or predictors.
+  - Centralizes lifecycle logic without coupling components.
 
 ---
 
@@ -100,16 +103,17 @@ This section describes the core architectural layers, the main classes within ea
 
 ---
 
-## Reconstruction Layer
-### `app/core/reconstruction/`
+## Compensation Layer
+### `app/core/compensation/`
 
 #### Reconstructor
-- **Purpose**: Reconstructs missing events in the event stream.
-- **Role**: Creates replacement events using statistical inference.
+- **Purpose**: Detect and reconstruct missing events in the event stream.
+- **Role**: Creates replacement events using prediction.
 - **Responsibilities**:
+  - Monitor incoming events to detect missing observations.
   - Maintain predictor state using observed events.
-  - Produce reconstructed events when notified of a missing observation.
-  - Publish reconstructed events back into the `EventStream`.
+  - Produce reconstructed events when required.
+  - Emit reconstructed events back into the `EventStream`.
 - **Design Choice**:
   - Reconstruction logic is decoupled from scheduling.
 
@@ -178,6 +182,23 @@ This section describes the core architectural layers, the main classes within ea
 - **Design Choice**:
   - Language-neutral schema shared across Python and Java.
 
+#### EventConsumer (Interface)
+- **Purpose**: Common interface for all components that react to events.
+- **Role**: Defines the contract for event-driven processing.
+- **Responsibilities**:
+  - Consume immutable `Event` objects via `consume_event(event)`.
+- **Design Choice**:
+  - Ensures uniform handling across reconstructors, loggers, coordinators, and CEP adapters.
+
+
+#### EventGenerator (Interface)
+- **Purpose**: Interface for components that produce events from data sources.
+- **Role**: Defines how event-producing entities generate and emit events into the system.
+- **Responsibilities**:
+  - Generate event payloads (`generate_event()`).
+  - Emit events onto the `EventStream` (`emit_event()`).
+- **Design Choice**:
+  - Ensures consistent event production across all sources.
 ---
 
 ## Pattern Schema (Java)
@@ -204,3 +225,18 @@ This section describes the core architectural layers, the main classes within ea
   - Records all events in the event stream.
 - **Design Choice**:
   - Ensures experimental reproducibility.
+
+
+## Statechart Layer
+### `app/state_charts/`
+#### Generated Statecharts (Yakindu)
+- **Purpose**: Formal specification of lifecycle behaviour.
+- **Role**: Define valid states, transitions, and constraints.
+- **Responsibilities**:
+  - Enforce valid transitions.
+  - Emit observable signals.
+  - Support timed/event-driven execution.
+- **Design Choice**:
+  - Automatically generated from models developed in ItemisCreate
+
+---

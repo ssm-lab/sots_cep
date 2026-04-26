@@ -69,6 +69,19 @@ class LifecycleManager:
                     f"[LIFECYCLE] Failed to activate {source_id}: {e}"
                 )
 
+    def apply_initial_lifecycle(self, sources_cfg):
+        logging.info("[LIFECYCLE] Applying initial lifecycle configuration")
+
+        for source_id, cfg in sources_cfg.items():
+            lifecycle_cfg = cfg.get("default_lifecycle_state", {})
+            belonging = lifecycle_cfg.get("initial_belonging")
+            health = lifecycle_cfg.get("initial_health")
+
+            if belonging:
+                self.set_belonging(source_id, belonging)
+            if health:
+                self.set_health(source_id, health)
+
 
     def set_health(self, source_id, new_health):
         ctx = self.constituents.get(source_id)
@@ -110,7 +123,7 @@ class LifecycleManager:
             return
 
         try:
-            success = runtime.step_towards_belonging(new_belonging)
+            success = runtime.ensure_belonging(new_belonging)
 
             logging.info(
                 f"[LIFECYCLE] {source_id} belonging step → {new_belonging} "
@@ -121,19 +134,6 @@ class LifecycleManager:
             logging.warning(
                 f"[LIFECYCLE] Failed belonging update for {source_id}: {e}"
             )
-
-    def step_all_towards(self, target="participating"):
-        for source_id, ctx in self.constituents.items():
-            runtime = ctx.runtime
-
-            try:
-                runtime.step_towards_belonging(target)
-
-            except Exception as e:
-                logging.warning(
-                    f"[LIFECYCLE] Step failed for {source_id}: {e}"
-                )
-
 
     def get_belonging(self, source_id):
         ctx = self.constituents.get(source_id)
@@ -146,38 +146,6 @@ class LifecycleManager:
             "main": runtime.belonging_main(),
             "sub": runtime.belonging_substate()
         }
-            
-    def snapshot(self):
-        stats = {
-            "full_role": 0,
-            "restricted_role": 0,
-            "passive": 0,
-            "degraded": 0,
-            "failed": 0,
-        }
-
-        for ctx in self.constituents.values():
-            state = ctx.runtime.state_snapshot()
-
-            role = state["belonging_sub"]
-            health = state["health_main"]
-
-            if role == "restricted_role":
-                stats["restricted_role"] += 1
-
-            elif role == "full_role":
-                stats["full_role"] += 1
-
-            elif state["belonging_main"] == "passive":
-                stats["passive"] += 1
-
-            if health == "degraded":
-                stats["degraded"] += 1
-
-            if health == "failed":
-                stats["failed"] += 1
-
-        return stats
 
     def print_states(self):
         for source_id, ctx in self.constituents.items():
